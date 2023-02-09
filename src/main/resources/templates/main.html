@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 제이쿼리 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- 제이쿼리로 쿠키 컨트롤 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+    <!-- #########Font######### -->
+    <link ref="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"/>
+
+    <title>ticketingSystem | main</title>
+</head>
+<script>
+    function logout(check) {
+        // 토큰 값 ''으로 덮어쓰기
+        document.cookie =
+            'Authorization' + '=' + '' + ';path=/';
+
+        window.location.href = '/login'
+        // if(check) {
+        //     window.location.reload();
+        // }
+    }
+
+    function ticketing(showId) {
+        $.ajax({
+            type: "GET",
+            url: "/seats/" + showId,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Content-type","application/json");
+                xhr.setRequestHeader("Authorization", getCookie('Authorization'));
+            },
+            success: function (res) {
+                document.location='/seats/'+showId
+                console.log(res);
+            }
+        });
+    }
+
+    function getCookie(cName) {
+        cName = cName + '=';
+        var cookieData = document.cookie;
+        var start = cookieData.indexOf(cName);
+        var cValue = '';
+        if(start != -1){
+            start += cName.length;
+            var end = cookieData.indexOf(';', start);
+            if(end == -1)end = cookieData.length;
+            cValue = cookieData.substring(start, end);
+        }
+        return unescape(cValue);
+    }
+
+
+</script>
+<style>
+    @font-face {
+        font-family: 'Pretendard-Regular';
+        src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    a {
+        text-decoration: none;
+        color: #2b2b2b;
+
+    }
+
+    a:hover {
+        background-color: #F1F3F5;
+        font-size: 16.5px;
+    }
+
+    .header-navBar {
+        font-family: Pretendard-Regular;
+        font-weight: 400;
+        font-size: 16px;
+
+        display: flex;
+    }
+
+    .header-navBar > a {
+        margin-right: 25px;
+    }
+
+    button {
+        font-family: Pretendard-Regular;
+        font-weight: 400;
+        font-size: 16px;
+
+
+        border: 1px solid #2b2b2b;
+        background-color: #a6a6a6;
+
+        color: white;
+
+        padding-bottom: 2px;
+
+        transition-property: background-color;
+        transition-duration: 0.2s;
+    }
+
+    button:hover {
+        background-color: rgb(255, 225, 194);
+        color: rgb(237, 136, 36);
+        cursor: pointer;
+    }
+
+    .mainContainer {
+        display: flex;
+        margin-top: 3%;
+    }
+
+    .mainContainer > div {
+        margin-right: 32px;
+    }
+
+
+    .catField {
+        font-family: Pretendard-Regular;
+
+        box-shadow: 0px 0px 10px 1px grey;
+
+        border: 1px solid #2b2b2b;
+        border-radius: 10px;
+
+        width: 180px;
+        height: 420px;
+        margin-right: 35%;
+
+    }
+
+    .contnets {
+        font-family: Pretendard-Regular;
+
+
+        display: flex;
+        justify-content: center;
+        border: 1px solid #2b2b2b;
+        border-radius: 10px;
+        width: 130px;
+        height: 100px;
+    }
+
+</style>
+<body>
+<header>
+    <div class="header-navBar">
+        <a>header navBar-1</a>
+        <a>header navBar-2</a>
+        <a>header navBar-3</a>
+        <a onclick="logout()">logout</a>
+    </div>
+</header>
+<hr>
+<div class="mainContainer">
+    <div class="catField">
+        카테고리 들어가는 곳
+    </div>
+
+    <div class="contents-wrapper">
+        <div class="contnets">
+            상품같은 게 들어가는 곳
+        </div>
+    </div>
+
+     <div class="contents-wrapper">
+        <div class="contnets">
+            <button id="show1" onclick="ticketing(1)"> 공연1 </button>
+        </div>
+    </div>
+     <div class="contents-wrapper">
+        <div class="contnets" >
+            <button id="show2" onclick="ticketing(2)"> 공연2 </button>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
