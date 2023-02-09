@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!--ajax 설치    -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<style>
+    .header {
+        display: flex;
+    }
+
+    .header > h5 {
+        margin-right: 10px;
+    }
+</style>
+
+<script>
+    function search() {
+
+        let searchField = $('#searchField').val();
+
+        if (searchField == '') {
+            alert("검색 대상을 입력해 주세요!");
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: `/search`,
+            contentType: "application/json",
+            data: JSON.stringify({search: searchField}),
+            success: function (response) {
+                console.log(response)
+            }
+        });
+    }
+</script>
+
+<body>
+<header>
+    <div class="header">
+        <h5 onclick="location.href='/search'">검색</h5>
+        <h5 onclick="location.href='/ticketing'">티케팅</h5>
+    </div>
+    <hr>
+</header>
+<h3>
+    찾고싶은 대상을 입력하세요.
+</h3>
+<input id="searchField" type="text" name="searchField" style="width: 500px; height: 30px"
+       placeholder="찾고싶은 대상을 입력해 주세용">
+<hr>
+<div id="search-result-box">
+    <div class="search-wrapper">
+        <div class="search-left">
+            뭔가 이미지가 들어갈 수도?
+            <img src="" alt="">
+        </div>
+        <div class="search-center">
+            <div>${itemDto.title}</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
