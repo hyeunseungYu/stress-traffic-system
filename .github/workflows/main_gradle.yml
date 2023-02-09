@@ -26,6 +26,25 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
+
+      - name: make application.properties
+        run:  touch ./src/main/resources/application.properties
+        shell: bash
+
+      - name: deliver application.properties
+        run: echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.properties
+        shell: bash
+
+      - name: test make application.properties
+        run: |
+          mkdir -p ./src/test/resources
+          touch ./src/test/resources/application.properties
+        shell: bash
+
+      - name: test deliver application.properties
+        run: echo "${{ secrets.TEST_PROPERTIES }}" > ./src/test/resources/application.properties
+        shell: bash
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
