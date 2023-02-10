@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,9 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
-@EnableGlobalMethodSecurity(securedEnabled = true) // @Secured 어노테이션 활성화
 public class WebSecurityConfig {
-    private final JwtUtil jwtUtil;
 
     /**
      * BCrypt로 패스워드 인코딩 수행<br>
@@ -43,20 +40,33 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
+    private final JwtUtil jwtUtil;
 
 
     //h2 console 사용을 위해 h2관련해서 보안 검사를 건너뛰도록 함
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers(PathRequest.toH2Console())
+//                .requestMatchers(PathRequest.toH2Console())
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
+    private static final String[] PERMIT_URL_ARRAY = {
+            /* swagger v2 */
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            /* swagger v3 */
+            "/v3/api-docs/**",
+            "/swagger-ui/**"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         //CSRF(Cross-Site Request Forgery) 보호를 비활성화
         http.csrf().disable();
 
@@ -68,19 +78,18 @@ public class WebSecurityConfig {
                 //추후 api들에 맞춰 permit 여부 결정
                 .antMatchers("/api/members/**").permitAll()
                 .antMatchers("/signup").permitAll()
-                .antMatchers("/login").permitAll();
-//                .antMatchers("/main").authenticated()
+                .antMatchers("/login").permitAll()
+
+                //swagger 관련해서 인증 통과
+                .antMatchers(PERMIT_URL_ARRAY).permitAll()
 
                 //다른 것들은 전부 인증을 받아야 한다.
-//                .anyRequest().authenticated()
+                .anyRequest().authenticated()
                 // JWT 인증/인가를 사용하기 위한 설정
                 // addFilterBefore -> 1번째 인자값의 필터가 2번째 인자값의 필터를 수행하기 전에 실행됨.
                 // 즉, Jwt필터를 이용해 일단 토큰이 제대로 되어 있는 지부터 확인한다.
+                .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-
-//                .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-//        http.formLogin().loginPage("/login").permitAll();
         //http 보안 설정을 위 내용으로 해서 반환
         return http.build();
     }

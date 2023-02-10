@@ -46,7 +46,7 @@ public class CartService {
         Product product = getProduct(productId);
 
         //수량을 업데이트한다
-        cartItemRepository.updateQuantity(cart, product, quantity);
+//        cartItemRepository.updateQuantity(cart, product, quantity);
     }
 
     //장바구니 상품 삭제
