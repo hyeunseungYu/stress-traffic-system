@@ -4,6 +4,7 @@ import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import com.project.stress_traffic_system.product.service.ProductService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,8 +22,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-
-    //상품 10개씩 페이징
+    @ApiOperation(value = "상품전체조회", notes = "10개씩 페이징")
     @GetMapping("/products")
     public Page<ProductResponseDto> getProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -30,12 +30,13 @@ public class ProductController {
         return productService.getProducts(userDetails.getMember(), page);
     }
 
-    // 상품 상세페이지
+    @ApiOperation(value = "상품 상세페이지")
     @GetMapping("/products/{productId}")
     public ProductResponseDto getSeats(@PathVariable Long productId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return productService.getProduct(userDetails.getMember(), productId);
     }
 
+    @ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -43,6 +44,4 @@ public class ProductController {
             @RequestParam("page") int page) {
         return productService.searchProducts(userDetails.getMember(), condition, page);
     }
-
-
 }
