@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 public class ProductController {
 
     private final ProductService productService;
@@ -39,7 +39,7 @@ public class ProductController {
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            ProductSearchCondition condition,
+            @RequestBody ProductSearchCondition condition,
             @RequestParam("page") int page) {
         return productService.searchProducts(userDetails.getMember(), condition, page);
     }
