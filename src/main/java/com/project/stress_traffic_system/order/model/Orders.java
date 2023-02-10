@@ -8,18 +8,16 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.lang.reflect.Member;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Order {
+public class Orders {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
+    @Column(name = "orders_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,7 +33,7 @@ public class Order {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public Order(Members members, Product product, Integer quantity) {
+    public Orders(Members members, Product product, Integer quantity) {
         this.members = members;
         this.product = product;
         this.quantity = quantity;
