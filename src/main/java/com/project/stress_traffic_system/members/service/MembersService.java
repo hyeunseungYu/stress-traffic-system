@@ -1,5 +1,7 @@
 package com.project.stress_traffic_system.members.service;
 
+import com.project.stress_traffic_system.cart.model.Cart;
+import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.jwt.JwtUtil;
 import com.project.stress_traffic_system.members.dto.MembersRequestDto;
 import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MembersService {
     private final MembersRepository membersRepository;
+    private final CartRepository cartRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
@@ -74,7 +78,10 @@ public class MembersService {
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
         Members members = new Members(username, password, role);
-        membersRepository.save(members);
+        Members savedMember = membersRepository.save(members);
+
+        Cart cart = new Cart(savedMember);
+        cartRepository.save(cart);
 
         return handleMemberException("회원가입 성공", HttpStatus.OK, response);
     }
@@ -96,7 +103,5 @@ public class MembersService {
 
         return handleMemberException("로그인 성공", HttpStatus.OK, response);
     }
-
-
 
 }
