@@ -3,6 +3,7 @@ package com.project.stress_traffic_system.product.service;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
+import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -63,5 +64,11 @@ public class ProductService {
                 .imgurl(product.getImgurl())
                 .date(product.getDate())
                 .build();
+    }
+
+    // 상품 검색하기 (이름, 가격 필터링)
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> searchProducts(Members member, ProductSearchCondition condition, int page) {
+        return productRepository.searchProducts(condition, page);
     }
 }

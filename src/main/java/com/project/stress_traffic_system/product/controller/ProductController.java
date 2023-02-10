@@ -1,6 +1,7 @@
 package com.project.stress_traffic_system.product.controller;
 
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
+import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import com.project.stress_traffic_system.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +35,14 @@ public class ProductController {
     public ProductResponseDto getSeats(@PathVariable Long productId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return productService.getProduct(userDetails.getMember(), productId);
     }
+
+    @GetMapping("/products/search")
+    public Page<ProductResponseDto> searchProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            ProductSearchCondition condition,
+            @RequestParam("page") int page) {
+        return productService.searchProducts(userDetails.getMember(), condition, page);
+    }
+
+
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class ReservationService {
                 .memberId(reservation.getMemberId())
                 .createdAt(reservation.getCreatedAt())
                 .status(reservation.isStatus())
-                .seats(productRepository.findByReservationId(reservationId))
+                .seats(new ArrayList<>())
                 .build();
     }
 
