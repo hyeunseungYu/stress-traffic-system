@@ -14,11 +14,12 @@ public class CartRepositoryImpl implements CartItemRepositoryCustom{
         queryFactory = new JPAQueryFactory(em);
     }
 
-    @Override
-    public void updateQuantity(Cart cart, Product product, int quantity) {
-        queryFactory.update(cartItem)
-                .set(cartItem.quantity, quantity)
-                .where(cartItem.cart.eq(cart), cartItem.product.eq(product))
-                .execute();
-    }
+//    @Override //todo 해결할 것
+//    public void updateQuantity(Cart cart, Product product, int quantity) {
+//        queryFactory
+//                .update(cartItem)
+//                .set(cartItem.quantity, quantity)
+//                .where(cartItem.cart.eq(cart), cartItem.product.eq(product))
+//                .execute();
+//    }
 }

@@ -37,7 +37,7 @@ public class CartController {
 
     @ApiOperation(value = "장바구니 단일 상품 삭제")
     @PatchMapping("/products/{productId}/cart-delete")
-    public ResponseEntity<String> updateQuantity(
+    public ResponseEntity<String> deleteProduct(
             @PathVariable Long productId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -47,7 +47,7 @@ public class CartController {
 
     @ApiOperation(value = "장바구니 비우기")
     @PatchMapping("/products/cart-empty")
-    public ResponseEntity<String> updateQuantity(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<String> emptyCart(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         cartService.emptyCart(userDetails.getMember());
         return new ResponseEntity<>("success", HttpStatus.CREATED);
