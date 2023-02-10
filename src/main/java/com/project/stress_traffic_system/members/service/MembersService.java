@@ -30,7 +30,7 @@ public class MembersService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         Members members1 = new Members("test1", "11", MembersRoleEnum.MEMBER);
         Members members2 = new Members("test2", "11",MembersRoleEnum.MEMBER);
