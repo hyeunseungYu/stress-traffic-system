@@ -4,7 +4,7 @@ import com.project.stress_traffic_system.reservation.model.Reservation;
 import com.project.stress_traffic_system.reservation.model.dto.ReservationDetailResponseDto;
 import com.project.stress_traffic_system.reservation.model.dto.ReservationResponseDto;
 import com.project.stress_traffic_system.reservation.repository.ReservationRepository;
-import com.project.stress_traffic_system.ticketing.repository.SeatsRepository;
+import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final SeatsRepository seatsRepository;
+    private final ProductRepository productRepository;
 
     //예약 상세내역 가져오기
     public ReservationDetailResponseDto getReservation(Long reservationId, Long memberId) {
@@ -33,7 +33,7 @@ public class ReservationService {
                 .memberId(reservation.getMemberId())
                 .createdAt(reservation.getCreatedAt())
                 .status(reservation.isStatus())
-                .seats(seatsRepository.findByReservationId(reservationId))
+                .seats(productRepository.findByReservationId(reservationId))
                 .build();
     }
 
