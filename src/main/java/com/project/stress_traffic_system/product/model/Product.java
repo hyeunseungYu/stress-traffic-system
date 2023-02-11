@@ -28,6 +28,9 @@ public class Product {
     private String base; //
     private int price; //가격
     private int imgurl; //상품이미지 todo String 으로 변경
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Category category;
     @CreatedDate
     @Column(name = "DATE")
     private LocalDateTime date;
