@@ -8,11 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -44,4 +40,43 @@ public class ProductController {
             @RequestParam("page") int page) {
         return productService.searchProducts(userDetails.getMember(), condition, page);
     }
+
+    @ApiOperation(value = "카테고리1 상품조회")
+    @GetMapping("/products/category-1")
+    public Page<ProductResponseDto> searchByCategory1(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.searchByCategory(userDetails.getMember(), 1L, page);
+    }
+
+    @ApiOperation(value = "카테고리2 상품조회")
+    @GetMapping("/products/category-2")
+    public Page<ProductResponseDto> searchByCategory2(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.searchByCategory(userDetails.getMember(), 2L, page);
+    }
+    @ApiOperation(value = "카테고리3 상품조회")
+    @GetMapping("/products/category-3")
+    public Page<ProductResponseDto> searchByCategory3(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.searchByCategory(userDetails.getMember(), 3L, page);
+    }
+    @ApiOperation(value = "카테고리4 상품조회")
+    @GetMapping("/products/category-4")
+    public Page<ProductResponseDto> searchByCategory4(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.searchByCategory(userDetails.getMember(), 4L, page);
+    }
+    @ApiOperation(value = "카테고리5 상품조회")
+    @GetMapping("/products/category-5")
+    public Page<ProductResponseDto> searchByCategory5(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.searchByCategory(userDetails.getMember(), 5L, page);
+    }
+
+
 }

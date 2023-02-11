@@ -99,15 +99,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         StopWatch queryStopwatch = new StopWatch();
         queryStopwatch.start();
         namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
         queryStopwatch.stop();
 
         System.out.println("products 사이즈는 = " + products.size());
@@ -115,6 +106,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         System.out.println("쿼리 실행 시간 = " + queryStopwatch.getTotalTimeSeconds());
     }
 
+    // 상품 조건에 따라 검색(이름, 가격)
     @Override
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition, int page) {
         List<ProductResponseDto> content = queryFactory
@@ -138,6 +130,30 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .fetch();
 
         return new PageImpl<>(content);
+    }
+
+    @Override
+    public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.location,
+                        product.around,
+                        product.notice,
+                        product.base,
+                        product.price,
+                        product.imgurl,
+                        product.date
+                ))
+                .from(product)
+                .where(product.category.id.eq(categoryId))
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+
     }
 
     private BooleanExpression nameEq(String name) {

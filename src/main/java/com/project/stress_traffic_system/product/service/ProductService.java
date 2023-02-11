@@ -10,7 +10,6 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -70,5 +69,13 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchProducts(Members member, ProductSearchCondition condition, int page) {
         return productRepository.searchProducts(condition, page);
+    }
+
+    /*
+        카테고리 1~5 각각 조회하는 Api
+     */
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> searchByCategory(Members member, Long categoryId, int page) {
+        return productRepository.searchByCategory(categoryId, page);
     }
 }
