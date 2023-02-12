@@ -72,6 +72,9 @@ dependencies {
     //테스트 코드에서 롬복 가능하게
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    //devtools
+    compileOnly 'org.springframework.boot:spring-boot-devtools:2.7.1'
 }
 
 tasks.named('test') {
