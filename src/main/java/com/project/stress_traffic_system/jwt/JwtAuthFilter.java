@@ -14,14 +14,49 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-
     private final JwtUtil jwtUtil;
+
+    //스프링 시큐리티 필터 구현
+
+    //filterChain은!
+    //필터는 애플리케이션의 요청 및 응답을 처리하는데 사용됨.
+    //각 요청은 특정한 순서로 체인을 통과함.
+    //그래서 doFilter의 마지막 리소스에 도달할 때 까지 체인의 메서드가 차례로 실행됨.
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        //들어오는 요청에서 토큰을 추출함
+        String token = jwtUtil.resolveToken(request);
+        log.info("resolved token = {}",token);
+
+        //토큰이 null이 아니면 jwtUtil.validateToken(token)을 통해 유효성을 검사함.
+        //토큰이 유효하지 않으면 "토큰이 유효하지 않습니다."라는 메시지와 함께 오류 응답을 클라이언트에 보냄. ->
+        //jwtExceptionHandler(response, "토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED.value()) 메서드를 사용하여 HTTP 상태 코드 401(UNAUTHORIZED)을 반환.
+        if(token != null) {
+            if(!jwtUtil.validateToken(token)){
+                jwtExceptionHandler(response, "토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
+                return;
+            }
+
+            //토큰이 유효하면 jwtUtil.getUserInfoFromToken(token)을 사용하여 토큰에서 사용자 정보를 추출.
+            Claims info = jwtUtil.getUserInfoFromToken(token);
+
+            //Claims 객체에 저장된 사용자 정보는 "setAuthentication(info.getSubject())를 호출하여 사용자에 대한 인증을 설정하는 데 사용됩니다.
+            setAuthentication(info.getSubject());
+        }
+        //doFilter(request, response)를 호출해서 체인의 다음 필터나 마지막 리소스를 호출.
+        filterChain.doFilter(request,response);
+    }
+
+
 
 
 
@@ -79,33 +114,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
     }
 
-    //스프링 시큐리티 필터 구현
-
-    //filterChain은!
-    //필터는 애플리케이션의 요청 및 응답을 처리하는데 사용됨.
-    //각 요청은 특정한 순서로 체인을 통과함.
-    //그래서 doFilter의 마지막 리소스에 도달할 때 까지 체인의 메서드가 차례로 실행됨.
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //들어오는 요청에서 토큰을 추출함
-        String token = jwtUtil.resolveToken(request);
-
-        //토큰이 null이 아니면 jwtUtil.validateToken(token)을 통해 유효성을 검사함.
-        //토큰이 유효하지 않으면 "토큰이 유효하지 않습니다."라는 메시지와 함께 오류 응답을 클라이언트에 보냄. ->
-        //jwtExceptionHandler(response, "토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED.value()) 메서드를 사용하여 HTTP 상태 코드 401(UNAUTHORIZED)을 반환.
-        if(token != null) {
-            if(!jwtUtil.validateToken(token)){
-                jwtExceptionHandler(response, "토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
-                return;
-            }
-
-            //토큰이 유효하면 jwtUtil.getUserInfoFromToken(token)을 사용하여 토큰에서 사용자 정보를 추출.
-            Claims info = jwtUtil.getUserInfoFromToken(token);
-
-            //Claims 객체에 저장된 사용자 정보는 "setAuthentication(info.getSubject())를 호출하여 사용자에 대한 인증을 설정하는 데 사용됩니다.
-            setAuthentication(info.getSubject());
-        }
-        //doFilter(request, response)를 호출해서 체인의 다음 필터나 마지막 리소스를 호출.
-        filterChain.doFilter(request,response);
-    }
 }
