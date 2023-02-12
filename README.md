@@ -1,4 +1,2 @@
 # stress-traffic-system
-# test
-# test
-# test
+# JIRA 연결 테스트
