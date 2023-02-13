@@ -1,17 +1,22 @@
 package com.project.stress_traffic_system.product.service;
 
 import com.project.stress_traffic_system.members.entity.Members;
+import com.project.stress_traffic_system.product.model.Category;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
+import com.project.stress_traffic_system.product.repository.CategoryRepository;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProductService {
@@ -42,7 +47,7 @@ public class ProductService {
                         .description(product.getDescription())
                         .shippingFee(product.getShippingFee())
                         .imgurl(product.getImgurl())
-                        .count(product.getCount())
+                        .count(product.getClickCount())
                         .stock(product.getStock())
                         .introduction(product.getIntroduction())
                         .pages(product.getPages())
@@ -62,7 +67,7 @@ public class ProductService {
                 .description(product.getDescription())
                 .shippingFee(product.getShippingFee())
                 .imgurl(product.getImgurl())
-                .count(product.getCount())
+                .count(product.getClickCount())
                 .stock(product.getStock())
                 .introduction(product.getIntroduction())
                 .pages(product.getPages())
