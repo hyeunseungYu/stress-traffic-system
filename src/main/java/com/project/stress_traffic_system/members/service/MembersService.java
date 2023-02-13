@@ -101,6 +101,7 @@ public class MembersService {
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
 
+
         return handleMemberException("로그인 성공", HttpStatus.OK, response);
     }
 

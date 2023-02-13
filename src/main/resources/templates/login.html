@@ -25,7 +25,7 @@
 
         $.ajax({
             type: "POST",
-            url: '/api/members/login',
+            url: `/api/members/login`,
             contentType: 'application/json',
             data: JSON.stringify({
                 username: login_id_value,
@@ -42,14 +42,25 @@
                         //response header에서 토큰을 가져와서 쿠키에 Authorization 키 / 밸류로 저장
                         //';path=/'는 쿠키에 저장될 경로를 말함. 여기에선'/'로 되어있어서 쿠키가 우리 웹사이트 전체에서 사용될 수 있음
                         //xhr은 XMLHttpRequest 객체를 말함. 비동기적으로 데이터를 주고받는 ajax에서 사용되는 것으로 여기에선 response header의 값을 가져오기 위해 사용됨.
-                        document.cookie = 'Authorization' + '=' + xhr.getResponseHeader('Authorization') + ';path=/';
+                    console.log(xhr.getResponseHeader('Authorization'))
 
-                        window.location.href ='/main'
+                    localStorage.setItem("Authorization",xhr.getResponseHeader('Authorization'))
+                    console.log("스토리지에서 확인 " + localStorage.getItem("Authorization"))
+
+                    $.ajaxSetup({
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", localStorage.getItem("Authorization"));
+                        }
+                    });
+
+
+                    window.location.href = "/main";
+
                 }
             },
             error: function (response) {
                 console.log(response['responseJSON'])
-                alert(response['reponseJSON']['msg'])
+                alert(response['responseJSON']['errorMessage'])
             },
         })
     }

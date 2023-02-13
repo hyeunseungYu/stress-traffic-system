@@ -29,4 +29,13 @@ public class MembersController {
     public MembersResponseMsgDto login(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response) {
         return membersService.login(membersRequestDto, response);
     }
+
+    @PostMapping("/logTest")
+    public void logTest() {
+        log.trace("trace Log");
+        log.debug("Debug Log");
+        log.info("info Log");
+        log.warn("Warn Log");
+        log.error("Error Log");
+    }
 }
