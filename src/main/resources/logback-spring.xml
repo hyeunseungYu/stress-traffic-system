@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="30 seconds"> <!-- logback 구현체가 설정을 확인하는 주기. -->
+<configuration scan="true" scanPeriod="30 seconds"> <!-- logback 구현체가 설정을 확인하는 주기. 지금 설정이면 주기적으로 스캔할 것이고, 30초마다 스캔한다는 뜻 -->
     <property name="moduleId" value="around_hub_spring_boot"/><!-- moduleId는 프로젝트가 설치된 폴더명 또는 구분할 수 있는 식별자이면 됨 -->
     <property name="type" value="around_hub"/><!-- 로그파일명을 구성하는 인자 -->
     <property name="logback" value="logback"/><!-- log를 저장할 최종 디렉토리명 -->
-    <property name="logdir" value="D:\Workspace\LogFiles"/>
+    <property name="logdir" value="/Users/yuhyeonseung/Desktop"/>
 
+    <!-- TRACE > DEBUG > INFO > WARN > ERROR > OFF -->
     <!-- Appenders -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender"><!--class를 이렇게 잡으면 로그가 콘솔에 출력이 된다. -->
+    <!--로그 출력 형식 지정.
+    %-5level -> 로그 레벨. 다섯글자까지 나오니까 앞에 -5를 달아줌
+    %thread -> 스레드 이름
+    %logger{30} -> 로거 이름을 출력 {30}을 안달면 java.com.stress ~~ 이렇게 생략 안하고 나옴.
+    %msg%n -> 로그 메시지 출력 후 개행-->
+
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level><!--디버그 이상의 로그들을 보겠다는 필터값을 설정-->
         </filter>
         <encoder>
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger{30} %msg%n</pattern><!--로그 패턴 설정-->
+            <pattern>[%d{yyyy-MM-dd HH:mm}] %highlight([%-5level]) %cyan([%thread]) %magenta([%logger{30}]) %msg%n</pattern><!--로그 패턴 설정-->
         </encoder>
     </appender>
 
