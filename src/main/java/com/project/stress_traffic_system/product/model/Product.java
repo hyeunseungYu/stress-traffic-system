@@ -38,6 +38,10 @@ public class Product {
     @CreatedDate
     private LocalDateTime date;
 
+    public void setClickCount(Long clickCount) {
+        this.clickCount = clickCount;
+    }
+
     //상품 주문 시 재고수량 감소 시키기
     public void removeStock(int quantity) {
         int restStock = this.stock - quantity;
