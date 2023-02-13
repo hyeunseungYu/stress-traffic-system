@@ -1,27 +1,39 @@
 package com.project.stress_traffic_system.product.service;
 
 import com.project.stress_traffic_system.members.entity.Members;
+import com.project.stress_traffic_system.product.model.Category;
 import com.project.stress_traffic_system.product.model.Product;
+import com.project.stress_traffic_system.product.model.Review;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
+import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
+import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
+import com.project.stress_traffic_system.product.repository.CategoryRepository;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
+import com.project.stress_traffic_system.product.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProductService {
+    private final ReviewRepository reviewRepository;
 
     private final ProductRepository productRepository;
     private final int PAGE_SIZE = 10;
-    private final String SORT_BY = "name";
+    private final String SORT_BY = "date";
 
     //todo param Members 없앨지 정하기
 
+    //전체상품 가져오기
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(Members member, int page) {
 
@@ -37,12 +49,14 @@ public class ProductService {
         return new PageImpl<>(products.stream().map(product -> ProductResponseDto.builder()
                         .id(product.getId())
                         .name(product.getName())
-                        .location(product.getLocation())
-                        .around(product.getAround())
-                        .notice(product.getNotice())
-                        .base(product.getBase())
                         .price(product.getPrice())
+                        .description(product.getDescription())
+                        .shippingFee(product.getShippingFee())
                         .imgurl(product.getImgurl())
+                        .count(product.getClickCount())
+                        .stock(product.getStock())
+                        .introduction(product.getIntroduction())
+                        .pages(product.getPages())
                         .date(product.getDate())
                         .build())
                 .collect(Collectors.toList()));
@@ -51,31 +65,78 @@ public class ProductService {
     //상품 id로 상세정보 가져오기
     @Transactional(readOnly = true)
     public ProductResponseDto getProduct(Members member, Long productId) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다"));
+        Product product = findProduct(productId);
+        product.setClickCount(product.getClickCount() + 1);
         return ProductResponseDto.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .location(product.getLocation())
-                .around(product.getAround())
-                .notice(product.getNotice())
-                .base(product.getBase())
                 .price(product.getPrice())
+                .description(product.getDescription())
+                .shippingFee(product.getShippingFee())
                 .imgurl(product.getImgurl())
+                .count(product.getClickCount())
+                .stock(product.getStock())
+                .introduction(product.getIntroduction())
+                .pages(product.getPages())
                 .date(product.getDate())
                 .build();
+
     }
 
     // 상품 검색하기 (이름, 가격 필터링)
+
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchProducts(Members member, ProductSearchCondition condition, int page) {
         return productRepository.searchProducts(condition, page);
     }
-
     /*
         카테고리 1~5 각각 조회하는 Api
      */
+
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchByCategory(Members member, Long categoryId, int page) {
         return productRepository.searchByCategory(categoryId, page);
+    }
+
+    //리뷰 등록하기
+    @Transactional
+    public ReviewResponseDto createReview(Members member, Long productId, ReviewRequestDto requestDto) {
+
+        log.info("requestDto.getContent = {}", requestDto.getContent());
+
+        //리뷰를 등록할 상품 찾아오기
+        Product product = findProduct(productId);
+
+        Review review = new Review(product, member, requestDto.getContent());
+
+        Review savedReview = reviewRepository.save(review);
+        return ReviewResponseDto.builder()
+                .id(savedReview.getId())
+                .content(savedReview.getContent())
+                .username(savedReview.getMember().getUsername())
+                .createdAt(savedReview.getCreatedAt())
+                .build();
+    }
+
+    //리뷰 목록 가져오기
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getReviews(Members member, Long productId) {
+        Product product = findProduct(productId);
+
+        List<Review> reviewList = reviewRepository.findAllByProduct(product);
+
+        return reviewList.stream().map(review ->
+                        ReviewResponseDto.builder()
+                                .id(review.getId())
+                                .content(review.getContent())
+                                .username(review.getMember().getUsername())
+                                .createdAt(review.getCreatedAt())
+                                .build())
+                .collect(Collectors.toList());
+    }
+
+    //상품 id로 상품 찾아오기
+    private Product findProduct(Long productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다"));
     }
 }

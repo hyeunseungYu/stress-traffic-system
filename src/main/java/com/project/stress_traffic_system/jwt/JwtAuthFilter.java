@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //들어오는 요청에서 토큰을 추출함
         String token = jwtUtil.resolveToken(request);
-        log.info("resolved token = {}",token);
+//        log.info("resolved token = {}",token);
 
         //토큰이 null이 아니면 jwtUtil.validateToken(token)을 통해 유효성을 검사함.
         //토큰이 유효하지 않으면 "토큰이 유효하지 않습니다."라는 메시지와 함께 오류 응답을 클라이언트에 보냄. ->

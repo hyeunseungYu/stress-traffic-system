@@ -2,7 +2,7 @@ package com.project.stress_traffic_system.cart.service;
 
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.cart.model.CartItem;
-import com.project.stress_traffic_system.cart.model.dto.CartRequestDto;
+import com.project.stress_traffic_system.cart.model.dto.CartResponseDto;
 import com.project.stress_traffic_system.cart.repository.CartItemRepository;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.members.entity.Members;
@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class CartService {
@@ -20,19 +24,47 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
 
+
+    //장바구니에 담긴 상품 목록 가져오기
+    public List<CartResponseDto> getCartItems(Members member) {
+
+        //회원의 장바구니 가져오기
+        Cart cart = getCart(member);
+
+        //장바구니에 담긴 상품목록 가져오기
+        List<CartItem> cartItems = cartItemRepository.findAllByCart(cart);
+
+        return cartItems.stream().map(cartItem ->
+                        CartResponseDto.builder()
+                                .itemName(cartItem.getProduct().getName())
+                                .imgurl(cartItem.getProduct().getImgurl())
+                                .price(cartItem.getProduct().getPrice())
+                                .quantity(cartItem.getQuantity())
+                                .build())
+                .collect(Collectors.toList());
+    }
+
     //장바구니에 상품 추가
     @Transactional
-    public void addToCart(Members member, CartRequestDto requestDto) {
+    public void addToCart(Members member, Long productId) {
 
         //해당 회원의 장바구니를 찾아온다
         Cart cart = getCart(member);
 
         //상품정보를 가져온다
-        Product product = getProduct(requestDto.getProductId());
+        Product product = getProduct(productId);
 
-        //장바구니아이템 엔티티를 저장한다
-        CartItem cartItem = new CartItem(cart, product, requestDto.getQuantity());
-        cartItemRepository.save(cartItem);
+        Optional<CartItem> findCartItem = cartItemRepository.findByCartAndProduct(cart, product);
+
+        //장바구니에 상품이 없으면 장바구니아이템 엔티티를 저장한다
+        if (findCartItem.isEmpty()) {
+            CartItem cartItem = new CartItem(cart, product);
+            cartItemRepository.save(cartItem);
+            return;
+        }
+
+        //장바구니에 이미 담긴 상품이라면 수량을 +1 해준다
+        findCartItem.get().setQuantity(findCartItem.get().getQuantity() + 1);
     }
 
     //장바구니의 상품 수량 변경
@@ -45,8 +77,12 @@ public class CartService {
         //상품정보를 가져온다
         Product product = getProduct(productId);
 
-        //수량을 업데이트한다
-//        cartItemRepository.updateQuantity(cart, product, quantity);
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(
+                () -> new IllegalArgumentException("장바구니에 해당 상품이 없습니다")
+        );
+
+        //save를 호출하지 않아도 자동으로 변경 감지하여 flush 된다
+        cartItem.setQuantity(quantity);
     }
 
     //장바구니 상품 삭제
@@ -79,5 +115,4 @@ public class CartService {
                 () -> new IllegalArgumentException("존재하지 않는 상품입니다")
         );
     }
-
 }

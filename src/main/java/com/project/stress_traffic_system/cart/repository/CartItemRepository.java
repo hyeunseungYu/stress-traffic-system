@@ -4,10 +4,17 @@ import com.project.stress_traffic_system.cart.model.CartItem;
 import com.project.stress_traffic_system.product.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CartItemRepository extends JpaRepository<CartItem, Long>, CartItemRepositoryCustom {
+import java.util.List;
+import java.util.Optional;
+
+public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     void deleteByCartAndProduct(Cart cart, Product product);
 
     void deleteAllByCart(Cart cart);
+
+    Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
+
+    List<CartItem> findAllByCart(Cart cart);
 }
 
