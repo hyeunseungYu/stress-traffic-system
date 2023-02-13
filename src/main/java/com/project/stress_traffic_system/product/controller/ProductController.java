@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/api")
 @RestController
 public class ProductController {
 
@@ -28,7 +29,7 @@ public class ProductController {
 
     @ApiOperation(value = "상품 상세페이지")
     @GetMapping("/products/{productId}")
-    public ProductResponseDto getSeats(@PathVariable Long productId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ProductResponseDto getSeats(@PathVariable Long productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return productService.getProduct(userDetails.getMember(), productId);
     }
 
@@ -56,6 +57,7 @@ public class ProductController {
             @RequestParam("page") int page) {
         return productService.searchByCategory(userDetails.getMember(), 2L, page);
     }
+
     @ApiOperation(value = "카테고리3 상품조회")
     @GetMapping("/products/category-3")
     public Page<ProductResponseDto> searchByCategory3(
@@ -63,6 +65,7 @@ public class ProductController {
             @RequestParam("page") int page) {
         return productService.searchByCategory(userDetails.getMember(), 3L, page);
     }
+
     @ApiOperation(value = "카테고리4 상품조회")
     @GetMapping("/products/category-4")
     public Page<ProductResponseDto> searchByCategory4(
@@ -70,6 +73,7 @@ public class ProductController {
             @RequestParam("page") int page) {
         return productService.searchByCategory(userDetails.getMember(), 4L, page);
     }
+
     @ApiOperation(value = "카테고리5 상품조회")
     @GetMapping("/products/category-5")
     public Page<ProductResponseDto> searchByCategory5(

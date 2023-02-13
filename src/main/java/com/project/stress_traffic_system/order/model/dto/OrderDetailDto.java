@@ -7,12 +7,13 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class OrderResponseDto {
+public class OrderDetailDto {
 
     private Long orderId;
     private String name;
     private Integer quantity;
     private Integer price;
     private Integer totalPrice;
-    private LocalDateTime createdAt;
+    private LocalDateTime orderDate;
+    private String status;
 }
