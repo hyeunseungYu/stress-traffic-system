@@ -33,6 +33,9 @@ public class CartItem {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
     public CartItem(Cart cart, Product product, Integer quantity) {
         this.cart = cart;
         this.product = product;

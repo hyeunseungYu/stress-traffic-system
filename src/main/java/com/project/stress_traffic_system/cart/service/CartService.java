@@ -3,6 +3,7 @@ package com.project.stress_traffic_system.cart.service;
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.cart.model.CartItem;
 import com.project.stress_traffic_system.cart.model.dto.CartRequestDto;
+import com.project.stress_traffic_system.cart.model.dto.CartResponseDto;
 import com.project.stress_traffic_system.cart.repository.CartItemRepository;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.members.entity.Members;
@@ -12,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class CartService {
@@ -19,6 +23,26 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+
+
+    //장바구니에 담긴 상품 목록 가져오기
+    public List<CartResponseDto> getCartItems(Members member) {
+
+        //회원의 장바구니 가져오기
+        Cart cart = getCart(member);
+
+        //장바구니에 담긴 상품목록 가져오기
+        List<CartItem> cartItems = cartItemRepository.findAllByCart(cart);
+
+        return cartItems.stream().map(cartItem ->
+                        CartResponseDto.builder()
+                                .itemName(cartItem.getProduct().getName())
+                                .imgurl(cartItem.getProduct().getImgurl())
+                                .price(cartItem.getProduct().getPrice())
+                                .quantity(cartItem.getQuantity())
+                                .build())
+                .collect(Collectors.toList());
+    }
 
     //장바구니에 상품 추가
     @Transactional
@@ -45,8 +69,12 @@ public class CartService {
         //상품정보를 가져온다
         Product product = getProduct(productId);
 
-        //수량을 업데이트한다
-//        cartItemRepository.updateQuantity(cart, product, quantity);
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(
+                () -> new IllegalArgumentException("장바구니에 해당 상품이 없습니다")
+        );
+
+        //save를 호출하지 않아도 자동으로 변경 감지하여 flush 된다
+        cartItem.setQuantity(quantity);
     }
 
     //장바구니 상품 삭제
@@ -79,5 +107,4 @@ public class CartService {
                 () -> new IllegalArgumentException("존재하지 않는 상품입니다")
         );
     }
-
 }

@@ -1,21 +1,30 @@
 package com.project.stress_traffic_system.cart.controller;
 
 import com.project.stress_traffic_system.cart.model.dto.CartRequestDto;
+import com.project.stress_traffic_system.cart.model.dto.CartResponseDto;
 import com.project.stress_traffic_system.cart.service.CartService;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
+@RequestMapping("/api")
 @RestController
 public class CartController {
 
     private final CartService cartService;
+
+    @ApiOperation(value = "장바구니 상품목록 조회")
+    @GetMapping("/products/cart")
+    public List<CartResponseDto> getCartItems(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return cartService.getCartItems(userDetails.getMember());
+    }
 
     @ApiOperation(value = "장바구니에 상품 추가")
     @PostMapping("/products/cart")
