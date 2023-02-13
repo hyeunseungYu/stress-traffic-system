@@ -66,6 +66,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponseDto getProduct(Members member, Long productId) {
         Product product = findProduct(productId);
+        product.setClickCount(product.getClickCount() + 1);
         return ProductResponseDto.builder()
                 .id(product.getId())
                 .name(product.getName())
