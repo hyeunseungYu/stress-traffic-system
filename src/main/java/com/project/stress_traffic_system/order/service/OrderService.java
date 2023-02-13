@@ -35,6 +35,10 @@ public class OrderService {
                 () -> new IllegalArgumentException("상품이 존재하지 않습니다")
         );
 
+        if (requestDto.getQuantity() > product.getStock()) {
+            throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
+        }
+
         //주문상품 객체 만들기
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto.getQuantity());
         List<OrderItem> orderItems = new ArrayList<>();
@@ -66,6 +70,11 @@ public class OrderService {
             Product product = productRepository.findById(orderRequestDto.getProductId()).orElseThrow(
                     () -> new IllegalArgumentException("상품이 존재하지 않습니다")
             );
+
+            if (orderRequestDto.getQuantity() > product.getStock()) {
+                throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
+            }
+
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto.getQuantity());
             orderItems.add(orderItem);
         }
