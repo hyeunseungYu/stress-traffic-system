@@ -2,14 +2,19 @@ package com.project.stress_traffic_system.product.controller;
 
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
+import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
+import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import com.project.stress_traffic_system.product.service.ProductService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -82,5 +87,19 @@ public class ProductController {
         return productService.searchByCategory(userDetails.getMember(), 5L, page);
     }
 
+    @ApiOperation(value = "상품 리뷰 등록하기")
+    @PostMapping("/products/{productId}/review")
+    public ReviewResponseDto createReview(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable Long productId, @RequestBody ReviewRequestDto requestDto) {
+        return productService.createReview(userDetails.getMember(), productId, requestDto);
+    }
 
+    @ApiOperation(value = "상품 리뷰목록 조회하기")
+    @GetMapping("/products/{productId}/review")
+    public List<ReviewResponseDto> getReviews(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable Long productId) {
+        return productService.getReviews(userDetails.getMember(), productId);
+    }
 }

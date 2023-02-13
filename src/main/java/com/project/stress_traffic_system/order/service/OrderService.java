@@ -60,6 +60,7 @@ public class OrderService {
     }
 
     //여러 상품 주문하기
+    @Transactional
     public OrderDto orderMany(Members member, List<OrderRequestDto> requestDtoList) {
 
         List<Orders> ordersList = new ArrayList<>();
@@ -92,6 +93,7 @@ public class OrderService {
     }
 
     //주문내역 리스트 가져오기
+    @Transactional(readOnly = true)
     public List<OrderListDto> getOrders(Members member) {
         List<Orders> orderList = orderRepository.findAllByMembersOrderByCreatedAtAsc(member);
         log.info("orderList 사이즈는 = {}", orderList.size());
@@ -108,6 +110,7 @@ public class OrderService {
     }
 
     //주문 상세내역 가져오기
+    @Transactional(readOnly = true)
     public List<OrderDetailDto> getOrderDetail(Members member, Long orderId) {
         Orders order = orderRepository.findById(orderId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 주문입니다")
