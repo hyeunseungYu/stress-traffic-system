@@ -11,6 +11,7 @@ import com.project.stress_traffic_system.order.repository.OrderRepository;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -39,11 +41,12 @@ public class OrderService {
         orderItems.add(orderItem);
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
-        Orders orders = new Orders();
-        orders.createOrder(member, orderItems);
+        Orders order = Orders.createOrder(member, orderItems);
+
+        log.info("orderItems 사이즈는 = {}", order.getOrderItems().size());
 
         //주문정보 저장
-        Orders savedOrders = orderRepository.save(orders);
+        Orders savedOrders = orderRepository.save(order);
 
         //주문내역 반환 (주문번호와, 주문일자)
         return OrderDto.builder()
@@ -68,8 +71,7 @@ public class OrderService {
         }
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
-        Orders order = new Orders();
-        order.createOrder(member, orderItems);
+        Orders order = Orders.createOrder(member, orderItems);
 
         Orders savedOrder = orderRepository.save(order);
 
@@ -83,6 +85,8 @@ public class OrderService {
     //주문내역 리스트 가져오기
     public List<OrderListDto> getOrders(Members member) {
         List<Orders> orderList = orderRepository.findAllByMembersOrderByCreatedAtAsc(member);
+        log.info("orderList 사이즈는 = {}", orderList.size());
+
         return orderList.stream().map(
                 orders -> OrderListDto.builder()
                         .orderId(orders.getId())
