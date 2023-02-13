@@ -69,7 +69,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.setDescription(productInfo[3].isEmpty() ? "" : productInfo[3]);
                         product.setShippingFee(productInfo[4].isEmpty() ? 0 : Integer.parseInt(productInfo[4]));
                         product.setImgurl(productInfo[5].isEmpty() ? 0 : Integer.parseInt(productInfo[5]));
-                        product.setCount(productInfo[6].isEmpty() ? 0 : Long.parseLong(productInfo[6]));
+                        product.setClickCount(productInfo[6].isEmpty() ? 0 : Long.parseLong(productInfo[6]));
                         product.setStock(productInfo[7].isEmpty() ? 0 : Integer.parseInt(productInfo[7]));
                         product.setIntroduction(productInfo[8].isEmpty() ? "" : productInfo[8]);
                         product.setPages(productInfo[9].isEmpty() ? 0 : Integer.parseInt(productInfo[9]));
@@ -121,7 +121,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.description,
                         product.shippingFee,
                         product.imgurl,
-                        product.count,
+                        product.clickCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -148,7 +148,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.description,
                         product.shippingFee,
                         product.imgurl,
-                        product.count,
+                        product.clickCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -165,7 +165,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     }
 
     private BooleanExpression nameLike(String name) {
-        return StringUtils.isEmpty(name) ? null : product.name.like(name);
+        return StringUtils.isEmpty(name) ? null : product.name.contains(name);
     }
 
     private BooleanExpression priceFrom(Integer priceFrom) {

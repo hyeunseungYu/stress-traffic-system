@@ -11,6 +11,7 @@ import com.project.stress_traffic_system.order.repository.OrderRepository;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -33,17 +35,22 @@ public class OrderService {
                 () -> new IllegalArgumentException("상품이 존재하지 않습니다")
         );
 
+        if (requestDto.getQuantity() > product.getStock()) {
+            throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
+        }
+
         //주문상품 객체 만들기
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto.getQuantity());
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
-        Orders orders = new Orders();
-        orders.createOrder(member, orderItems);
+        Orders order = Orders.createOrder(member, orderItems);
+
+        log.info("orderItems 사이즈는 = {}", order.getOrderItems().size());
 
         //주문정보 저장
-        Orders savedOrders = orderRepository.save(orders);
+        Orders savedOrders = orderRepository.save(order);
 
         //주문내역 반환 (주문번호와, 주문일자)
         return OrderDto.builder()
@@ -53,6 +60,7 @@ public class OrderService {
     }
 
     //여러 상품 주문하기
+    @Transactional
     public OrderDto orderMany(Members member, List<OrderRequestDto> requestDtoList) {
 
         List<Orders> ordersList = new ArrayList<>();
@@ -63,13 +71,17 @@ public class OrderService {
             Product product = productRepository.findById(orderRequestDto.getProductId()).orElseThrow(
                     () -> new IllegalArgumentException("상품이 존재하지 않습니다")
             );
+
+            if (orderRequestDto.getQuantity() > product.getStock()) {
+                throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
+            }
+
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto.getQuantity());
             orderItems.add(orderItem);
         }
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
-        Orders order = new Orders();
-        order.createOrder(member, orderItems);
+        Orders order = Orders.createOrder(member, orderItems);
 
         Orders savedOrder = orderRepository.save(order);
 
@@ -81,8 +93,11 @@ public class OrderService {
     }
 
     //주문내역 리스트 가져오기
+    @Transactional(readOnly = true)
     public List<OrderListDto> getOrders(Members member) {
         List<Orders> orderList = orderRepository.findAllByMembersOrderByCreatedAtAsc(member);
+        log.info("orderList 사이즈는 = {}", orderList.size());
+
         return orderList.stream().map(
                 orders -> OrderListDto.builder()
                         .orderId(orders.getId())
@@ -95,6 +110,7 @@ public class OrderService {
     }
 
     //주문 상세내역 가져오기
+    @Transactional(readOnly = true)
     public List<OrderDetailDto> getOrderDetail(Members member, Long orderId) {
         Orders order = orderRepository.findById(orderId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 주문입니다")

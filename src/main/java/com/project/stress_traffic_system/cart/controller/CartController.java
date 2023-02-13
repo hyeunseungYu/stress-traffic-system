@@ -1,6 +1,5 @@
 package com.project.stress_traffic_system.cart.controller;
 
-import com.project.stress_traffic_system.cart.model.dto.CartRequestDto;
 import com.project.stress_traffic_system.cart.model.dto.CartResponseDto;
 import com.project.stress_traffic_system.cart.service.CartService;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
@@ -27,9 +26,9 @@ public class CartController {
     }
 
     @ApiOperation(value = "장바구니에 상품 추가")
-    @PostMapping("/products/cart")
-    public ResponseEntity<String> addToCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CartRequestDto requestDto) {
-        cartService.addToCart(userDetails.getMember(), requestDto);
+    @PostMapping("/products/cart/{productId}")
+    public ResponseEntity<String> addToCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long productId) {
+        cartService.addToCart(userDetails.getMember(), productId);
         return new ResponseEntity<>("success", HttpStatus.CREATED);
     }
 
@@ -45,7 +44,7 @@ public class CartController {
     }
 
     @ApiOperation(value = "장바구니 단일 상품 삭제")
-    @PatchMapping("/products/{productId}/cart-delete")
+    @DeleteMapping("/products/{productId}/cart-delete")
     public ResponseEntity<String> deleteProduct(
             @PathVariable Long productId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -55,7 +54,7 @@ public class CartController {
     }
 
     @ApiOperation(value = "장바구니 비우기")
-    @PatchMapping("/products/cart-empty")
+    @DeleteMapping("/products/cart-empty")
     public ResponseEntity<String> emptyCart(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         cartService.emptyCart(userDetails.getMember());

@@ -8,7 +8,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static javax.persistence.CascadeType.ALL;
+import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Getter
 @NoArgsConstructor
@@ -17,7 +22,7 @@ import java.util.List;
 public class Orders {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "orders_id")
     private Long id;
 
@@ -25,10 +30,10 @@ public class Orders {
 
     private int totalQuantity; // 총 주문수량
 
-    @OneToMany
-    private List<OrderItem> orderItems; //주문한 책 리스트
+    @OneToMany(mappedBy = "orders", cascade = ALL)
+    private List<OrderItem> orderItems = new ArrayList<>(); //주문한 책 리스트
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private Members members;
 
@@ -53,23 +58,19 @@ public class Orders {
     }
 
     //생성 메서드
-    public Orders createOrder(Members member, List<OrderItem> orderItems) {
+    public static Orders createOrder(Members member, List<OrderItem> orderItems) {
+        Orders order = new Orders();
 
-        //주문자 정보 저장
-        setMembers(member);
+        //회원정보, 주문상태 저장
+        order.setMembers(member);
+        order.setStatus("order");
 
         for (OrderItem orderItem : orderItems) {
-            //orderItems 리스트에 주문상품 하나씩 저장
-            addOrderItem(orderItem);
-
-            //totalPrice에 총 주문금액 저장
-            this.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity();
-            this.totalQuantity += orderItem.getQuantity();
+            //총 주문금액, 총 수량 저장
+            order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity();
+            order.totalQuantity += orderItem.getQuantity();
+            order.addOrderItem(orderItem);
         }
-
-        //주문상태는 주문완료로 설정
-        setStatus("order");
-        return this;
+        return order;
     }
-
 }

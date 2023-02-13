@@ -26,7 +26,7 @@ public class Product {
     private String description; //상세설명
     private int shippingFee; // 배송료
     private int imgurl; //상품이미지
-    private Long count; // 조회수
+    private Long clickCount; // 조회수
     private int stock; //상품수량
 
     private String introduction; //책소개

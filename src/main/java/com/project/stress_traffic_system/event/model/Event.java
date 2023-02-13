@@ -1,6 +1,7 @@
 package com.project.stress_traffic_system.event.model;
 
 import com.project.stress_traffic_system.members.entity.Members;
+import com.project.stress_traffic_system.product.model.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,12 +21,9 @@ public class Event {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private Members member;
+    private Product product;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
-
-    public Event(Members member) {
-        this.member = member;
+    public Event(Product product) {
+        this.product = product;
     }
 }

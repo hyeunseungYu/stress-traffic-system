@@ -2,7 +2,6 @@ package com.project.stress_traffic_system.cart.service;
 
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.cart.model.CartItem;
-import com.project.stress_traffic_system.cart.model.dto.CartRequestDto;
 import com.project.stress_traffic_system.cart.model.dto.CartResponseDto;
 import com.project.stress_traffic_system.cart.repository.CartItemRepository;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -46,17 +46,25 @@ public class CartService {
 
     //장바구니에 상품 추가
     @Transactional
-    public void addToCart(Members member, CartRequestDto requestDto) {
+    public void addToCart(Members member, Long productId) {
 
         //해당 회원의 장바구니를 찾아온다
         Cart cart = getCart(member);
 
         //상품정보를 가져온다
-        Product product = getProduct(requestDto.getProductId());
+        Product product = getProduct(productId);
 
-        //장바구니아이템 엔티티를 저장한다
-        CartItem cartItem = new CartItem(cart, product, requestDto.getQuantity());
-        cartItemRepository.save(cartItem);
+        Optional<CartItem> findCartItem = cartItemRepository.findByCartAndProduct(cart, product);
+
+        //장바구니에 상품이 없으면 장바구니아이템 엔티티를 저장한다
+        if (findCartItem.isEmpty()) {
+            CartItem cartItem = new CartItem(cart, product);
+            cartItemRepository.save(cartItem);
+            return;
+        }
+
+        //장바구니에 이미 담긴 상품이라면 수량을 +1 해준다
+        findCartItem.get().setQuantity(findCartItem.get().getQuantity() + 1);
     }
 
     //장바구니의 상품 수량 변경
