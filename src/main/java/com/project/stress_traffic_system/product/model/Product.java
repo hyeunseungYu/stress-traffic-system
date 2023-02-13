@@ -37,4 +37,13 @@ public class Product {
 
     @CreatedDate
     private LocalDateTime date;
+
+    //상품 주문 시 재고수량 감소 시키기
+    public void removeStock(int quantity) {
+        int restStock = this.stock - quantity;
+        if (restStock < 0) {
+            throw new IllegalArgumentException("재고가 부족합니다"); //todo 예외
+        }
+        this.stock = restStock;
+    }
 }
