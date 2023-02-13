@@ -11,25 +11,30 @@ import java.time.LocalDateTime;
 @Builder
 public class ProductResponseDto {
     private Long id;
-    private String name;
-    private String location;
-    private String around;
-    private String notice;
-    private String base;
-    private int price;
-    private int imgurl; // todo String 으로 변경
+    private String name; //상품이름
+    private int price; //가격
+    private String description; //상세설명
+    private int shippingFee; // 배송료
+    private int imgurl; //상품이미지
+    private Long count; // 조회수
+    private int stock; //상품수량
+
+    private String introduction; //책소개
+    private int pages; //쪽수
     private LocalDateTime date;
 
     @QueryProjection
-    public ProductResponseDto(Long id, String name, String location, String around, String notice, String base, int price, int imgurl, LocalDateTime date) {
+    public ProductResponseDto(Long id, String name, int price, String description, int shippingFee, int imgurl, Long count, int stock, String introduction, int pages, LocalDateTime date) {
         this.id = id;
         this.name = name;
-        this.location = location;
-        this.around = around;
-        this.notice = notice;
-        this.base = base;
         this.price = price;
+        this.description = description;
+        this.shippingFee = shippingFee;
         this.imgurl = imgurl;
+        this.count = count;
+        this.stock = stock;
+        this.introduction = introduction;
+        this.pages = pages;
         this.date = date;
     }
 }

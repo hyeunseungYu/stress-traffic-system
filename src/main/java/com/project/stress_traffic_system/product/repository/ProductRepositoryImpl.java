@@ -6,6 +6,7 @@ import com.project.stress_traffic_system.product.model.dto.ProductSearchConditio
 import com.project.stress_traffic_system.product.model.dto.QProductResponseDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static com.project.stress_traffic_system.product.model.QProduct.product;
 
+@Slf4j
 public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -63,13 +65,15 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
                     if (data != null) {
                         product.setName(productInfo[1].isEmpty() ? "" : productInfo[1]);      //객체에 값 저장하기
-                        product.setLocation(productInfo[2].isEmpty() ? "" : productInfo[2]);
-                        product.setAround(productInfo[3].isEmpty() ? "" : productInfo[3]);
-                        product.setNotice(productInfo[4].isEmpty() ? "" : productInfo[4]);
-                        product.setBase(productInfo[5].isEmpty() ? "" : productInfo[5]);
-                        product.setPrice(productInfo[6].isEmpty() ? 0 : Integer.parseInt(productInfo[6]));
-                        product.setImgurl(productInfo[7].isEmpty() ? 0 : Integer.parseInt(productInfo[7]));
-                        product.setDate(productInfo[8].isEmpty() ? null : LocalDateTime.parse(productInfo[8], formatter));
+                        product.setPrice(productInfo[2].isEmpty() ? 0 : Integer.parseInt(productInfo[2]));
+                        product.setDescription(productInfo[3].isEmpty() ? "" : productInfo[3]);
+                        product.setShippingFee(productInfo[4].isEmpty() ? 0 : Integer.parseInt(productInfo[4]));
+                        product.setImgurl(productInfo[5].isEmpty() ? 0 : Integer.parseInt(productInfo[5]));
+                        product.setCount(productInfo[6].isEmpty() ? 0 : Long.parseLong(productInfo[6]));
+                        product.setStock(productInfo[7].isEmpty() ? 0 : Integer.parseInt(productInfo[7]));
+                        product.setIntroduction(productInfo[8].isEmpty() ? "" : productInfo[8]);
+                        product.setPages(productInfo[9].isEmpty() ? 0 : Integer.parseInt(productInfo[9]));
+                        product.setDate(productInfo[10].isEmpty() ? null : LocalDateTime.parse(productInfo[10], formatter));
                     }
                     products.add(product);
                 }
@@ -89,8 +93,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         stopWatch.stop();
 
         //jdbc batchUpdate 실행
-        String sql = String.format("INSERT INTO Product (name, location, around, notice, base, price, imgurl, DATE) " +
-                "VALUES (:name, :location, :around, :notice, :base, :price, :imgurl, :date)", "Product");
+        String sql = String.format("INSERT INTO Product (name, price, description, shipping_fee, imgurl, count, stock, introduction, pages, date) " +
+                "VALUES (:name, :price, :description, :shipping_fee, :imgurl, :count, :stock, :introduction, :pages, :date)", "Product");
 
         SqlParameterSource[] params = products.stream()
                 .map(BeanPropertySqlParameterSource::new)
@@ -101,9 +105,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         namedParameterJdbcTemplate.batchUpdate(sql, params);
         queryStopwatch.stop();
 
-        System.out.println("products 사이즈는 = " + products.size());
-        System.out.println("객체 생성 시간 = " + stopWatch.getTotalTimeSeconds());
-        System.out.println("쿼리 실행 시간 = " + queryStopwatch.getTotalTimeSeconds());
+        log.info("products 사이즈는 = {}", products.size());
+        log.info("객체 생성 시간 = {}", stopWatch.getTotalTimeSeconds());
+        log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
     }
 
     // 상품 조건에 따라 검색(이름, 가격)
@@ -113,16 +117,18 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .select(new QProductResponseDto(
                         product.id,
                         product.name,
-                        product.location,
-                        product.around,
-                        product.notice,
-                        product.base,
                         product.price,
+                        product.description,
+                        product.shippingFee,
                         product.imgurl,
+                        product.count,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
                         product.date
                 ))
                 .from(product)
-                .where(nameEq(condition.getName()),
+                .where(nameLike(condition.getName()),
                         priceFrom(condition.getPriceFrom()),
                         priceTo(condition.getPriceTo()))
                 .offset(page)
@@ -138,12 +144,14 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .select(new QProductResponseDto(
                         product.id,
                         product.name,
-                        product.location,
-                        product.around,
-                        product.notice,
-                        product.base,
                         product.price,
+                        product.description,
+                        product.shippingFee,
                         product.imgurl,
+                        product.count,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
                         product.date
                 ))
                 .from(product)
@@ -156,7 +164,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
     }
 
-    private BooleanExpression nameEq(String name) {
+    private BooleanExpression nameLike(String name) {
         return StringUtils.isEmpty(name) ? null : product.name.like(name);
     }
 

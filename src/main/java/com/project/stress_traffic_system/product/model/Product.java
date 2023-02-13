@@ -22,16 +22,19 @@ public class Product {
     private Long id;
 
     private String name; //상품이름
-    private String location; //주소
-    private String around; //상세주소
-    private String notice; //공지
-    private String base; //
     private int price; //가격
-    private int imgurl; //상품이미지 todo String 으로 변경
+    private String description; //상세설명
+    private int shippingFee; // 배송료
+    private int imgurl; //상품이미지
+    private Long count; // 조회수
+    private int stock; //상품수량
+
+    private String introduction; //책소개
+    private int pages; //쪽수
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
+
     @CreatedDate
-    @Column(name = "DATE")
     private LocalDateTime date;
 }

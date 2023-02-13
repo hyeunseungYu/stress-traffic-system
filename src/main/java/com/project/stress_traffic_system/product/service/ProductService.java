@@ -18,10 +18,11 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final int PAGE_SIZE = 10;
-    private final String SORT_BY = "name";
+    private final String SORT_BY = "date";
 
     //todo param Members 없앨지 정하기
 
+    //전체상품 가져오기
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(Members member, int page) {
 
@@ -37,12 +38,14 @@ public class ProductService {
         return new PageImpl<>(products.stream().map(product -> ProductResponseDto.builder()
                         .id(product.getId())
                         .name(product.getName())
-                        .location(product.getLocation())
-                        .around(product.getAround())
-                        .notice(product.getNotice())
-                        .base(product.getBase())
                         .price(product.getPrice())
+                        .description(product.getDescription())
+                        .shippingFee(product.getShippingFee())
                         .imgurl(product.getImgurl())
+                        .count(product.getCount())
+                        .stock(product.getStock())
+                        .introduction(product.getIntroduction())
+                        .pages(product.getPages())
                         .date(product.getDate())
                         .build())
                 .collect(Collectors.toList()));
@@ -55,14 +58,17 @@ public class ProductService {
         return ProductResponseDto.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .location(product.getLocation())
-                .around(product.getAround())
-                .notice(product.getNotice())
-                .base(product.getBase())
                 .price(product.getPrice())
+                .description(product.getDescription())
+                .shippingFee(product.getShippingFee())
                 .imgurl(product.getImgurl())
+                .count(product.getCount())
+                .stock(product.getStock())
+                .introduction(product.getIntroduction())
+                .pages(product.getPages())
                 .date(product.getDate())
                 .build();
+
     }
 
     // 상품 검색하기 (이름, 가격 필터링)
