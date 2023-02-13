@@ -15,8 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 
@@ -31,6 +33,7 @@ public class JwtUtil {
 
     //jwt를 사용할 예정이니 앞에 bearer를 달아주는 약속
     private static final String BEARER_PREFIX = "Bearer ";
+
 
     //토큰 유효시간 설정
     private static final long TOKEN_TIME = 960 * 60 * 1000L;
@@ -56,8 +59,13 @@ public class JwtUtil {
     public String resolveToken(HttpServletRequest request) {
         //request의 헤더에서 Authorization의 값 가져옴
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+
         //bearer라는 텍스트가 있고, bearer로 시작하면 하위 문자열 반환
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            //토큰 확인
+            log.info("bearerToken = {}" , bearerToken);
+            log.info("has Text = {}",StringUtils.hasText(bearerToken));
+            log.info("startwith = {}",bearerToken.startsWith(BEARER_PREFIX));
             return bearerToken.substring(7);
         }
         return null;
@@ -105,7 +113,7 @@ public class JwtUtil {
     public Authentication createAuthentication(String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         log.info("userDetails = {}", userDetails.getUsername());
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
     }
 
 

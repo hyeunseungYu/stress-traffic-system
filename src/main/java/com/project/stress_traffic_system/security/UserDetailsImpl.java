@@ -15,11 +15,13 @@ public class UserDetailsImpl implements UserDetails {
     private final Members members;
 
     private final String username;
+    private final String password;
 
     //생성자
-    public UserDetailsImpl(Members members, String username) {
+    public UserDetailsImpl(Members members, String username, String password) {
         this.members = members;
         this.username = username;
+        this.password = password;
     }
 
     public Members getMember() {
@@ -58,7 +60,7 @@ public class UserDetailsImpl implements UserDetails {
     //계정에 대한 비밀번호를 반환하지 않음
     @Override
     public String getPassword() {
-        return null;
+        return this.password;
     }
 
     //계정이 만료되었는지
