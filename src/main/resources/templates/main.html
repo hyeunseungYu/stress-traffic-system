@@ -17,12 +17,51 @@
     <title>ticketingSystem | main</title>
 </head>
 <script>
-    function logout(check) {
-        // 토큰 값 ''으로 덮어쓰기
-        document.cookie =
-            'Authorization' + '=' + '' + ';path=/';
+    let host = 'http://' + window.location.host;
 
-        window.location.href = '/login'
+    $(document).ready(function (){
+        // 토큰 여부 확인하여 로그인 확인
+        console.log("document ready " + localStorage.getItem("Authorization"))
+        const auth = localStorage.getItem("Authorization");
+
+        if (auth === null) {
+            window.location.href = host + "/login";
+        }
+
+    })
+
+    function  getToken() {
+        let tName = 'Bearer' + ' ';
+        console.log("token data = " + localStorage.getItem('Authorization'))
+        let tokenData = localStorage.getItem('Authorization');
+
+        console.log("token index = " + tokenData.indexOf('Bearer'))
+        let token = tokenData.indexOf('Bearer');
+
+        let auth = '';
+        if(token !== -1){
+            console.log("token = " + tName.length)
+            token += tName.length;
+
+            console.log("end = " + tokenData.indexOf(';', token))
+            let end = tokenData.indexOf(';', token);
+
+            if(end === -1)end = token.length;
+
+            console.log("auth =" + tokenData.substring(token, end))
+            auth = tokenData.substring(token, end);
+        }
+
+        console.log("final auth =" + auth)
+        return auth;
+    }
+
+
+    function logout() {
+        // 토큰 값 ''으로 덮어쓰기
+        localStorage.removeItem("Authorization")
+        window.location.reload();
+        // window.location.href = '/login'
         // if(check) {
         //     window.location.reload();
         // }
