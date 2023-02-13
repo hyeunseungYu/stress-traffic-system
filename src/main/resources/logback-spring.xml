@@ -3,7 +3,7 @@
     <property name="moduleId" value="around_hub_spring_boot"/><!-- moduleId는 프로젝트가 설치된 폴더명 또는 구분할 수 있는 식별자이면 됨 -->
     <property name="type" value="around_hub"/><!-- 로그파일명을 구성하는 인자 -->
     <property name="logback" value="logback"/><!-- log를 저장할 최종 디렉토리명 -->
-    <property name="logdir" value="/Users/yuhyeonseung/Desktop"/>
+    <property name="log_dir" value="${log.config.path}"/>
 
     <!-- TRACE > DEBUG > INFO > WARN > ERROR > OFF -->
     <!-- Appenders -->
@@ -27,10 +27,10 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
-        <file>${logdir}/${moduleId}/${logback}/debug_${type}.log</file>
+        <file>${log_dir}/${moduleId}/${logback}/debug_${type}.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${logdir}/${moduleId}/${logback}/debug_${type}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>${log_dir}/${moduleId}/${logback}/debug_${type}.%d{yyyy-MM-dd}.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
@@ -42,10 +42,10 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
-        <file>${logdir}/${moduleId}/${logback}/info_${type}.log</file>
+        <file>${log_dir}/${moduleId}/${logback}/info_${type}.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${logdir}/${moduleId}/${logback}/info_${type}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>${log_dir}/${moduleId}/${logback}/info_${type}.%d{yyyy-MM-dd}.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
