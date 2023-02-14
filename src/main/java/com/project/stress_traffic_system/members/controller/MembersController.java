@@ -1,14 +1,10 @@
 package com.project.stress_traffic_system.members.controller;
 
-import com.project.stress_traffic_system.members.dto.MembersRequestDto;
+import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
 import com.project.stress_traffic_system.members.service.MembersService;
-import com.project.stress_traffic_system.security.UserDetailsImpl;
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,12 +17,12 @@ public class MembersController {
     private final MembersService membersService;
 
     @PostMapping("/signup")
-    public MembersResponseMsgDto signup(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto signup(@RequestBody SignupRequestDto membersRequestDto, HttpServletResponse response) {
         return membersService.signup(membersRequestDto, response);
     }
 
     @PostMapping("/login")
-    public MembersResponseMsgDto login(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto login(@RequestBody SignupRequestDto membersRequestDto, HttpServletResponse response) {
         return membersService.login(membersRequestDto, response);
     }
 
