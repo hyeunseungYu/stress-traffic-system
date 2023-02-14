@@ -94,9 +94,9 @@ public class MembersService {
                 () -> new IllegalArgumentException("등록되지 않은 회원입니다."));
 
         //비밀번호 확인
-//        if (!passwordEncoder.matches(password, existMember.getPassword())) {
-//            return handleMemberException("비밀번호가 일치하지 않습니다.",HttpStatus.BAD_REQUEST, response);
-//        }
+        if (!passwordEncoder.matches(password, existMember.getPassword())) {
+            return handleMemberException("비밀번호가 일치하지 않습니다.",HttpStatus.BAD_REQUEST, response);
+        }
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
 

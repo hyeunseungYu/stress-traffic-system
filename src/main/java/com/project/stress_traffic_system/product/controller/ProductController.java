@@ -34,7 +34,7 @@ public class ProductController {
 
     @ApiOperation(value = "상품 상세페이지")
     @GetMapping("/products/{productId}")
-    public ProductResponseDto getSeats(@PathVariable Long productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ProductResponseDto getProductDetail(@PathVariable Long productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return productService.getProduct(userDetails.getMember(), productId);
     }
 
