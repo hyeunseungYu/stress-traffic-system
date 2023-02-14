@@ -48,11 +48,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Gradle Build 수행
           # uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         # with:
         # arguments: build
         run : ./gradlew clean build
+
+      - name: 테스트 결과를 PR에 코멘트로 등록합니다
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: '**/build/test-results/test/TEST-*.xml'
 
       # 디렉토리 생성
       - name: Make Directory
