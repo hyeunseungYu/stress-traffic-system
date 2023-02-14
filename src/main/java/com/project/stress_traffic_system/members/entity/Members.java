@@ -23,12 +23,16 @@ public class Members implements Serializable{
     private String password;
 
     @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private MembersRoleEnum role;
 
-    public Members(String username, String password, MembersRoleEnum role) {
+    public Members(String username, String password, String address, MembersRoleEnum role) {
         this.username = username;
         this.password = password;
+        this.address = address;
         this.role = role;
     }
 }
