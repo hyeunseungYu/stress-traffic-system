@@ -75,6 +75,9 @@ dependencies {
 
     //devtools 추가
     compileOnly 'org.springframework.boot:spring-boot-devtools:2.7.1'
+
+    //log관련하여 ExceptionLogConverter에서 StringUtils를 사용하기 위해 추가하였음.
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 
 tasks.named('test') {

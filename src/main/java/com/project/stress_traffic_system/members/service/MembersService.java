@@ -54,6 +54,7 @@ public class MembersService {
         membersExceptionHandler(response, status.value());
         return new MembersResponseMsgDto(message, status.value());
     }
+
     @Transactional
     public MembersResponseMsgDto signup(MembersRequestDto membersRequestDto, HttpServletResponse response) {
         String username = membersRequestDto.getUsername();

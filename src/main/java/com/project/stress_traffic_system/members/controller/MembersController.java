@@ -32,6 +32,7 @@ public class MembersController {
 
     @PostMapping("/logTest")
     public void logTest() {
+        int test = 0/0;
         log.trace("trace Log");
         log.debug("Debug Log");
         log.info("info Log");
