@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.bulk_data;
 
 import com.github.javafaker.Faker;
@@ -111,4 +112,4 @@ class BulkInsertTest {
             System.out.println(e.getMessage());
         }
     }
-}
+}*/
