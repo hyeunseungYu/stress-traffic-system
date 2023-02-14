@@ -1,5 +1,8 @@
 package com.project.stress_traffic_system.product.repository;
 
+import com.project.stress_traffic_system.members.entity.Members;
+import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
+import com.project.stress_traffic_system.members.repository.MembersRepository;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
@@ -9,6 +12,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -23,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.project.stress_traffic_system.product.model.QProduct.product;
 
@@ -31,7 +36,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JPAQueryFactory queryFactory;
-    private final Integer PAGE_LIMIT = 10;
+    private final Integer PAGE_LIMIT = 100;
 
     private ProductRepositoryImpl(EntityManager em, NamedParameterJdbcTemplate jdbcTemplate) {
         queryFactory = new JPAQueryFactory(em);
@@ -41,7 +46,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     //Product bulk 데이터 입력하기
     @Override
     public void bulkInsert() {
-        String path = "C:\\Users\\forbe\\Downloads\\products100.csv"; //csv 경로
+        String path = "E:\\프로그래밍\\항해99\\5. final\\stress-traffic-system\\product.csv"; //csv 경로
         FileReader in = null;
         BufferedReader bufIn = null;
 
@@ -54,7 +59,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
             in = new FileReader(path);
             bufIn = new BufferedReader(in);
-            bufIn.readLine(); // 컬럼명은 저장되지 않도록 한 줄 읽기
+//            bufIn.readLine(); // 컬럼명은 저장되지 않도록 한 줄 읽기
 
             String data;
             do {//파일에서 데이터를 읽어 파싱하고 Product 객체로 만들어 ArrayList에 넣는다.
@@ -64,16 +69,17 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     Product product = new Product();   //Product 객체 생성하기
 
                     if (data != null) {
-                        product.setName(productInfo[1].isEmpty() ? "" : productInfo[1]);      //객체에 값 저장하기
-                        product.setPrice(productInfo[2].isEmpty() ? 0 : Integer.parseInt(productInfo[2]));
+//                        product.setCategory_id(productInfo[0].isEmpty() ? 1 : Long.parseLong(productInfo[0]));  //todo category
+                        product.setName(productInfo[1].isEmpty() ? "" : productInfo[1]);
+                        product.setPrice(productInfo[2].isEmpty() ? 10000 : Integer.parseInt(productInfo[2]));
                         product.setDescription(productInfo[3].isEmpty() ? "" : productInfo[3]);
-                        product.setShippingFee(productInfo[4].isEmpty() ? 0 : Integer.parseInt(productInfo[4]));
-                        product.setImgurl(productInfo[5].isEmpty() ? 0 : Integer.parseInt(productInfo[5]));
+                        product.setShippingFee(productInfo[4].isEmpty() ? 2500 : Integer.parseInt(productInfo[4]));
+                        product.setImgurl(productInfo[5].isEmpty() ? 1 : Integer.parseInt(productInfo[5]));
                         product.setClickCount(productInfo[6].isEmpty() ? 0 : Long.parseLong(productInfo[6]));
-                        product.setStock(productInfo[7].isEmpty() ? 0 : Integer.parseInt(productInfo[7]));
+                        product.setStock(productInfo[7].isEmpty() ? 100 : Integer.parseInt(productInfo[7]));
                         product.setIntroduction(productInfo[8].isEmpty() ? "" : productInfo[8]);
-                        product.setPages(productInfo[9].isEmpty() ? 0 : Integer.parseInt(productInfo[9]));
-                        product.setDate(productInfo[10].isEmpty() ? null : LocalDateTime.parse(productInfo[10], formatter));
+                        product.setPages(productInfo[9].isEmpty() ? 200 : Integer.parseInt(productInfo[9]));
+                        product.setDate(LocalDateTime.now());
                     }
                     products.add(product);
                 }
@@ -93,8 +99,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         stopWatch.stop();
 
         //jdbc batchUpdate 실행
-        String sql = String.format("INSERT INTO Product (name, price, description, shipping_fee, imgurl, count, stock, introduction, pages, date) " +
-                "VALUES (:name, :price, :description, :shipping_fee, :imgurl, :count, :stock, :introduction, :pages, :date)", "Product");
+        String sql = String.format("INSERT INTO Product (name, price, description, shipping_fee, imgurl, click_count, stock, introduction, pages, category_id, date) " +
+                "VALUES (:name, :price, :description, :shippingFee, :imgurl, :clickCount, :stock, :introduction, :pages, :category_id, :date)", "Product");
 
         SqlParameterSource[] params = products.stream()
                 .map(BeanPropertySqlParameterSource::new)
@@ -106,6 +112,71 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         queryStopwatch.stop();
 
         log.info("products 사이즈는 = {}", products.size());
+        log.info("객체 생성 시간 = {}", stopWatch.getTotalTimeSeconds());
+        log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
+    }
+
+    //Product bulk 데이터 입력하기
+    public void bulkInsertMembers() {
+        String path = "E:\\프로그래밍\\항해99\\5. final\\stress-traffic-system\\user.csv"; //csv 경로
+        FileReader in = null;
+        BufferedReader bufIn = null;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<Members> members = new ArrayList<>();
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        try {
+
+            in = new FileReader(path);
+            bufIn = new BufferedReader(in);
+//            bufIn.readLine(); // 컬럼명은 저장되지 않도록 한 줄 읽기
+
+            String data;
+            do {//파일에서 데이터를 읽어 파싱하고 Product 객체로 만들어 ArrayList에 넣는다.
+                data = bufIn.readLine();  //한 라인 읽기
+                if (data != null) {
+                    String[] userInfo = data.split(",");  //콤마로 분리하기
+                    Members member = new Members();   //Product 객체 생성하기
+
+                    if (data != null) {
+                        member.setUsername(userInfo[0].isEmpty() ? UUID.randomUUID().toString() : userInfo[0]);
+                        member.setPassword("$2a$10$8aYgCESquxcDpVSMTGHGEOawngL3UncAMpBwcux.Zr4WbpClUYerG");
+                        member.setRole(MembersRoleEnum.MEMBER);
+                        member.setAddress(userInfo[3].isEmpty() ? "서울" : userInfo[3]);
+                    }
+                    members.add(member);
+                }
+            } while (data != null);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }  finally {
+            try {
+                in.close();
+            } catch (Exception e) {
+            }
+            try {
+                bufIn.close();
+            } catch (Exception e) {
+            }
+        }
+        stopWatch.stop();
+
+//        jdbc batchUpdate 실행
+        String sql = String.format("INSERT INTO users (username, password, role, address) " +
+                "VALUES (:username, :password, 'MEMBER', :address)", "Members");
+
+        SqlParameterSource[] params = members.stream()
+                .map(BeanPropertySqlParameterSource::new)
+                .toArray(SqlParameterSource[]::new);
+
+        StopWatch queryStopwatch = new StopWatch();
+        queryStopwatch.start();
+        namedParameterJdbcTemplate.batchUpdate(sql, params);
+        queryStopwatch.stop();
+
+        log.info("members 사이즈는 = {}", members.size());
         log.info("객체 생성 시간 = {}", stopWatch.getTotalTimeSeconds());
         log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
     }
@@ -131,6 +202,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .where(nameLike(condition.getName()),
                         priceFrom(condition.getPriceFrom()),
                         priceTo(condition.getPriceTo()))
+                .orderBy(product.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
@@ -156,12 +228,38 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 ))
                 .from(product)
                 .where(product.category.id.eq(categoryId))
+                .orderBy(product.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
 
         return new PageImpl<>(content);
 
+    }
+
+    @Override
+    public Page<ProductResponseDto> findAllOrderByClickCountDesc(int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
     }
 
     private BooleanExpression nameLike(String name) {

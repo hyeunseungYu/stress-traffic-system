@@ -35,6 +35,8 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
+//    private Long category_id;
+
     @CreatedDate
     private LocalDateTime date;
 
