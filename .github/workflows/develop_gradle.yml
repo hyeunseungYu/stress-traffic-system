@@ -52,7 +52,7 @@ jobs:
           # uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         # with:
         # arguments: build
-        run : ./gradlew clean build
+        run : ./gradlew clean build --info
         shell: bash
 
       - name: 테스트 결과를 PR에 코멘트로 등록합니다
