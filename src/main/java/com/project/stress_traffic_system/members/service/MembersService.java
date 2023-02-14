@@ -3,21 +3,18 @@ package com.project.stress_traffic_system.members.service;
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.jwt.JwtUtil;
-import com.project.stress_traffic_system.members.dto.MembersRequestDto;
+import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
@@ -32,9 +29,9 @@ public class MembersService {
 
 //    @PostConstruct
     public void init() {
-        Members members1 = new Members("test1", "11", MembersRoleEnum.MEMBER);
-        Members members2 = new Members("test2", "11",MembersRoleEnum.MEMBER);
-        Members members3 = new Members("test3", "11",MembersRoleEnum.MEMBER);
+        Members members1 = new Members("test1", "11", "서울시", MembersRoleEnum.MEMBER);
+        Members members2 = new Members("test2", "11", "안양시", MembersRoleEnum.MEMBER);
+        Members members3 = new Members("test3", "11", "김해시", MembersRoleEnum.MEMBER);
 
         membersRepository.save(members1);
         membersRepository.save(members2);
@@ -55,9 +52,10 @@ public class MembersService {
         return new MembersResponseMsgDto(message, status.value());
     }
     @Transactional
-    public MembersResponseMsgDto signup(MembersRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto signup(SignupRequestDto membersRequestDto, HttpServletResponse response) {
         String username = membersRequestDto.getUsername();
         String password = passwordEncoder.encode(membersRequestDto.getPassword());
+        String address = membersRequestDto.getAddress();
 
         //회원 중복 확인
         Optional<Members> found = membersRepository.findByUsername(username);
@@ -66,18 +64,18 @@ public class MembersService {
         }
 
         //아이디 양식 확인
-        if (!membersRequestDto.getUsername().matches("^[a-zA-Z0-9]{5,10}$")) {
+        if (!membersRequestDto.getUsername().matches("^[a-zA-Z0-9]{4,10}$")) {
             return handleMemberException("아이디 양식을 지켜주세요!", HttpStatus.BAD_REQUEST, response);
         }
 
         //비밀번호 양식
-        if (!membersRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,12}$")) {
-            return handleMemberException("비밀번호는 영어 대소문자, 숫자의 최소 8자에서 최대 12자리여야 합니다.", HttpStatus.BAD_REQUEST, response);
+        if (!membersRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,}$")) {
+            return handleMemberException("비밀번호는 영어 대소문자, 숫자, 특수문자의 최소 8자에서 최대 16자리여야 합니다.", HttpStatus.BAD_REQUEST, response);
         }
 
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
-        Members members = new Members(username, password, role);
+        Members members = new Members(username, password, address, role);
         Members savedMember = membersRepository.save(members);
 
         Cart cart = new Cart(savedMember);
@@ -86,7 +84,7 @@ public class MembersService {
         return handleMemberException("회원가입 성공", HttpStatus.OK, response);
     }
 
-    public MembersResponseMsgDto login(MembersRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto login(SignupRequestDto membersRequestDto, HttpServletResponse response) {
         String username = membersRequestDto.getUsername();
         String password = membersRequestDto.getPassword();
 
