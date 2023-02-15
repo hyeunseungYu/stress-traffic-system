@@ -17,12 +17,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 public class WebSecurityConfig {
+
+    private static final List<String> permitOrigin =
+            List.of("http://localhost:3000","http://localhost:8080");
 
     /**
      * BCrypt로 패스워드 인코딩 수행<br>
@@ -73,6 +81,9 @@ public class WebSecurityConfig {
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+        //cors 설정
+        http.cors().configurationSource(configurationSource());
+
         //다양한 엔드포인트 패턴에 대한 요청을 승인
         http.authorizeRequests()
                 //추후 api들에 맞춰 permit 여부 결정
@@ -93,5 +104,26 @@ public class WebSecurityConfig {
 
         //http 보안 설정을 위 내용으로 해서 반환
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource configurationSource() {
+        UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
+
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(permitOrigin);
+        config.addAllowedMethod("*");
+//        config.setAllowedHeaders(permitHeader);
+
+        config.addAllowedHeader("Authorization");
+        config.addAllowedHeader("Content-Type");
+
+        config.addExposedHeader("Authorization");
+        config.addExposedHeader("Content-Type");
+        config.setAllowCredentials(true);
+
+        corsConfigurationSource.registerCorsConfiguration("/**", config);
+
+        return corsConfigurationSource;
     }
 }

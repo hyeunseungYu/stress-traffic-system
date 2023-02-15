@@ -28,7 +28,7 @@ public class ProductService {
     private final ReviewRepository reviewRepository;
 
     private final ProductRepository productRepository;
-    private final int PAGE_SIZE = 10;
+    private final int PAGE_SIZE = 100;
     private final String SORT_BY = "date";
 
     //todo param Members 없앨지 정하기
@@ -37,29 +37,9 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProducts(Members member, int page) {
 
-        // 페이징 처리
-        Sort.Direction direction = Sort.Direction.ASC;
-        Sort sort = Sort.by(direction, SORT_BY);
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, sort);
+        //모든 상품 100개 단위로 가져오기
+        return productRepository.findAllOrderByClickCountDesc(page);
 
-        //모든 상품 10개 단위로 가져오기
-        Page<Product> products = productRepository.findAll(pageable);
-
-        //dto로 변환하기
-        return new PageImpl<>(products.stream().map(product -> ProductResponseDto.builder()
-                        .id(product.getId())
-                        .name(product.getName())
-                        .price(product.getPrice())
-                        .description(product.getDescription())
-                        .shippingFee(product.getShippingFee())
-                        .imgurl(product.getImgurl())
-                        .count(product.getClickCount())
-                        .stock(product.getStock())
-                        .introduction(product.getIntroduction())
-                        .pages(product.getPages())
-                        .date(product.getDate())
-                        .build())
-                .collect(Collectors.toList()));
     }
 
     //상품 id로 상세정보 가져오기
