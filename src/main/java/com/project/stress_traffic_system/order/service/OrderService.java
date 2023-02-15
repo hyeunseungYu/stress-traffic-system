@@ -40,7 +40,7 @@ public class OrderService {
         }
 
         //주문상품 객체 만들기
-        OrderItem orderItem = OrderItem.createOrderItem(product, requestDto.getQuantity());
+        OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
 
@@ -76,7 +76,7 @@ public class OrderService {
                 throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
             }
 
-            OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto.getQuantity());
+            OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
             orderItems.add(orderItem);
         }
 
