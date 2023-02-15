@@ -3,11 +3,13 @@ package com.project.stress_traffic_system.members.service;
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.jwt.JwtUtil;
+import com.project.stress_traffic_system.members.dto.LoginRequestDto;
 import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.security.SessionConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
@@ -26,6 +29,7 @@ public class MembersService {
     private final CartRepository cartRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final SessionConfig sessionConfig;
 
 //    @PostConstruct
     public void init() {
@@ -70,13 +74,13 @@ public class MembersService {
         }
 
         //비밀번호 양식
-        if (!membersRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,}$")) {
+        if (!membersRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$")) {
             return handleMemberException("비밀번호는 영어 대소문자, 숫자, 특수문자의 최소 8자에서 최대 16자리여야 합니다.", HttpStatus.BAD_REQUEST, response);
         }
 
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
-        Members members = new Members(username, password, address, role);
+        Members members = new Members(username, password, role);
         Members savedMember = membersRepository.save(members);
 
         Cart cart = new Cart(savedMember);
@@ -85,7 +89,7 @@ public class MembersService {
         return handleMemberException("회원가입 성공", HttpStatus.OK, response);
     }
 
-    public MembersResponseMsgDto login(SignupRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto login(LoginRequestDto membersRequestDto, HttpServletResponse response) {
         String username = membersRequestDto.getUsername();
         String password = membersRequestDto.getPassword();
 
@@ -98,10 +102,15 @@ public class MembersService {
             return handleMemberException("비밀번호가 일치하지 않습니다.",HttpStatus.BAD_REQUEST, response);
         }
 
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
+        sessionConfig.createSession(existMember.getUsername(), response);
+//        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
 
 
         return handleMemberException("로그인 성공", HttpStatus.OK, response);
     }
 
+    public MembersResponseMsgDto logout(HttpServletResponse response, HttpServletRequest request) {
+        sessionConfig.expire(request);
+        return handleMemberException("로그아웃 성공", HttpStatus.OK, response);
+    }
 }

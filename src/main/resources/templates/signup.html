@@ -140,7 +140,7 @@
                 return false
             }
 
-            if (!/^[a-zA-Z0-9]{7,12}$/.test(input[1].value)) {
+            if (!/^[a-zA-Z0-9$@!%*#?&]{7,12}$/.test(input[1].value)) {
                 document.getElementById(errorID[1]).innerHTML = "비밀번호는 영어 대소문자, 숫자의 최소 8자에서 최대 12자리여야 합니다."
                 join.PW.focus()
                 return false

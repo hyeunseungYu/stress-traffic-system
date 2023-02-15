@@ -21,14 +21,25 @@
 
     $(document).ready(function (){
         // 토큰 여부 확인하여 로그인 확인
-        console.log("document ready " + localStorage.getItem("Authorization"))
-        const auth = localStorage.getItem("Authorization");
+        console.log("document ready " + getCookie("SESSION"))
+        const auth = getCookie("SESSION");
 
         if (auth === null) {
             window.location.href = host + "/login";
         }
 
     })
+
+    // $(document).ready(function (){
+    //     // 토큰 여부 확인하여 로그인 확인
+    //     console.log("document ready " + localStorage.getItem("Authorization"))
+    //     const auth = localStorage.getItem("Authorization");
+    //
+    //     if (auth === null) {
+    //         window.location.href = host + "/login";
+    //     }
+    //
+    // })
 
     function  getToken() {
         let tName = 'Bearer' + ' ';
@@ -58,13 +69,18 @@
 
 
     function logout() {
-        // 토큰 값 ''으로 덮어쓰기
-        localStorage.removeItem("Authorization")
-        window.location.reload();
-        // window.location.href = '/login'
-        // if(check) {
-        //     window.location.reload();
-        // }
+        $.ajax({
+            type: "POST",
+            url: "/api/members/logout",
+            success: function (res) {
+                alert(res["msg"])
+                window.location.reload();
+            }
+        });
+        // // 토큰 값 ''으로 덮어쓰기
+        // localStorage.removeItem("Authorization")
+        // window.location.reload();
+
     }
 
     function ticketing(showId) {

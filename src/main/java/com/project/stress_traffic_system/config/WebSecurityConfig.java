@@ -71,7 +71,7 @@ public class WebSecurityConfig {
         http.csrf().disable();
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //다양한 엔드포인트 패턴에 대한 요청을 승인
         http.authorizeRequests()

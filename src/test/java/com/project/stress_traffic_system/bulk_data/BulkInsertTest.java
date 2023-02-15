@@ -1,9 +1,10 @@
 package com.project.stress_traffic_system.bulk_data;
 
-import com.github.javafaker.Faker;
+
 import com.project.stress_traffic_system.product.model.Category;
 import com.project.stress_traffic_system.product.repository.CategoryRepository;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

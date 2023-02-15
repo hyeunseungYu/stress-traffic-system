@@ -49,8 +49,11 @@ dependencies {
     //springSecurity
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    //spring data redis
+    // spring에서 redis에 대한 의존성
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // spring에서 redis를 session storage로 사용하기 위한 의존성
+    implementation 'org.springframework.session:spring-session-data-redis'
 
     //테스트 환경에서 사용하기 위한 embedded redis
     implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.1'
@@ -72,6 +75,10 @@ dependencies {
     //테스트 코드에서 롬복 가능하게
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    //test faker
+    implementation 'net.datafaker:datafaker:1.5.0'
+    testImplementation 'net.datafaker:datafaker:1.5.0'
 
     //devtools 추가
     compileOnly 'org.springframework.boot:spring-boot-devtools:2.7.1'

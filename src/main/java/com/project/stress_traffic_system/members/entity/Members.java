@@ -24,7 +24,7 @@ public class Members implements Serializable{
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String address;
 
     @Column(nullable = false)
@@ -35,6 +35,12 @@ public class Members implements Serializable{
         this.username = username;
         this.password = password;
         this.address = address;
+        this.role = role;
+    }
+
+    public Members(String username, String password, MembersRoleEnum role) {
+        this.username = username;
+        this.password = password;
         this.role = role;
     }
 }
