@@ -1,7 +1,6 @@
 package com.project.stress_traffic_system.order.model.dto;
 
 import lombok.Getter;
-import java.util.HashMap;
 
 @Getter
 public class OrderRequestDto {
