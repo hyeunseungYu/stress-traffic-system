@@ -29,7 +29,7 @@ public class OrderController {
         return orderService.orderOne(userDetails.getMember(), requestDto);
     }
 
-    @ApiOperation(value = "여러상품 주문하기")
+    @ApiOperation(value = "여러상품 주문하기(장바구니에서)")
     @PostMapping("/products/order-many")
     public OrderDto orderMany(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
