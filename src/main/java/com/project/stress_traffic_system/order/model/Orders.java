@@ -1,6 +1,7 @@
 package com.project.stress_traffic_system.order.model;
 
 import com.project.stress_traffic_system.members.entity.Members;
+import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static javax.persistence.CascadeType.ALL;
@@ -66,8 +68,19 @@ public class Orders {
         order.setStatus("order");
 
         for (OrderItem orderItem : orderItems) {
-            //총 주문금액, 총 수량 저장
-            order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity();
+            //총 주문금액, 총 수량 저장//
+            //금액 할인
+            if(orderItem.getDcType().equals("price")){
+                order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity() - orderItem.getDiscount();
+            }
+            //퍼센트 할인
+            else if (orderItem.getDcType().equals("percentage")){
+                order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity() * (1 - orderItem.getDiscount()/100);
+            }
+            else { //할인없음
+                order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity();
+            }
+
             order.totalQuantity += orderItem.getQuantity();
             order.addOrderItem(orderItem);
         }

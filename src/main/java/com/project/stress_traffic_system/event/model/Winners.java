@@ -2,6 +2,7 @@ package com.project.stress_traffic_system.event.model;
 
 import com.project.stress_traffic_system.members.entity.Members;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -15,6 +16,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Entity
+@RequiredArgsConstructor
 public class Winners {
 
     @Id @GeneratedValue(strategy = IDENTITY)
