@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ProductRepositoryCustom {
 
-    Page<ProductResponseDto> searchProducts(ProductSearchCondition condition, int page);
+    Page<ProductResponseDto> searchProducts(ProductSearchCondition condition);
 
     void bulkInsert();
     void bulkInsertMembers();

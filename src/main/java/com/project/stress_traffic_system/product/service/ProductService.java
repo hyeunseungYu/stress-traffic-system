@@ -66,8 +66,8 @@ public class ProductService {
     // 상품 검색하기 (이름, 가격 필터링)
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> searchProducts(Members member, ProductSearchCondition condition, int page) {
-        return productRepository.searchProducts(condition, page);
+    public Page<ProductResponseDto> searchProducts(Members member, ProductSearchCondition condition) {
+        return productRepository.searchProducts(condition);
     }
     /*
         카테고리 1~5 각각 조회하는 Api
