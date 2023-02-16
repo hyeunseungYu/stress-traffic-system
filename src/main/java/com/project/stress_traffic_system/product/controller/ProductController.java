@@ -42,9 +42,8 @@ public class ProductController {
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody ProductSearchCondition condition,
-            @RequestParam("page") int page) {
-        return productService.searchProducts(userDetails.getMember(), condition, page);
+            ProductSearchCondition condition) {
+        return productService.searchProducts(userDetails.getMember(), condition);
     }
 
     @ApiOperation(value = "카테고리1 상품조회")
