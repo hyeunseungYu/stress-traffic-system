@@ -7,7 +7,11 @@ import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.model.dto.QProductResponseDto;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -181,12 +185,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
     }
 
-    // 상품 조건에 따라 검색(이름, 가격)
-    @Override
+    // 상품 조건에 따라 검색(이름, 가격) LIKE 구문 사용
+    /*@Override
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
         //TODO 검색어가 공백으로 넘어왔을경우 전체조회가 이뤄지기때문에 content를 비워서 내보내야 한다.
         List<ProductResponseDto> content = new ArrayList<>();
-        if (!condition.getName().equals("")) {
+        if (!condition.getName().trim().equals("")) {
             content = queryFactory
                     .select(new QProductResponseDto(
                             product.id,
@@ -204,6 +208,41 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     .from(product)
                     .where(nameLike(condition.getName()),
                             priceFrom(condition.getPriceFrom()),
+                            priceTo(condition.getPriceTo()))
+                    .orderBy(product.clickCount.desc())
+                    .offset(condition.getPage())
+                    .limit(PAGE_LIMIT)
+                    .fetch();
+        }
+        return new PageImpl<>(content);
+    }*/
+
+    // 상품 조건에 따라 검색(이름, 가격) FULL TEXT INDEX 사용
+    @Override
+    public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
+        //TODO 검색어가 공백으로 넘어왔을경우 전체조회가 이뤄지기때문에 content를 비워서 내보내야 한다.
+        List<ProductResponseDto> content = new ArrayList<>();
+        if (!condition.getName().trim().equals("")) {
+            BooleanBuilder builder = new BooleanBuilder();
+            NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
+                    "function('match',{0},{1})",product.name, condition.getName() + "*");
+            builder.and(booleanTemplate.gt(0));
+            content = queryFactory
+                    .select(new QProductResponseDto(
+                            product.id,
+                            product.name,
+                            product.price,
+                            product.description,
+                            product.shippingFee,
+                            product.imgurl,
+                            product.clickCount,
+                            product.stock,
+                            product.introduction,
+                            product.pages,
+                            product.date
+                    ))
+                    .from(product)
+                    .where(builder,priceFrom(condition.getPriceFrom()),
                             priceTo(condition.getPriceTo()))
                     .orderBy(product.clickCount.desc())
                     .offset(condition.getPage())
