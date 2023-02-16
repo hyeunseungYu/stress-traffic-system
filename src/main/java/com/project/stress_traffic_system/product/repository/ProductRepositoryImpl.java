@@ -183,30 +183,33 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
     // 상품 조건에 따라 검색(이름, 가격)
     @Override
-    public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition, int page) {
-        List<ProductResponseDto> content = queryFactory
-                .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
-                ))
-                .from(product)
-                .where(nameLike(condition.getName()),
-                        priceFrom(condition.getPriceFrom()),
-                        priceTo(condition.getPriceTo()))
-                .orderBy(product.clickCount.desc())
-                .offset(page)
-                .limit(PAGE_LIMIT)
-                .fetch();
-
+    public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
+        //TODO 검색어가 공백으로 넘어왔을경우 전체조회가 이뤄지기때문에 content를 비워서 내보내야 한다.
+        List<ProductResponseDto> content = new ArrayList<>();
+        if (!condition.getName().equals("")) {
+            content = queryFactory
+                    .select(new QProductResponseDto(
+                            product.id,
+                            product.name,
+                            product.price,
+                            product.description,
+                            product.shippingFee,
+                            product.imgurl,
+                            product.clickCount,
+                            product.stock,
+                            product.introduction,
+                            product.pages,
+                            product.date
+                    ))
+                    .from(product)
+                    .where(nameLike(condition.getName()),
+                            priceFrom(condition.getPriceFrom()),
+                            priceTo(condition.getPriceTo()))
+                    .orderBy(product.clickCount.desc())
+                    .offset(condition.getPage())
+                    .limit(PAGE_LIMIT)
+                    .fetch();
+        }
         return new PageImpl<>(content);
     }
 

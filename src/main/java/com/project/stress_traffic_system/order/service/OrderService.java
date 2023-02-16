@@ -1,5 +1,9 @@
 package com.project.stress_traffic_system.order.service;
 
+import com.project.stress_traffic_system.cart.model.Cart;
+import com.project.stress_traffic_system.cart.model.CartItem;
+import com.project.stress_traffic_system.cart.repository.CartItemRepository;
+import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.order.model.OrderItem;
 import com.project.stress_traffic_system.order.model.Orders;
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,20 +31,20 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
 
     //단일 상품 주문하기
     @Transactional
     public OrderDto orderOne(Members member, OrderRequestDto requestDto) {
 
-        Product product = productRepository.findById(requestDto.getProductId()).orElseThrow(
-                () -> new IllegalArgumentException("상품이 존재하지 않습니다")
-        );
 
-        if (requestDto.getQuantity() > product.getStock()) {
-            throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
-        }
+        Cart cart = findCart(member);   //회원의 장바구니 가져오기
+        Product product = checkProduct(requestDto); //상품정보
+        checkStock(requestDto, product); //재고가 있는지 확인
+        checkQuantity(requestDto);  //주문수량이 유효한지 확인
 
-        //주문상품 객체 만들기
+        //주문상품 객체 만들기(생성메서드)
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
@@ -47,10 +52,10 @@ public class OrderService {
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
         Orders order = Orders.createOrder(member, orderItems);
 
-        log.info("orderItems 사이즈는 = {}", order.getOrderItems().size());
-
         //주문정보 저장
         Orders savedOrders = orderRepository.save(order);
+
+        deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
 
         //주문내역 반환 (주문번호와, 주문일자)
         return OrderDto.builder()
@@ -63,21 +68,22 @@ public class OrderService {
     @Transactional
     public OrderDto orderMany(Members member, List<OrderRequestDto> requestDtoList) {
 
-        List<Orders> ordersList = new ArrayList<>();
-        List<OrderItem> orderItems = new ArrayList<>();
+        Cart cart = findCart(member); //회원의 장바구니 가져오기
+
+        List<OrderItem> orderItems = new ArrayList<>(); //주문상품 목록
 
         //주문상품 리스트에 주문상품 목록을 담아준다
         for (OrderRequestDto orderRequestDto : requestDtoList) {
-            Product product = productRepository.findById(orderRequestDto.getProductId()).orElseThrow(
-                    () -> new IllegalArgumentException("상품이 존재하지 않습니다")
-            );
 
-            if (orderRequestDto.getQuantity() > product.getStock()) {
-                throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
-            }
+            Product product = checkProduct(orderRequestDto); //상품정보 가져오기
+            checkStock(orderRequestDto, product);   //재고확인하기
+            checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
 
+            //주문상품 객체 생성해서 list에 추가
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
             orderItems.add(orderItem);
+
+            deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
         }
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
@@ -146,5 +152,41 @@ public class OrderService {
 
         //상품 갯수가 여러개이면 "ㅇㅇ 외" 로 표시
         return orders.getOrderItems().get(0).getProduct().getName() + " 외";
+    }
+
+    //주문수량이 적정한지
+    private void checkQuantity(OrderRequestDto requestDto) {
+        if (requestDto.getQuantity() < 1) {
+            throw new IllegalArgumentException("최소 1개 이상 주문해주세요");
+        }
+    }
+
+    //상품이 존재하는지 확인
+    private Product checkProduct(OrderRequestDto requestDto) {
+        return productRepository.findById(requestDto.getProductId()).orElseThrow(
+                () -> new IllegalArgumentException("상품이 존재하지 않습니다")
+        );
+    }
+
+    //재고수량 확인하기
+    private void checkStock(OrderRequestDto orderRequestDto, Product product) {
+        if (orderRequestDto.getQuantity() > product.getStock()) {
+            throw new IllegalArgumentException("주문 가능 수량을 초과하였습니다");
+        }
+    }
+
+    //회원 장바구니 가져오기
+    private Cart findCart(Members member) {
+        return cartRepository.findByMember(member);
+    }
+
+    //장바구니에서 주문한 아이템 삭제하기
+    private void deleteCartItem(Cart cart, Product product) {
+        Optional<CartItem> cartItem = cartItemRepository.findByCartAndProduct(cart, product);
+
+        //장바구니에서 주문상품이 존재하면 장바구니에서 삭제해버린다
+        if (cartItem.isPresent()) {
+            cartItemRepository.deleteByCartAndProduct(cart, product);
+        }
     }
 }
