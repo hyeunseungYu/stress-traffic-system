@@ -70,7 +70,7 @@ public class ProductService {
     // 상품 검색하기 (이름, 가격 필터링)
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> searchProducts(Members member, ProductSearchCondition condition) {
+    public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
         return productRepository.searchProducts(condition);
     }
     /*

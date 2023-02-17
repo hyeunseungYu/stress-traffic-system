@@ -41,9 +41,8 @@ public class ProductController {
     @ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
             ProductSearchCondition condition) {
-        return productService.searchProducts(userDetails.getMember(), condition);
+        return productService.searchProducts(condition);
     }
 
     @ApiOperation(value = "카테고리1 상품조회")
@@ -111,7 +110,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "베스트셀러 상품조회")
-    @GetMapping("/products/ebook")
+    @GetMapping("/products/bestseller")
     public Page<ProductResponseDto> findBestSeller(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam("page") int page) {

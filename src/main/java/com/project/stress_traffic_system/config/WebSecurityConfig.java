@@ -88,6 +88,7 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 //추후 api들에 맞춰 permit 여부 결정
                 .antMatchers("/api/members/**").permitAll()
+                .antMatchers("/api/products/**").permitAll()
                 .antMatchers("/signup").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/main").permitAll()
