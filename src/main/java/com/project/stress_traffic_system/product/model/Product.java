@@ -31,17 +31,25 @@ public class Product {
 
     private String introduction; //책소개
     private int pages; //쪽수
+    private Long orderCount;// 누적주문수량
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private SubCategory subCategory;
+
+//    private Long category_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
-
-//    private Long category_id;
 
     @CreatedDate
     private LocalDateTime date;
 
     public void setClickCount(Long clickCount) {
         this.clickCount = clickCount;
+    }
+
+    public void setOrderCount(Long orderCount) {
+        this.orderCount = orderCount;
     }
 
     //상품 주문 시 재고수량 감소 시키기

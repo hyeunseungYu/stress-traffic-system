@@ -2,13 +2,12 @@ package com.project.stress_traffic_system.product.repository;
 
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
-import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.product.model.Category;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.model.dto.QProductResponseDto;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
@@ -16,7 +15,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -253,33 +251,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     }
 
     @Override
-    public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
-        List<ProductResponseDto> content = queryFactory
-                .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
-                ))
-                .from(product)
-                .where(product.category.id.eq(categoryId))
-                .orderBy(product.clickCount.desc())
-                .offset(page)
-                .limit(PAGE_LIMIT)
-                .fetch();
-
-        return new PageImpl<>(content);
-
-    }
-
-    @Override
     public Page<ProductResponseDto> findAllOrderByClickCountDesc(int page) {
         List<ProductResponseDto> content = queryFactory
                 .select(new QProductResponseDto(
@@ -297,6 +268,88 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 ))
                 .from(product)
                 .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+    }
+
+    // 소분류로 조회하기
+    @Override
+    public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .where(product.subCategory.id.eq(categoryId))
+                .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+
+    }
+
+    //대분류로 조회하기
+    @Override
+    public Page<ProductResponseDto> findByMainCategory(Category category, int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .where(product.category.eq(category))
+                .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+
+    }
+
+    //베스트셀러 검색
+    @Override
+    public Page<ProductResponseDto> findBestSeller(int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .orderBy(product.orderCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();

@@ -69,6 +69,7 @@ public class Orders {
 
         for (OrderItem orderItem : orderItems) {
             //총 주문금액, 총 수량 저장//
+            //todo orderItem에 있는 discount를 없애서 product에만 추가할지, 둘다 있게 할지 정할 것
             //금액 할인
             if(orderItem.getDcType().equals("price")){
                 order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity() - orderItem.getDiscount();

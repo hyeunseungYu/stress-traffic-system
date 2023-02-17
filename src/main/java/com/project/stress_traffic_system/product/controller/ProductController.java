@@ -86,6 +86,40 @@ public class ProductController {
         return productService.searchByCategory(userDetails.getMember(), 5L, page);
     }
 
+    @ApiOperation(value = "국내도서 상품조회")
+    @GetMapping("/products/domestic")
+    public Page<ProductResponseDto> findDomesticProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findByMainCategory(userDetails.getMember(), "국내도서", page);
+    }
+
+    @ApiOperation(value = "해외도서 상품조회")
+    @GetMapping("/products/foreign")
+    public Page<ProductResponseDto> findForeignProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findByMainCategory(userDetails.getMember(), "해외도서", page);
+    }
+
+    @ApiOperation(value = "E-Book 상품조회")
+    @GetMapping("/products/ebook")
+    public Page<ProductResponseDto> findEbookProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findByMainCategory(userDetails.getMember(), "EBOOK", page);
+    }
+
+    @ApiOperation(value = "베스트셀러 상품조회")
+    @GetMapping("/products/ebook")
+    public Page<ProductResponseDto> findBestSeller(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findBestSeller(userDetails.getMember(), page);
+    }
+
+
+
     @ApiOperation(value = "상품 리뷰 등록하기")
     @PostMapping("/products/{productId}/review")
     public ReviewResponseDto createReview(

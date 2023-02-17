@@ -44,6 +44,9 @@ public class OrderService {
         checkStock(requestDto, product); //재고가 있는지 확인
         checkQuantity(requestDto);  //주문수량이 유효한지 확인
 
+        //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
+        product.setOrderCount(product.getOrderCount() + requestDto.getQuantity());
+
         //주문상품 객체 만들기(생성메서드)
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
         List<OrderItem> orderItems = new ArrayList<>();
@@ -78,6 +81,9 @@ public class OrderService {
             Product product = checkProduct(orderRequestDto); //상품정보 가져오기
             checkStock(orderRequestDto, product);   //재고확인하기
             checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
+
+            //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
+            product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
 
             //주문상품 객체 생성해서 list에 추가
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
