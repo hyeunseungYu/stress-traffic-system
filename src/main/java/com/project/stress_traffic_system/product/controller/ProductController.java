@@ -41,9 +41,8 @@ public class ProductController {
     @ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
             ProductSearchCondition condition) {
-        return productService.searchProducts(userDetails.getMember(), condition);
+        return productService.searchProducts(condition);
     }
 
     @ApiOperation(value = "카테고리1 상품조회")
@@ -85,6 +84,40 @@ public class ProductController {
             @RequestParam("page") int page) {
         return productService.searchByCategory(userDetails.getMember(), 5L, page);
     }
+
+    @ApiOperation(value = "국내도서 상품조회")
+    @GetMapping("/products/domestic")
+    public Page<ProductResponseDto> findDomesticProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findByMainCategory(userDetails.getMember(), "국내도서", page);
+    }
+
+    @ApiOperation(value = "해외도서 상품조회")
+    @GetMapping("/products/foreign")
+    public Page<ProductResponseDto> findForeignProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findByMainCategory(userDetails.getMember(), "해외도서", page);
+    }
+
+    @ApiOperation(value = "E-Book 상품조회")
+    @GetMapping("/products/ebook")
+    public Page<ProductResponseDto> findEbookProducts(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findByMainCategory(userDetails.getMember(), "EBOOK", page);
+    }
+
+    @ApiOperation(value = "베스트셀러 상품조회")
+    @GetMapping("/products/bestseller")
+    public Page<ProductResponseDto> findBestSeller(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam("page") int page) {
+        return productService.findBestSeller(userDetails.getMember(), page);
+    }
+
+
 
     @ApiOperation(value = "상품 리뷰 등록하기")
     @PostMapping("/products/{productId}/review")

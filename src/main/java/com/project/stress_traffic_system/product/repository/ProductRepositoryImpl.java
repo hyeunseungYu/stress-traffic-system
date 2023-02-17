@@ -2,17 +2,19 @@ package com.project.stress_traffic_system.product.repository;
 
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
-import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.product.model.Category;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.model.dto.QProductResponseDto;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -181,12 +183,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
     }
 
-    // 상품 조건에 따라 검색(이름, 가격)
-    @Override
+    // 상품 조건에 따라 검색(이름, 가격) LIKE 구문 사용
+    /*@Override
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
         //TODO 검색어가 공백으로 넘어왔을경우 전체조회가 이뤄지기때문에 content를 비워서 내보내야 한다.
         List<ProductResponseDto> content = new ArrayList<>();
-        if (!condition.getName().equals("")) {
+        if (!condition.getName().trim().equals("")) {
             content = queryFactory
                     .select(new QProductResponseDto(
                             product.id,
@@ -211,33 +213,41 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     .fetch();
         }
         return new PageImpl<>(content);
-    }
+    }*/
 
+    // 상품 조건에 따라 검색(이름, 가격) FULL TEXT INDEX 사용
     @Override
-    public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
-        List<ProductResponseDto> content = queryFactory
-                .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
-                ))
-                .from(product)
-                .where(product.category.id.eq(categoryId))
-                .orderBy(product.clickCount.desc())
-                .offset(page)
-                .limit(PAGE_LIMIT)
-                .fetch();
-
+    public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
+        //TODO 검색어가 공백으로 넘어왔을경우 전체조회가 이뤄지기때문에 content를 비워서 내보내야 한다.
+        List<ProductResponseDto> content = new ArrayList<>();
+        if (!condition.getName().trim().equals("")) {
+            BooleanBuilder builder = new BooleanBuilder();
+            NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
+                    "function('match',{0},{1})",product.name, condition.getName() + "*");
+            builder.and(booleanTemplate.gt(0));
+            content = queryFactory
+                    .select(new QProductResponseDto(
+                            product.id,
+                            product.name,
+                            product.price,
+                            product.description,
+                            product.shippingFee,
+                            product.imgurl,
+                            product.clickCount,
+                            product.stock,
+                            product.introduction,
+                            product.pages,
+                            product.date
+                    ))
+                    .from(product)
+                    .where(builder,priceFrom(condition.getPriceFrom()),
+                            priceTo(condition.getPriceTo()))
+                    .orderBy(product.clickCount.desc())
+                    .offset(condition.getPage())
+                    .limit(PAGE_LIMIT)
+                    .fetch();
+        }
         return new PageImpl<>(content);
-
     }
 
     @Override
@@ -258,6 +268,88 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 ))
                 .from(product)
                 .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+    }
+
+    // 소분류로 조회하기
+    @Override
+    public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .where(product.subCategory.id.eq(categoryId))
+                .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+
+    }
+
+    //대분류로 조회하기
+    @Override
+    public Page<ProductResponseDto> findByMainCategory(Category category, int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .where(product.category.eq(category))
+                .orderBy(product.clickCount.desc())
+                .offset(page)
+                .limit(PAGE_LIMIT)
+                .fetch();
+
+        return new PageImpl<>(content);
+
+    }
+
+    //베스트셀러 검색
+    @Override
+    public Page<ProductResponseDto> findBestSeller(int page) {
+        List<ProductResponseDto> content = queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .orderBy(product.orderCount.desc(), product.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
