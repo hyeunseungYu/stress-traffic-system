@@ -349,7 +349,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.date
                 ))
                 .from(product)
-                .orderBy(product.orderCount.desc())
+                .orderBy(product.orderCount.desc(), product.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
