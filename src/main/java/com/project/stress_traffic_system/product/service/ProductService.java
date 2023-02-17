@@ -4,6 +4,7 @@ import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.product.model.Category;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.Review;
+import com.project.stress_traffic_system.product.model.SubCategory;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
@@ -11,14 +12,15 @@ import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
 import com.project.stress_traffic_system.product.repository.CategoryRepository;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import com.project.stress_traffic_system.product.repository.ReviewRepository;
+import com.project.stress_traffic_system.product.repository.SubCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,6 +30,8 @@ public class ProductService {
     private final ReviewRepository reviewRepository;
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final SubCategoryRepository subCategoryRepository;
     private final int PAGE_SIZE = 100;
     private final String SORT_BY = "date";
 
@@ -75,8 +79,33 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchByCategory(Members member, Long categoryId, int page) {
+
+        Optional<SubCategory> subCategory = subCategoryRepository.findById(categoryId);
+
+        if (subCategory.isEmpty()) {
+            throw new IllegalArgumentException("존재하지 않는 카테고리 입니다");
+        }
         return productRepository.searchByCategory(categoryId, page);
     }
+
+    /*
+        카테고리(대분류) API - 국내도서, 해외도서, E-Book
+     */
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> findByMainCategory(Members member, String categoryName, int page) {
+        Category category = categoryRepository.findByCategoryName(categoryName).orElseThrow(
+                () -> new IllegalArgumentException("등록되지 않은 카테고리 입니다"));
+
+        return productRepository.findByMainCategory(category, page);
+    }
+
+    //todo 베스트셀러는 order가 가장 많은 순서대로
+    //베스트셀러 조회하기
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> findBestSeller(Members member,int page) {
+        return productRepository.findBestSeller(page);
+    }
+
 
     //리뷰 등록하기
     @Transactional
