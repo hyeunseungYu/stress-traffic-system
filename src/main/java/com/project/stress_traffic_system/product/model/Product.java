@@ -28,7 +28,7 @@ public class Product {
     private int imgurl; //상품이미지
     private Long clickCount; // 조회수
     private int stock; //상품수량
-    private Float discount; //할인(금액할인, 퍼센트할인)
+    private int discount; //할인(금액할인, 퍼센트할인)
 
     private String introduction; //책소개
     private int pages; //쪽수
@@ -58,5 +58,17 @@ public class Product {
             throw new IllegalArgumentException("재고가 부족합니다"); //todo 예외
         }
         this.stock = restStock;
+    }
+
+    //할인가 세팅하기
+    public int getDiscount(int price, int dc) {
+        if (dc > 100) {
+            //dc가 "가격할인"일 경우는 정가에서 할인가를 뺀다.
+            return price - dc;
+
+        } else {
+            //dc가 "할인율"일 경우는 정가에 (100-할인율)% 을 곱한다.
+            return (int) (price * ( (100.0 - dc) / 100.0));
+        }
     }
 }

@@ -69,20 +69,9 @@ public class Orders {
 
         for (OrderItem orderItem : orderItems) {
             //총 주문금액, 총 수량 저장//
+            int dcPrice = orderItem.getProduct().getDiscount(orderItem.getProduct().getPrice(), orderItem.getProduct().getDiscount());
+            order.totalPrice += dcPrice * orderItem.getQuantity();
 
-            if (orderItem.getProduct().getDiscount() > 100) {
-                /* 할인가 = (정가 - 할인금액) x 개수 */
-                int dcPrice = (int) (orderItem.getProduct().getPrice() - orderItem.getProduct().getDiscount() ) * orderItem.getQuantity();
-                orderItem.getProduct().setPrice(dcPrice); //할인된 가격으로 세팅
-                order.totalPrice += dcPrice;
-            }
-            else if (orderItem.getProduct().getDiscount() < 100) {
-                /* 할인가 = 정가 x 할인율 x 개수 */
-                int dcPrice = (int) (orderItem.getProduct().getPrice() * ((100.0 - orderItem.getProduct().getDiscount()) / 100.0) * orderItem.getQuantity());
-                orderItem.getProduct().setPrice(dcPrice);//할인된 가격으로 세팅
-                order.totalPrice += dcPrice;
-            }
-            order.totalQuantity += orderItem.getQuantity();
             order.addOrderItem(orderItem);
         }
         return order;
