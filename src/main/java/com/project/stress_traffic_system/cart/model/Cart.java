@@ -4,6 +4,7 @@ import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.product.model.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
