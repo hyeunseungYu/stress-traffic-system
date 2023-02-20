@@ -19,6 +19,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
+    private final ProductRedisService productRedisService;
     private final int PAGE_SIZE = 100;
     private final String SORT_BY = "date";
 
@@ -147,5 +149,23 @@ public class ProductService {
     //상품 id로 상품 찾아오기
     private Product findProduct(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다"));
+    }
+
+    /*
+        캐싱
+     */
+
+    //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
+    @Transactional
+    public void cacheProducts() {
+        List<ProductResponseDto> domesticProducts = productRepository.findByMainCategory(1L);
+        List<ProductResponseDto> foreignProducts = productRepository.findByMainCategory(2L);
+        List<ProductResponseDto> EBookProducts = productRepository.findByMainCategory(3L);
+        List<ProductResponseDto> BestSellers = productRepository.findBestSeller();
+
+        productRedisService.cacheProducts(domesticProducts);
+        productRedisService.cacheProducts(foreignProducts);
+        productRedisService.cacheProducts(EBookProducts);
+        productRedisService.cacheProducts(BestSellers);
     }
 }

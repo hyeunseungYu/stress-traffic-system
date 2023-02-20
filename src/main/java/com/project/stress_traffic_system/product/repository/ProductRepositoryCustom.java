@@ -5,6 +5,8 @@ import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface ProductRepositoryCustom {
 
     Page<ProductResponseDto> searchProducts(ProductSearchCondition condition);
@@ -17,4 +19,7 @@ public interface ProductRepositoryCustom {
     Page<ProductResponseDto> findByMainCategory(Category category, int page); //카테고리(대분류) 검색
 
     Page<ProductResponseDto> findBestSeller(int page); //베스트셀러 검색
+    List<ProductResponseDto> findBestSeller(); //베스트셀러 상위 1만건 검색
+
+    List<ProductResponseDto> findByMainCategory(Long categoryId); // 카테고리(대분류) 상위 1만건 검색
 }
