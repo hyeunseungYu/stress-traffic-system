@@ -49,9 +49,7 @@ public class Product {
         this.clickCount = clickCount;
     }
 
-    public void setOrderCount(Long orderCount) {
-        this.orderCount = orderCount;
-    }
+    public void setOrderCount(Long orderCount) { this.orderCount = orderCount; }
 
     //상품 주문 시 재고수량 감소 시키기
     public void removeStock(int quantity) {
