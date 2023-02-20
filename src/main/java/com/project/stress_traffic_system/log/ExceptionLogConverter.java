@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.log;
 import java.util.stream.Stream;
 
@@ -33,3 +34,4 @@ public class ExceptionLogConverter extends ThrowableProxyConverter {
         return sb.toString();
     }
 }
+*/
