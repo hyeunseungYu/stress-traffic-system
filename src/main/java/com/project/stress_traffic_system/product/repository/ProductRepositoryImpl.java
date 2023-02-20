@@ -357,6 +357,54 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         return new PageImpl<>(content);
     }
 
+    // 베스트셀러 상위 1만건 가져오기 - 캐싱용도
+    @Override
+    public List<ProductResponseDto> findBestSeller() {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .orderBy(product.orderCount.desc(), product.clickCount.desc())
+                .limit(10000)
+                .fetch();
+
+    }
+
+    //카테고리 id로 상품상세정보 가져오기 - 캐싱용도
+    @Override
+    public List<ProductResponseDto> findByMainCategory(Long categoryId) {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .where(product.category.id.eq(categoryId))
+                .orderBy(product.clickCount.desc())
+                .limit(10000)
+                .fetch();
+    }
+
     private BooleanExpression nameLike(String name) {
         return StringUtils.isEmpty(name) ? null : product.name.contains(name);
     }
