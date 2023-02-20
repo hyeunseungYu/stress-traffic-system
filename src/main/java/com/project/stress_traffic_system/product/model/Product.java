@@ -28,6 +28,7 @@ public class Product {
     private int imgurl; //상품이미지
     private Long clickCount; // 조회수
     private int stock; //상품수량
+    private Float discount; //할인(금액할인, 퍼센트할인)
 
     private String introduction; //책소개
     private int pages; //쪽수

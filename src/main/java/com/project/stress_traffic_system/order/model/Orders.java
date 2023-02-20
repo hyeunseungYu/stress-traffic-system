@@ -69,19 +69,15 @@ public class Orders {
 
         for (OrderItem orderItem : orderItems) {
             //총 주문금액, 총 수량 저장//
-            //todo orderItem에 있는 discount를 없애서 product에만 추가할지, 둘다 있게 할지 정할 것
-            //금액 할인
-            if(orderItem.getDcType().equals("price")){
-                order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity() - orderItem.getDiscount();
-            }
-            //퍼센트 할인
-            else if (orderItem.getDcType().equals("percentage")){
-                order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity() * (1 - orderItem.getDiscount()/100);
-            }
-            else { //할인없음
-                order.totalPrice += orderItem.getProduct().getPrice() * orderItem.getQuantity();
-            }
 
+            if (orderItem.getProduct().getDiscount() > 100) {
+                /* 가격 = (정가 - 할인금액) x 개수 */
+                order.totalPrice += orderItem.getProduct().getPrice() - orderItem.getProduct().getDiscount() * orderItem.getQuantity();
+            }
+            else if (orderItem.getProduct().getDiscount() < 100) {
+                /* 가격 = 정가 x 할인율 x 개수 */
+                order.totalPrice += orderItem.getProduct().getPrice() * ((100.0 - orderItem.getProduct().getDiscount()) / 100.0) * orderItem.getQuantity();
+            }
             order.totalQuantity += orderItem.getQuantity();
             order.addOrderItem(orderItem);
         }

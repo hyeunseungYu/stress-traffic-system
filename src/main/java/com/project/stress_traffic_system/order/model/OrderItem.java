@@ -29,11 +29,6 @@ public class OrderItem {
 
     private int quantity; //주문수량
 
-    private String dcType;
-
-    private Float discount;
-
-
     public void setOrders(Orders orders) {
         this.orders = orders;
     }
@@ -46,13 +41,6 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    public void setDcType(String dcType) {
-        this.dcType = dcType;
-    }
-
-    public void setDiscount(Float discount) {
-        this.discount = discount;
-    }
 
     //생성메서드
     public static OrderItem createOrderItem(Product product, OrderRequestDto orderRequestDto) {
@@ -63,10 +51,6 @@ public class OrderItem {
 
         // 주문 들어온 만큼 재고 줄어들게끔
         product.removeStock(orderRequestDto.getQuantity());
-
-        //할인 적용
-        orderItem.setDcType(orderRequestDto.getDcType());
-        orderItem.setDiscount(orderRequestDto.getDiscount());
 
         return orderItem;
     }
