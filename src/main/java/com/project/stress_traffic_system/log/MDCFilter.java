@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.log;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,3 +27,4 @@ public class MDCFilter implements Filter {
         MDC.clear();
     }
 }
+*/
