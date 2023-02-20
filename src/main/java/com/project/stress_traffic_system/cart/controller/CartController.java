@@ -25,6 +25,7 @@ public class CartController {
         return cartService.getCartItems(userDetails.getMember());
     }
 
+    //responseEntity -> HTTP 응답을 나타내는 객체. HTTP응답을 생성할때 사용하며, 클라이언트에게 보내는 상태 코드나 헤더, 바디를 제어할 수 있음
     @ApiOperation(value = "장바구니에 상품 추가")
     @PostMapping("/products/cart/{productId}")
     public ResponseEntity<String> addToCart(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long productId) {
@@ -42,6 +43,7 @@ public class CartController {
         cartService.updateQuantity(userDetails.getMember(), productId, quantity);
         return new ResponseEntity<>("success", HttpStatus.CREATED);
     }
+
 
     @ApiOperation(value = "장바구니 단일 상품 삭제")
     @DeleteMapping("/products/{productId}/cart-delete")
