@@ -38,7 +38,7 @@ public class CartService {
                         CartResponseDto.builder()
                                 .itemName(cartItem.getProduct().getName())
                                 .imgurl(cartItem.getProduct().getImgurl())
-                                .price(cartItem.getProduct().getPrice())
+                                .price(cartItem.getProduct().getDiscount(cartItem.getProduct().getPrice(), cartItem.getProduct().getDiscount()))
                                 .quantity(cartItem.getQuantity())
                                 .build())
                 .collect(Collectors.toList());
