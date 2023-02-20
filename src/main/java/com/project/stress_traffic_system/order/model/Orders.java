@@ -69,8 +69,12 @@ public class Orders {
 
         for (OrderItem orderItem : orderItems) {
             //총 주문금액, 총 수량 저장//
+
+            //할인금액
             int dcPrice = orderItem.getProduct().getDiscount(orderItem.getProduct().getPrice(), orderItem.getProduct().getDiscount());
-            order.totalPrice += dcPrice * orderItem.getQuantity();
+
+            order.totalPrice += dcPrice * orderItem.getQuantity(); //총 주문금액
+            order.totalQuantity += orderItem.getQuantity(); //총 수량
 
             order.addOrderItem(orderItem);
         }
