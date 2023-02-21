@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest()
 @AutoConfigureMockMvc
 @WebAppConfiguration
 public class MembersControllerTest {
@@ -67,8 +67,8 @@ public class MembersControllerTest {
     @DisplayName("로그인 테스트")
     public void login() throws Exception {
         //given
-        String username = "zser20";
-        String password = "abcd1234?";
+        String username = "dkswns035";
+        String password = "dks153153!";
 
         LoginRequestDto loginRequestDto = LoginRequestDto.builder()
                 .username(username)
