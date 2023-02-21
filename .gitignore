@@ -205,3 +205,5 @@ gradle-app.setting
 
 #application.properties
 application.properties
+application-testDB.properties
+application-productDB.properties

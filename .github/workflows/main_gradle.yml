@@ -30,12 +30,20 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: make application-productDB.properties
+        run:  touch ./src/main/resources/application-productDB.properties
+        shell: bash
+
+      - name: deliver application-productDB.properties
+        run: echo "${{ secrets.PRODUCT_PROPERTIES }}" > ./src/main/resources/application-productDB.properties
+        shell: bash
+
       - name: make application.properties
         run:  touch ./src/main/resources/application.properties
         shell: bash
 
       - name: deliver application.properties
-        run: echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.properties
+        run: echo "${{ secrets.PRODUCT_APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
         shell: bash
 
       - name: test make application.properties
