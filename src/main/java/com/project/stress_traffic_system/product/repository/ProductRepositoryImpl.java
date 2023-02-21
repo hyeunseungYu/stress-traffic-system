@@ -234,6 +234,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                             product.shippingFee,
                             product.imgurl,
                             product.clickCount,
+                            product.orderCount,
                             product.stock,
                             product.introduction,
                             product.pages,
@@ -261,6 +262,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.shippingFee,
                         product.imgurl,
                         product.clickCount,
+                        product.orderCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -287,6 +289,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.shippingFee,
                         product.imgurl,
                         product.clickCount,
+                        product.orderCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -305,8 +308,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
 
     //대분류로 조회하기
     @Override
-    public Page<ProductResponseDto> findByMainCategory(Category category, int page) {
-        List<ProductResponseDto> content = queryFactory
+    public List<ProductResponseDto> findByMainCategory(Category category, int page) {
+        return queryFactory
                 .select(new QProductResponseDto(
                         product.id,
                         product.name,
@@ -315,6 +318,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.shippingFee,
                         product.imgurl,
                         product.clickCount,
+                        product.orderCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -327,14 +331,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .limit(PAGE_LIMIT)
                 .fetch();
 
-        return new PageImpl<>(content);
-
     }
 
     //베스트셀러 검색
     @Override
-    public Page<ProductResponseDto> findBestSeller(int page) {
-        List<ProductResponseDto> content = queryFactory
+    public List<ProductResponseDto> findBestSeller(int page) {
+        return queryFactory
                 .select(new QProductResponseDto(
                         product.id,
                         product.name,
@@ -343,6 +345,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.shippingFee,
                         product.imgurl,
                         product.clickCount,
+                        product.orderCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -353,8 +356,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
-
-        return new PageImpl<>(content);
     }
 
     // 베스트셀러 상위 1만건 가져오기 - 캐싱용도
@@ -369,6 +370,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.shippingFee,
                         product.imgurl,
                         product.clickCount,
+                        product.orderCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -393,6 +395,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         product.shippingFee,
                         product.imgurl,
                         product.clickCount,
+                        product.orderCount,
                         product.stock,
                         product.introduction,
                         product.pages,
@@ -403,6 +406,48 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .orderBy(product.clickCount.desc())
                 .limit(10000)
                 .fetch();
+    }
+
+    @Override
+    public List<ProductResponseDto> findProductDetail() {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.orderCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .orderBy(product.clickCount.desc())
+                .limit(10000)
+                .fetch();
+    }
+
+    // 상품 조회수 Return
+    @Override
+    public Long getClickCount(Long productId) {
+        return queryFactory.select(product.clickCount)
+                .from(product)
+                .where(product.id.eq(productId))
+                .fetchOne();
+    }
+
+    //상품 조회수 변경 로직
+    @Override
+    public void setClickCount(Long productId, long clickCount) {
+        queryFactory
+                .update(product)
+                .set(product.clickCount, clickCount)
+                .where(product.id.eq(productId))
+                .execute();
     }
 
     private BooleanExpression nameLike(String name) {
