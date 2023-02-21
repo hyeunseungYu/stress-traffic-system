@@ -99,7 +99,7 @@ jobs:
         run: cp ./scripts/*.sh ./deploy
 
       - name: Make zip file
-        run: zip -r ./main_product_traffic.zip ./deploy
+        run: zip -r ./sts_product.zip ./deploy
         shell: bash
 
       - name: Configure AWS credentials
@@ -110,7 +110,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./main_product_traffic.zip s3://product-traffic/
+        run: aws s3 cp --region ap-northeast-2 ./sts_product.zip s3://product-traffic/
 
 
 
@@ -119,8 +119,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCT_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCT_AWS_SECRET_ACCESS_KEY }}
-        run: aws deploy create-deployment --application-name product_traffic_system
-          --deployment-group-name product_traffic_system
+        run: aws deploy create-deployment --application-name asg_sts_product
+          --deployment-group-name stsProductCodeDeploy
           --file-exists-behavior OVERWRITE
-          --s3-location bucket=product-traffic,bundleType=zip,key=main_product_traffic.zip
+          --s3-location bucket=product-traffic,bundleType=zip,key=sts_product.zip
           --region ap-northeast-2
