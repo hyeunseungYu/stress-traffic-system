@@ -3,16 +3,20 @@ package com.project.stress_traffic_system.product.service;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -100,7 +104,7 @@ public class ProductRedisService {
     }
 
     //상품 조회수 증가 -> 레디스에 업데이트
-    public void incrementView(String key, Long productId) {
+    public void addClickCount(String key, Long productId) {
 
         //레디스에서 키 value (String - String) 템플릿을 가져온다
         ValueOperations<String, String> values = clickCountRedisTemplate.opsForValue();
@@ -110,18 +114,50 @@ public class ProductRedisService {
             키는 productId가 포함되어있고, value는 조회수를 repository 에서 가져온다. 유효시간은 60분
             value를 1만큼 증가시킨다(조회수 증가 => increment)
          */
-        if(values.get(key) == null) {
-            setView(key, String.valueOf(productRepository.getClickCount(productId)), Duration.ofMinutes(60));
+        if (values.get(key) == null) {
+            setClickCount(key, String.valueOf(productRepository.getClickCount(productId)), Duration.ofMinutes(60));
             values.increment(key);
-        }
-        else values.increment(key);
+        } else values.increment(key);
     }
 
     //레디스에 상품의 조회수 정보를 저장한다
-    private void setView(String key, String clickCount, Duration duration) {
+    private void setClickCount(String key, String clickCount, Duration duration) {
         ValueOperations<String, String> values = clickCountRedisTemplate.opsForValue();
         values.set(key, clickCount, duration);
     }
 
-    //todo 조회수를 주기적으로 DB에 업데이트 하는 코드 필요함
+    //레디스에서 상품 조회수 가져오기
+    public Long getClickCount(Long productId) {
+        ValueOperations<String, String> values = clickCountRedisTemplate.opsForValue();
+        String result = values.get("clickCount::" + productId);
+        if (result != null) {
+            return Long.parseLong(result);
+        }
+        return -1L;
+    }
+
+    //Redis에 있는 상품 조회수를 주기적으로 DB에 업데이트
+    @Scheduled(cron = "0 30 * * * *")
+    @Transactional
+    public void updateClickCount() {
+        Set<String> keys = clickCountRedisTemplate.keys("clickCount::*");
+        log.info("조회수 RDS에 업데이트 실행 시작");
+
+        // key가 존재하는 경우, 각각의 key에 대하여 조회수 정보를 DB에 업데이트한다.
+        for (String key : keys) {
+
+            //key에서 productId 추출
+            long productId = Long.parseLong(key.split("::")[1]);
+
+            //key에서 조회수(value)를 가져온다
+            long clickCount = Long.parseLong(Objects.requireNonNull(clickCountRedisTemplate.opsForValue().get(key)));
+
+            // 추출한 productId와 조회수 정보를 이용하여 DB의 product 테이블에 업데이트한다.
+            productRepository.setClickCount(productId, clickCount);
+
+            // 해당 key에 대한 조회수 정보가 DB에 반영되었으므로, Redis에서 해당 key를 삭제한다.
+            clickCountRedisTemplate.delete(key);
+        }
+        log.info("조회수 RDS에 업데이트 실행 종료");
+    }
 }

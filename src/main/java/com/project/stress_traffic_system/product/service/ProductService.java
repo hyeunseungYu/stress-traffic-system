@@ -15,15 +15,12 @@ import com.project.stress_traffic_system.product.repository.ReviewRepository;
 import com.project.stress_traffic_system.product.repository.SubCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -79,10 +76,22 @@ public class ProductService {
                     .build();
         }
 
-//        addClickCount(productId); todo redis에 저장하고 DB 업데이트 스케줄링 하는 것으로 추후 변경
-        long clickCount = redisProduct.get().getClickCount() + 1;
-        productRepository.setClickCount(productId, clickCount);
-        return redisProduct.get();
+        ProductResponseDto responseDto = redisProduct.get();
+
+        //레디스에 저장된 조회수를 검색해본다
+        Long clickCount = productRedisService.getClickCount(productId);
+
+        // 저장된 조회수가 없으면 dto에서 1을 더한 값을 가져온다
+        if (clickCount == -1L) {
+            responseDto.setClickCount(responseDto.getClickCount() + 1);
+        }
+
+        //저장된 조회수가 있으면 해당 값 +1 을 dto에 세팅해준다
+        responseDto.setClickCount(clickCount + 1);
+
+        //해당 상품 id의 조회수를 증가시켜서 레디스에 저장한다
+        addClickCount(productId);
+        return responseDto;
     }
 
     // 상품 검색하기 (이름, 가격 필터링)
@@ -223,6 +232,6 @@ public class ProductService {
     public void addClickCount(Long productId) {
         String key = "clickCount::" + productId;
         log.info("조회수 증가 메서드 실행");
-        productRedisService.incrementView(key, productId);
+        productRedisService.addClickCount(key, productId);
     }
 }
