@@ -31,8 +31,8 @@ public class ViewController {
         return new ModelAndView("index");
     }
     @GetMapping("/main")
-    public ModelAndView mainPage() {
-        return new ModelAndView("main");
+    public String mainPage() {
+        return "success";
     }
 
     @GetMapping("/api/main")
