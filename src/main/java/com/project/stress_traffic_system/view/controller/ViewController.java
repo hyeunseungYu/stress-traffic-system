@@ -32,7 +32,7 @@ public class ViewController {
     }
     @GetMapping("/main")
     public String mainPage() {
-        return "success";
+        return "성공ㅋ";
     }
 
     @GetMapping("/api/main")
