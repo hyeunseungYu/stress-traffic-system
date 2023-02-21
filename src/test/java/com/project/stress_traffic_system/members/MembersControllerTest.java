@@ -45,7 +45,7 @@ public class MembersControllerTest {
     @DisplayName("회원가입 테스트")
     public void signup() throws Exception{
         //given
-        String username = RandomStringUtils.randomAlphanumeric(10);
+        String username = "usertest";
         String password = "abcde123?";
         String address = "서울";
 
@@ -67,7 +67,7 @@ public class MembersControllerTest {
     @DisplayName("로그인 테스트")
     public void login() throws Exception {
         //given
-        String username = "dkswns036";
+        String username = "usertest";
         String password = "abcde123?";
 
         LoginRequestDto loginRequestDto = LoginRequestDto.builder()
