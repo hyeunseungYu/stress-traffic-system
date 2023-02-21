@@ -17,12 +17,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,37 +40,47 @@ public class ProductService {
     private final int PAGE_SIZE = 100;
     private final String SORT_BY = "date";
 
-    //todo param Members 없앨지 정하기
 
     //전체상품 가져오기
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> getProducts(Members member, int page) {
+    public Page<ProductResponseDto> getProducts(int page) {
 
         //모든 상품 100개 단위로 가져오기
         return productRepository.findAllOrderByClickCountDesc(page);
 
     }
 
-    //상품 id로 상세정보 가져오기
-    @Cacheable(value = "product", key = "#productId")
-    @Transactional(readOnly = true)
-    public ProductResponseDto getProduct(Members member, Long productId) {
-        Product product = findProduct(productId);
-        product.setClickCount(product.getClickCount() + 1);
-        return ProductResponseDto.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .price(product.getPrice())
-                .description(product.getDescription())
-                .shippingFee(product.getShippingFee())
-                .imgurl(product.getImgurl())
-                .count(product.getClickCount())
-                .stock(product.getStock())
-                .introduction(product.getIntroduction())
-                .pages(product.getPages())
-                .date(product.getDate())
-                .build();
+    //상품 id로 상세정보 가져오기 (레디스에서 먼저 조회하기)
+    @Transactional
+    public ProductResponseDto getProduct(Long productId) {
 
+        Optional<ProductResponseDto> redisProduct = productRedisService.getProduct(productId);
+        if (redisProduct.isEmpty()) {
+            Product product = findProduct(productId);
+
+            //조회수 늘리기
+            productRepository.setClickCount(productId, product.getClickCount() + 1);
+
+            return ProductResponseDto.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .price(product.getPrice())
+                    .description(product.getDescription())
+                    .shippingFee(product.getShippingFee())
+                    .imgurl(product.getImgurl())
+                    .clickCount(product.getClickCount())
+                    .orderCount(product.getOrderCount())
+                    .stock(product.getStock())
+                    .introduction(product.getIntroduction())
+                    .pages(product.getPages())
+                    .date(product.getDate())
+                    .build();
+        }
+
+//        addClickCount(productId); todo redis에 저장하고 DB 업데이트 스케줄링 하는 것으로 추후 변경
+        long clickCount = redisProduct.get().getClickCount() + 1;
+        productRepository.setClickCount(productId, clickCount);
+        return redisProduct.get();
     }
 
     // 상품 검색하기 (이름, 가격 필터링)
@@ -82,7 +94,7 @@ public class ProductService {
      */
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> searchByCategory(Members member, Long categoryId, int page) {
+    public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
 
         Optional<SubCategory> subCategory = subCategoryRepository.findById(categoryId);
 
@@ -95,21 +107,28 @@ public class ProductService {
     /*
         카테고리(대분류) API - 국내도서, 해외도서, E-Book
      */
+
+    //카테고리별 상품리스트 가져오기
+    // Redis에서 조회하고 없을 경우에는 DB 조회하기
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> findByMainCategory(Members member, String categoryName, int page) {
-        Category category = categoryRepository.findByCategoryName(categoryName).orElseThrow(
-                () -> new IllegalArgumentException("등록되지 않은 카테고리 입니다"));
+    public List<ProductResponseDto> findByMainCategory(String categoryName, int page) {
+        Set<ZSetOperations.TypedTuple<ProductResponseDto>> products = productRedisService.findProductsByCategory(convertCategoryName(categoryName) + "::", page);
 
-        return productRepository.findByMainCategory(category, page);
+        log.info("Redis에서 조회한 products 사이즈는 = {}", products.size());
+
+        if (products.size() == 0) {
+            Category category = categoryRepository.findByCategoryName(categoryName).orElseThrow(
+                    () -> new IllegalArgumentException("등록되지 않은 카테고리 입니다"));
+
+            if (categoryName.equals("best")) {
+                return productRepository.findBestSeller(page);
+            }
+            return productRepository.findByMainCategory(category, page);
+        }
+
+        return products.stream().map(ProductResponseDto::convertToResponseRankingDto).collect(Collectors.toList());
+
     }
-
-    //todo 베스트셀러는 order가 가장 많은 순서대로
-    //베스트셀러 조회하기
-    @Transactional(readOnly = true)
-    public Page<ProductResponseDto> findBestSeller(Members member,int page) {
-        return productRepository.findBestSeller(page);
-    }
-
 
     //리뷰 등록하기
     @Transactional
@@ -133,7 +152,7 @@ public class ProductService {
 
     //리뷰 목록 가져오기
     @Transactional(readOnly = true)
-    public List<ReviewResponseDto> getReviews(Members member, Long productId) {
+    public List<ReviewResponseDto> getReviews(Long productId) {
         Product product = findProduct(productId);
 
         List<Review> reviewList = reviewRepository.findAllByProduct(product);
@@ -161,13 +180,44 @@ public class ProductService {
     @Transactional
     public void cacheProducts() {
         List<ProductResponseDto> domesticProducts = productRepository.findByMainCategory(1L);
-        List<ProductResponseDto> foreignProducts = productRepository.findByMainCategory(2L);
-        List<ProductResponseDto> EBookProducts = productRepository.findByMainCategory(3L);
-        List<ProductResponseDto> BestSellers = productRepository.findBestSeller();
+        productRedisService.cacheProducts(domesticProducts, "domestic");
 
-        productRedisService.cacheProducts(domesticProducts);
-        productRedisService.cacheProducts(foreignProducts);
-        productRedisService.cacheProducts(EBookProducts);
-        productRedisService.cacheProducts(BestSellers);
+        List<ProductResponseDto> foreignProducts = productRepository.findByMainCategory(2L);
+        productRedisService.cacheProducts(foreignProducts, "foreign");
+
+        List<ProductResponseDto> EBookProducts = productRepository.findByMainCategory(3L);
+        productRedisService.cacheProducts(EBookProducts, "ebook");
+
+        List<ProductResponseDto> BestSellers = productRepository.findBestSeller();
+        productRedisService.cacheProducts(BestSellers, "best");
+    }
+
+    //상품 상세페이지 상위 1만건 캐싱하기
+    @Transactional
+    public void cacheProductsDetail() {
+        List<ProductResponseDto> list = productRepository.findProductDetail();
+        productRedisService.cacheProductsDetail(list);
+    }
+
+    //한글 대분류 이름을 영어로 변환
+    private String convertCategoryName(String categoryName) {
+        switch (categoryName) {
+            case "국내도서":
+                return "domestic";
+            case "해외도서":
+                return "foreign";
+            case "e-book":
+                return "ebook";
+            case "best":
+                return "best";
+        }
+        return categoryName;
+    }
+
+    // 상품 조회수 추가로직
+    public void addClickCount(Long productId) {
+        String key = "clickCount::" + productId;
+        log.info("조회수 증가 메서드 실행");
+        productRedisService.incrementView(key, productId);
     }
 }

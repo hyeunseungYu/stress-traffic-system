@@ -26,16 +26,14 @@ public class ProductController {
 
     @ApiOperation(value = "상품전체조회", notes = "10개씩 페이징")
     @GetMapping("/products")
-    public Page<ProductResponseDto> getProducts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.getProducts(userDetails.getMember(), page);
+    public Page<ProductResponseDto> getProducts(@RequestParam("page") int page) {
+        return productService.getProducts(page);
     }
 
     @ApiOperation(value = "상품 상세페이지")
     @GetMapping("/products/{productId}")
-    public ProductResponseDto getProductDetail(@PathVariable Long productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return productService.getProduct(userDetails.getMember(), productId);
+    public ProductResponseDto getProductDetail(@PathVariable Long productId) {
+        return productService.getProduct(productId);
     }
 
     @ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
@@ -47,77 +45,63 @@ public class ProductController {
 
     @ApiOperation(value = "카테고리1 상품조회")
     @GetMapping("/products/category-1")
-    public Page<ProductResponseDto> searchByCategory1(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.searchByCategory(userDetails.getMember(), 1L, page);
+    public Page<ProductResponseDto> searchByCategory1(@RequestParam("page") int page) {
+        return productService.searchByCategory(1L, page);
     }
 
     @ApiOperation(value = "카테고리2 상품조회")
     @GetMapping("/products/category-2")
-    public Page<ProductResponseDto> searchByCategory2(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.searchByCategory(userDetails.getMember(), 2L, page);
+    public Page<ProductResponseDto> searchByCategory2(@RequestParam("page") int page) {
+        return productService.searchByCategory(2L, page);
     }
 
     @ApiOperation(value = "카테고리3 상품조회")
     @GetMapping("/products/category-3")
-    public Page<ProductResponseDto> searchByCategory3(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.searchByCategory(userDetails.getMember(), 3L, page);
+    public Page<ProductResponseDto> searchByCategory3(@RequestParam("page") int page) {
+        return productService.searchByCategory(3L, page);
     }
 
     @ApiOperation(value = "카테고리4 상품조회")
     @GetMapping("/products/category-4")
-    public Page<ProductResponseDto> searchByCategory4(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.searchByCategory(userDetails.getMember(), 4L, page);
+    public Page<ProductResponseDto> searchByCategory4(@RequestParam("page") int page) {
+        return productService.searchByCategory(4L, page);
     }
 
     @ApiOperation(value = "카테고리5 상품조회")
     @GetMapping("/products/category-5")
-    public Page<ProductResponseDto> searchByCategory5(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.searchByCategory(userDetails.getMember(), 5L, page);
+    public Page<ProductResponseDto> searchByCategory5(@RequestParam("page") int page) {
+        return productService.searchByCategory(5L, page);
     }
 
     @ApiOperation(value = "국내도서 상품조회")
     @GetMapping("/products/domestic")
-    public Page<ProductResponseDto> findDomesticProducts(
+    public List<ProductResponseDto> findDomesticProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam("page") int page) {
-        return productService.findByMainCategory(userDetails.getMember(), "국내도서", page);
+        return productService.findByMainCategory("국내도서", page);
     }
 
     @ApiOperation(value = "해외도서 상품조회")
     @GetMapping("/products/foreign")
-    public Page<ProductResponseDto> findForeignProducts(
+    public List<ProductResponseDto> findForeignProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam("page") int page) {
-        return productService.findByMainCategory(userDetails.getMember(), "해외도서", page);
+        return productService.findByMainCategory("해외도서", page);
     }
 
     @ApiOperation(value = "E-Book 상품조회")
     @GetMapping("/products/ebook")
-    public Page<ProductResponseDto> findEbookProducts(
+    public List<ProductResponseDto> findEbookProducts(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam("page") int page) {
-        return productService.findByMainCategory(userDetails.getMember(), "EBOOK", page);
+        return productService.findByMainCategory("e-book", page);
     }
 
     @ApiOperation(value = "베스트셀러 상품조회")
     @GetMapping("/products/bestseller")
-    public Page<ProductResponseDto> findBestSeller(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
-        return productService.findBestSeller(userDetails.getMember(), page);
+    public List<ProductResponseDto> findBestSeller(@RequestParam("page") int page) {
+        return productService.findByMainCategory("best", page);
     }
-
-
 
     @ApiOperation(value = "상품 리뷰 등록하기")
     @PostMapping("/products/{productId}/review")
@@ -129,9 +113,20 @@ public class ProductController {
 
     @ApiOperation(value = "상품 리뷰목록 조회하기")
     @GetMapping("/products/{productId}/review")
-    public List<ReviewResponseDto> getReviews(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PathVariable Long productId) {
-        return productService.getReviews(userDetails.getMember(), productId);
+    public List<ReviewResponseDto> getReviews(@PathVariable Long productId) {
+        return productService.getReviews(productId);
     }
+
+    @ApiOperation(value = "카테고리별 상품데이터 캐싱")
+    @GetMapping("/products/cache")
+    public void cacheProducts() {
+        productService.cacheProducts();
+    }
+
+    @ApiOperation(value = "전체카테고리 상품데이터 1만건 캐싱 - 상세페이지 조회 용도")
+    @GetMapping("/products/cache/detail")
+    public void cacheProductsDetail() {
+        productService.cacheProductsDetail();
+    }
+
 }
