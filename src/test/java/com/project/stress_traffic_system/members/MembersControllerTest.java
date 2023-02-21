@@ -23,16 +23,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest
 @AutoConfigureMockMvc
 @WebAppConfiguration
 public class MembersControllerTest {
-
-    @Mock
-    private SignupRequestDto signupRequestDto;
-
-    @Mock
-    private LoginRequestDto loginRequestDto;
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,11 +45,11 @@ public class MembersControllerTest {
     @DisplayName("회원가입 테스트")
     public void signup() throws Exception{
         //given
-        String username = "asdf1234";
+        String username = RandomStringUtils.randomAlphanumeric(10);
         String password = "abcde123?";
         String address = "서울";
 
-        signupRequestDto = SignupRequestDto.builder()
+        SignupRequestDto signupRequestDto = SignupRequestDto.builder()
                 .username(username)
                 .password(password)
                 .address(address)
@@ -76,7 +70,7 @@ public class MembersControllerTest {
         String username = "asdf1234";
         String password = "abcde123?";
 
-        loginRequestDto = LoginRequestDto.builder()
+        LoginRequestDto loginRequestDto = LoginRequestDto.builder()
                 .username(username)
                 .password(password)
                 .build();
