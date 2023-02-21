@@ -9,6 +9,7 @@ import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CartService {
@@ -58,6 +60,7 @@ public class CartService {
 
         //장바구니에 상품이 없으면 장바구니아이템 엔티티를 저장한다
         if (findCartItem.isEmpty()) {
+            log.info("장바구니에 아이템이 없음 -> cartItemRepository.save 실행");
             CartItem cartItem = new CartItem(cart, product);
             cartItemRepository.save(cartItem);
             return;
