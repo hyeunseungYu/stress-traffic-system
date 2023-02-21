@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
+@Setter
 public class Cart {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
