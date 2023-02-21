@@ -1,5 +1,6 @@
 package com.project.stress_traffic_system.members.controller;
 
+import com.project.stress_traffic_system.members.dto.LoginRequestDto;
 import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
 import com.project.stress_traffic_system.members.service.MembersService;
@@ -22,7 +23,7 @@ public class MembersController {
     }
 
     @PostMapping("/login")
-    public MembersResponseMsgDto login(@RequestBody SignupRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto login(@RequestBody LoginRequestDto membersRequestDto, HttpServletResponse response) {
         return membersService.login(membersRequestDto, response);
     }
 

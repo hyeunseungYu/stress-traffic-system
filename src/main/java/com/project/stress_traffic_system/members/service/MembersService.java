@@ -3,6 +3,7 @@ package com.project.stress_traffic_system.members.service;
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.jwt.JwtUtil;
+import com.project.stress_traffic_system.members.dto.LoginRequestDto;
 import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
 import com.project.stress_traffic_system.members.entity.Members;
@@ -85,7 +86,7 @@ public class MembersService {
         return handleMemberException("회원가입 성공", HttpStatus.OK, response);
     }
 
-    public MembersResponseMsgDto login(SignupRequestDto membersRequestDto, HttpServletResponse response) {
+    public MembersResponseMsgDto login(LoginRequestDto membersRequestDto, HttpServletResponse response) {
         String username = membersRequestDto.getUsername();
         String password = membersRequestDto.getPassword();
 
