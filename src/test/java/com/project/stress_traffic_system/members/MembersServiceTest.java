@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,6 +33,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 //@ExtendWith(MockitoExtension.class) //Mockito 의 가짜 객체를 사용
 @SpringBootTest
+@WebAppConfiguration
 public class MembersServiceTest {
 
     @Autowired
