@@ -6,6 +6,7 @@ import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
 import com.project.stress_traffic_system.members.service.MembersService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,7 +33,6 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 //@ExtendWith(MockitoExtension.class) //Mockito 의 가짜 객체를 사용
 @SpringBootTest
-@WebAppConfiguration
 public class MembersServiceTest {
 
     @Autowired
@@ -43,7 +42,7 @@ public class MembersServiceTest {
     @DisplayName("회원가입 기능 확인")
     public void signup() throws Exception {
         //given
-        String username = "asdf1234";
+        String username = RandomStringUtils.randomAlphanumeric(10);
         String password = "abcde123?";
         String address = "서울";
 
