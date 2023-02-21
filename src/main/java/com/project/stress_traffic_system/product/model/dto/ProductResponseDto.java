@@ -55,4 +55,8 @@ public class ProductResponseDto {
     public static ProductResponseDto convertToResponseRankingDto(ZSetOperations.TypedTuple typedTuple){
         return (ProductResponseDto) typedTuple.getValue();
     }
+
+    public void setClickCount(Long clickCount) {
+        this.clickCount = clickCount;
+    }
 }
