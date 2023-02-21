@@ -26,7 +26,10 @@ public class EmbeddedRedisConfig {
     //객체가 생성될 때 실행됨
     @PostConstruct
     public void redisServer() throws IOException {
-        redisServer = new RedisServer(redisPort);
+        redisServer = RedisServer.builder()
+                .port(redisPort)
+                .setting("maxmemory 128M")
+                .build();
         redisServer.start();
     }
 
