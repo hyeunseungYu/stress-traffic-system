@@ -18,10 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -177,6 +179,7 @@ public class ProductService {
      */
 
     //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
+    @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
     public void cacheProducts() {
         List<ProductResponseDto> domesticProducts = productRepository.findByMainCategory(1L);
@@ -193,10 +196,12 @@ public class ProductService {
     }
 
     //상품 상세페이지 상위 1만건 캐싱하기
+    @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
     public void cacheProductsDetail() {
         List<ProductResponseDto> list = productRepository.findProductDetail();
         productRedisService.cacheProductsDetail(list);
+
     }
 
     //한글 대분류 이름을 영어로 변환

@@ -34,6 +34,8 @@ public class ProductRedisService {
         RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
         RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
 
+        productRedisTemplate.delete(code + "::");
+
         // 파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
         productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
 
@@ -56,7 +58,13 @@ public class ProductRedisService {
         RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
         RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
 
-        // 파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
+        //기존 데이터 삭제 로직
+        Set<String> keys = productRedisTemplate.keys("product::*");
+        for (String key : keys) {
+            productRedisTemplate.delete(key);
+        }
+
+        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
         productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
 
             // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
