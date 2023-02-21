@@ -67,8 +67,8 @@ public class MembersControllerTest {
     @DisplayName("로그인 테스트")
     public void login() throws Exception {
         //given
-        String username = "dkswns035";
-        String password = "dks153153!";
+        String username = "dkswns036";
+        String password = "abcde123?";
 
         LoginRequestDto loginRequestDto = LoginRequestDto.builder()
                 .username(username)
