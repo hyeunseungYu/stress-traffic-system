@@ -1,25 +1,26 @@
+<!--
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="30 seconds"> <!-- logback 구현체가 설정을 확인하는 주기. 지금 설정이면 주기적으로 스캔할 것이고, 30초마다 스캔한다는 뜻 -->
-    <conversionRule conversionWord="ex" converterClass="com.project.stress_traffic_system.log.ExceptionLogConverter"/><!--불필요한 로그를 줄이기 위해 사용-->
-    <property name="moduleId" value="around_hub_spring_boot"/><!-- moduleId는 프로젝트가 설치된 폴더명 또는 구분할 수 있는 식별자이면 됨 -->
-    <property name="type" value="around_hub"/><!-- 로그파일명을 구성하는 인자 -->
-    <property name="logback" value="logback"/><!-- log를 저장할 최종 디렉토리명 -->
+<configuration scan="true" scanPeriod="30 seconds"> &lt;!&ndash; logback 구현체가 설정을 확인하는 주기. 지금 설정이면 주기적으로 스캔할 것이고, 30초마다 스캔한다는 뜻 &ndash;&gt;
+    <conversionRule conversionWord="ex" converterClass="com.project.stress_traffic_system.log.ExceptionLogConverter"/>&lt;!&ndash;불필요한 로그를 줄이기 위해 사용&ndash;&gt;
+    <property name="moduleId" value="around_hub_spring_boot"/>&lt;!&ndash; moduleId는 프로젝트가 설치된 폴더명 또는 구분할 수 있는 식별자이면 됨 &ndash;&gt;
+    <property name="type" value="around_hub"/>&lt;!&ndash; 로그파일명을 구성하는 인자 &ndash;&gt;
+    <property name="logback" value="logback"/>&lt;!&ndash; log를 저장할 최종 디렉토리명 &ndash;&gt;
     <property name="logdir" value="${log.config.path}"/>
 
-    <!-- TRACE > DEBUG > INFO > WARN > ERROR > OFF -->
-    <!-- Appenders -->
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender"><!--class를 이렇게 잡으면 로그가 콘솔에 출력이 된다. -->
-    <!--로그 출력 형식 지정.
+    &lt;!&ndash; TRACE > DEBUG > INFO > WARN > ERROR > OFF &ndash;&gt;
+    &lt;!&ndash; Appenders &ndash;&gt;
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">&lt;!&ndash;class를 이렇게 잡으면 로그가 콘솔에 출력이 된다. &ndash;&gt;
+    &lt;!&ndash;로그 출력 형식 지정.
     %-5level -> 로그 레벨. 다섯글자까지 나오니까 앞에 -5를 달아줌
     %thread -> 스레드 이름
     %logger{30} -> 로거 이름을 출력 {30}을 안달면 java.com.stress ~~ 이렇게 생략 안하고 나옴.
-    %msg%n -> 로그 메시지 출력 후 개행-->
+    %msg%n -> 로그 메시지 출력 후 개행&ndash;&gt;
 
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>DEBUG</level><!--디버그 이상의 로그들을 보겠다는 필터값을 설정-->
+            <level>DEBUG</level>&lt;!&ndash;디버그 이상의 로그들을 보겠다는 필터값을 설정&ndash;&gt;
         </filter>
         <encoder>
-            <pattern>[%d{yyyy-MM-dd HH:mm}] %highlight([%-5level]) %cyan([%thread]) %magenta([%logger{30}]) %msg %ex %n</pattern><!--로그 패턴 설정-->
+            <pattern>[%d{yyyy-MM-dd HH:mm}] %highlight([%-5level]) %cyan([%thread]) %magenta([%logger{30}]) %msg %ex %n</pattern>&lt;!&ndash;로그 패턴 설정&ndash;&gt;
         </encoder>
     </appender>
 
@@ -54,7 +55,7 @@
         </encoder>
     </appender>
 
-    <!--
+    &lt;!&ndash;
     <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
       <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
         <level>WARN</level>
@@ -84,16 +85,16 @@
         <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger %msg%n</pattern>
       </encoder>
     </appender>
-  -->
-    <!-- TRACE > DEBUG > INFO > WARN > ERROR > OFF -->
-    <!-- Root Logger -->
+  &ndash;&gt;
+    &lt;!&ndash; TRACE > DEBUG > INFO > WARN > ERROR > OFF &ndash;&gt;
+    &lt;!&ndash; Root Logger &ndash;&gt;
     <root level="INFO">
-        <appender-ref ref="console" /><!--위에서 설정한 콘솔(name이 console인 appender. 사용하고자 하는 appender 이름과 일치하는지를 확인하면 됨)-->
-        <!--
+        <appender-ref ref="console" />&lt;!&ndash;위에서 설정한 콘솔(name이 console인 appender. 사용하고자 하는 appender 이름과 일치하는지를 확인하면 됨)&ndash;&gt;
+        &lt;!&ndash;
     <appender-ref ref="DEBUG_LOG" />
     <appender-ref ref="INFO_LOG" />
     <appender-ref ref="WARN_LOG" />
     <appender-ref ref="ERROR_LOG" />
-    -->
+    &ndash;&gt;
     </root>
-</configuration>
+</configuration>-->

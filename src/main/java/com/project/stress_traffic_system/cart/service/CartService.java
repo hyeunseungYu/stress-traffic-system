@@ -38,7 +38,7 @@ public class CartService {
                         CartResponseDto.builder()
                                 .itemName(cartItem.getProduct().getName())
                                 .imgurl(cartItem.getProduct().getImgurl())
-                                .price(cartItem.getProduct().getPrice())
+                                .price(cartItem.getProduct().getDiscount(cartItem.getProduct().getPrice(), cartItem.getProduct().getDiscount()))
                                 .quantity(cartItem.getQuantity())
                                 .build())
                 .collect(Collectors.toList());
@@ -82,6 +82,9 @@ public class CartService {
         );
 
         //save를 호출하지 않아도 자동으로 변경 감지하여 flush 된다
+        //@Transactional이 있기 때문에 dirty checking이 사용됨.
+        //-> @Transactional 해당 메서드 내에서 수행된 작업들이 하나의 트랜잭션이 되도록 묶음.
+        // -> 이후 해당 메서드 내에서 JPA 엔티티의 상태를 변경하면 트랜잭션이 커밋될 때 자동으로 dirty checking을 통해 변경 내용을 db에 반영시킴
         cartItem.setQuantity(quantity);
     }
 
