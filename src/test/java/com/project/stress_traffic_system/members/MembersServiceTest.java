@@ -59,8 +59,9 @@ public class MembersServiceTest {
                 .address(address)
                 .build();
 
-        //test에서만 사용할 custom 레포지터리를 생성(만약 Mock 레포지터리에 멤버를 저장하면 멤버를 반환한다.)
+        //test에서만 사용할 custom 레포지터리를 생성
         Members members = new Members();
+        //Mock 레포지터리에 멤버를 저장하면 멤버를 반환한다.
         when(MockMembersRepository.save(any(Members.class))).thenReturn(members);
 
         //Mock 서블릿 생성
@@ -79,8 +80,9 @@ public class MembersServiceTest {
     @DisplayName("로그인 기능 확인")
     public void login() throws Exception {
         //given
+        //실제 DB에 있는 아이디와 비밀번호
         String username = "zser27";
-        String password = "abcd1234?";
+        String password = "abcde123?";
 
         LoginRequestDto loginRequestDto = LoginRequestDto.builder()
                 .username(username)
