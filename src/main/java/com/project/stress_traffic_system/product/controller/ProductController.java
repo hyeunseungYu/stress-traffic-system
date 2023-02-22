@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -32,14 +33,14 @@ public class ProductController {
 
     @ApiOperation(value = "상품 상세페이지")
     @GetMapping("/products/{productId}")
-    public ProductResponseDto getProductDetail(@PathVariable Long productId) {
+    public ProductResponseDto getProductDetail(@PathVariable Long productId) throws IOException {
         return productService.getProduct(productId);
     }
 
     @ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
-            ProductSearchCondition condition) {
+            @RequestBody ProductSearchCondition condition) {
         return productService.searchProducts(condition);
     }
 
@@ -75,25 +76,19 @@ public class ProductController {
 
     @ApiOperation(value = "국내도서 상품조회")
     @GetMapping("/products/domestic")
-    public List<ProductResponseDto> findDomesticProducts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
+    public List<ProductResponseDto> findDomesticProducts(@RequestParam("page") int page) {
         return productService.findByMainCategory("국내도서", page);
     }
 
     @ApiOperation(value = "해외도서 상품조회")
     @GetMapping("/products/foreign")
-    public List<ProductResponseDto> findForeignProducts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
+    public List<ProductResponseDto> findForeignProducts(@RequestParam("page") int page) {
         return productService.findByMainCategory("해외도서", page);
     }
 
     @ApiOperation(value = "E-Book 상품조회")
     @GetMapping("/products/ebook")
-    public List<ProductResponseDto> findEbookProducts(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("page") int page) {
+    public List<ProductResponseDto> findEbookProducts(@RequestParam("page") int page) {
         return productService.findByMainCategory("e-book", page);
     }
 
@@ -129,4 +124,9 @@ public class ProductController {
         productService.cacheProductsDetail();
     }
 
+    //todo 삭제하기
+    @PostMapping("/products/save")
+    public String save() {
+        return productService.save();
+    }
 }
