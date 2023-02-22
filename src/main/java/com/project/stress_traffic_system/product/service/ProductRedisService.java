@@ -98,7 +98,7 @@ public class ProductRedisService {
     //레디스에서 상품 상세정보 가져오기 (상품 id로 조회)
     public Optional<ProductResponseDto> getProduct(Long productId) {
         String key = "product::" + productId;
-        log.info("Redis 실행 게시글 번호는 = {}", productId);
+        log.info("Redis 검색 실행 게시글 번호는 = {}", productId);
         ProductResponseDto product = productRedisTemplate.opsForValue().get(key);
         return Optional.ofNullable(product);
     }
