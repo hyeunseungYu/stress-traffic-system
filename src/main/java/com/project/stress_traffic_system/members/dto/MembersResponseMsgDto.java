@@ -6,6 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class MembersResponseMsgDto {
     private String msg;
     private int httpStatus;

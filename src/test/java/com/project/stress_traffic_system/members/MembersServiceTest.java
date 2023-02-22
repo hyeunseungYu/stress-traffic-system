@@ -10,7 +10,9 @@ import com.project.stress_traffic_system.members.repository.MembersRepository;
 import com.project.stress_traffic_system.members.service.MembersService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -72,26 +74,26 @@ public class MembersServiceTest {
         //then
         assertThat(responseMsgDto.getMsg()).isEqualTo("회원가입 성공");
     }
-//
-//    @Test
-//    @DisplayName("로그인 기능 확인")
-//    public void login() throws Exception {
-//        //given
-//        String username = "asdf1234";
-//        String password = "abcde123?";
-//
-//        LoginRequestDto loginRequestDto = LoginRequestDto.builder()
-//                .username(username)
-//                .password(password)
-//                .build();
-//
-//        HttpServletResponse response = mock(HttpServletResponse.class);
-//
-//        //when
-//        MembersResponseMsgDto responseMsgDto = memberService.login(loginRequestDto, response);
-//
-//        //then
-//        assertThat(responseMsgDto.getMsg()).isEqualTo("로그인 성공");
-//    }
+
+    @Test
+    @DisplayName("로그인 기능 확인")
+    public void login() throws Exception {
+        //given
+        String username = "zser27";
+        String password = "abcd1234?";
+
+        LoginRequestDto loginRequestDto = LoginRequestDto.builder()
+                .username(username)
+                .password(password)
+                .build();
+
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        //when
+        MembersResponseMsgDto responseMsgDto =  memberService.login(loginRequestDto, response);
+
+        //then
+        assertThat(responseMsgDto.getMsg()).isEqualTo("로그인 성공");
+    }
 
 }
