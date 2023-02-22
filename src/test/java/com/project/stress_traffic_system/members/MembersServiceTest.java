@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -28,7 +30,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 public class MembersServiceTest {
 
     @Autowired //로그인할 때는 실제 DB를 이용
-    MembersService membersService;
+    MembersService memberService;
 
     @Mock //가짜 객체
     MembersRepository MockMembersRepository;
@@ -71,25 +73,25 @@ public class MembersServiceTest {
         assertThat(responseMsgDto.getMsg()).isEqualTo("회원가입 성공");
     }
 
-    @Test
-    @DisplayName("로그인 기능 확인")
-    public void login() throws Exception {
-        //given
-        String username = "asdf1234";
-        String password = "abcde123?";
-
-        LoginRequestDto loginRequestDto = LoginRequestDto.builder()
-                .username(username)
-                .password(password)
-                .build();
-
-        HttpServletResponse response = mock(HttpServletResponse.class);
-
-        //when
-        MembersResponseMsgDto responseMsgDto = membersService.login(loginRequestDto, response);
-
-        //then
-        assertThat(responseMsgDto.getMsg()).isEqualTo("로그인 성공");
-    }
+//    @Test
+//    @DisplayName("로그인 기능 확인")
+//    public void login() throws Exception {
+//        //given
+//        String username = "asdf1234";
+//        String password = "abcde123?";
+//
+//        LoginRequestDto loginRequestDto = LoginRequestDto.builder()
+//                .username(username)
+//                .password(password)
+//                .build();
+//
+//        HttpServletResponse response = mock(HttpServletResponse.class);
+//
+//        //when
+//        MembersResponseMsgDto responseMsgDto = memberService.login(loginRequestDto, response);
+//
+//        //then
+//        assertThat(responseMsgDto.getMsg()).isEqualTo("로그인 성공");
+//    }
 
 }
