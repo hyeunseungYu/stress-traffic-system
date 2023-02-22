@@ -51,6 +51,7 @@ public class MembersControllerTest {
     @DisplayName("로그인 테스트")
     public void login() throws Exception {
         //given
+        //실제 저장 되어 있는 아이디
         String username = "zser27";
         String password = "abcde123?";
 
