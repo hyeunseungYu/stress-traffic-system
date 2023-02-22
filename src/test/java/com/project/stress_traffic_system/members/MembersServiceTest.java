@@ -72,7 +72,7 @@ public class MembersServiceTest {
         //then
         assertThat(responseMsgDto.getMsg()).isEqualTo("회원가입 성공");
     }
-
+//
 //    @Test
 //    @DisplayName("로그인 기능 확인")
 //    public void login() throws Exception {
