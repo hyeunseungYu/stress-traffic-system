@@ -3,49 +3,34 @@ package com.project.stress_traffic_system.members;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.stress_traffic_system.members.dto.LoginRequestDto;
 import com.project.stress_traffic_system.members.dto.SignupRequestDto;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest()
+@SpringBootTest
 @AutoConfigureMockMvc
-@WebAppConfiguration
 public class MembersControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
-    AutoCloseable openMocks;
-
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    @BeforeEach
-    public void setup() {
-        openMocks = MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(MembersControllerTest.class).build();
-    }
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     @DisplayName("회원가입 테스트")
     public void signup() throws Exception{
         //given
-        String username = "usertest";
+        String username = RandomStringUtils.randomAlphabetic(10);
         String password = "abcde123?";
         String address = "서울";
 
@@ -56,8 +41,7 @@ public class MembersControllerTest {
                 .build();
 
         // when & then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/api/members/signup")
+        mockMvc.perform(post("/api/members/signup")
                         .content(objectMapper.writeValueAsString(signupRequestDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -67,7 +51,8 @@ public class MembersControllerTest {
     @DisplayName("로그인 테스트")
     public void login() throws Exception {
         //given
-        String username = "usertest";
+        //실제 저장 되어 있는 아이디
+        String username = "zser27";
         String password = "abcde123?";
 
         LoginRequestDto loginRequestDto = LoginRequestDto.builder()
@@ -76,8 +61,7 @@ public class MembersControllerTest {
                 .build();
 
         // when & then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/api/members/login")
+        mockMvc.perform(post("/api/members/login")
                         .content(objectMapper.writeValueAsString(loginRequestDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
