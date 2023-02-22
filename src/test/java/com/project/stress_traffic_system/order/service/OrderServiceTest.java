@@ -1,0 +1,183 @@
+package com.project.stress_traffic_system.order.service;
+
+import com.project.stress_traffic_system.cart.model.Cart;
+import com.project.stress_traffic_system.cart.model.CartItem;
+import com.project.stress_traffic_system.cart.repository.CartItemRepository;
+import com.project.stress_traffic_system.cart.repository.CartRepository;
+import com.project.stress_traffic_system.cart.service.CartService;
+import com.project.stress_traffic_system.members.entity.Members;
+import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
+import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
+import com.project.stress_traffic_system.order.repository.OrderRepository;
+import com.project.stress_traffic_system.product.model.Product;
+import com.project.stress_traffic_system.product.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+
+@SpringBootTest
+@Slf4j
+@Nested
+
+
+@DisplayName("orderService 테스트")
+class OrderServiceTest {
+
+
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @BeforeEach
+    public void before() {
+        Product product = new Product(1L, 100);
+        productRepository.saveAndFlush(product);
+    }
+
+//    @AfterEach
+//    public void after() {
+//        productRepository.deleteAll();
+//    }
+
+    @Nested
+    @DisplayName("성공 케이스")
+
+    class successCase {
+        @Test
+        @DisplayName("재고 테스트 - locking 설정하였을때")
+        void decrease() throws InterruptedException {
+
+            int threadCount = 100;
+            ExecutorService executorService = Executors.newFixedThreadPool(30);
+
+            //스레드 100개가 작업을 완료할때까지 대기
+            //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
+            CountDownLatch latch = new CountDownLatch(threadCount);
+
+            //스레드풀에서 작업 시작
+            //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
+            for (int i = 0; i < threadCount; i++) {
+                executorService.submit(
+                        () ->  {
+                            try {
+                                orderService.decrease(1L,1);
+                            }finally {
+                                latch.countDown();
+                            }
+                        }
+                );
+            }
+
+            //모든 작업이 끝날때까지 기다림
+            //countDownLatch가 0이 되기 전에 끝나지 않도록 함.
+            //스레드 풀에서 아직 작업 중인데 for 문 끝나고 재고 조회로 넘어가지 않도록
+            latch.await();
+            Product product = productRepository.findById(1L).orElseThrow();
+            Assertions.assertEquals(0, product.getStock());
+        }
+    }
+
+    @Nested
+    @DisplayName("실패 케이스")
+    class failCase{
+        @Test
+        @DisplayName("재고 테스트 - locking 설정하지 않았을 때")
+        void decrease() throws InterruptedException {
+            int threadCount = 100;
+            ExecutorService executorService = Executors.newFixedThreadPool(30);
+
+            //스레드 100개가 작업을 완료할때까지 대기
+            //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
+            CountDownLatch latch = new CountDownLatch(threadCount);
+
+            //스레드풀에서 작업 시작
+            //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
+            for (int i = 0; i < threadCount; i++) {
+                executorService.submit(
+                        () ->  {
+                            try {
+                                Product product = productRepository.findById(1L).orElseThrow();
+                                product.removeStock(1);
+                                productRepository.save(product);;
+                            }finally {
+                                latch.countDown();
+                            }
+                        }
+                );
+            }
+
+            //모든 작업이 끝날때까지 기다림
+            //countDownLatch가 0이 되기 전에 끝나지 않도록 함.
+            //스레드 풀에서 아직 작업 중인데 for 문 끝나고 재고 조회로 넘어가지 않도록
+            latch.await();
+            Product product = productRepository.findById(1L).orElseThrow();
+            Assertions.assertNotEquals(0, product.getStock());
+        }
+
+    }
+
+
+
+//
+//    @Test
+//    void orderOne() throws InterruptedException {
+//
+//        int threadCount = 100;
+//        ExecutorService executorService = Executors.newFixedThreadPool(32);
+//
+//        //스레드 100개가 작업을 완료할때까지 대기
+//        //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
+//        CountDownLatch latch = new CountDownLatch(threadCount);
+//
+//
+//        //given
+//        when(cartRepository.findByMember(member)).thenReturn(cart);
+//        when(productRepository.findByIdWithPessimisticLock(orderRequestDto.getProductId())).thenReturn(product);
+//
+//        //when
+//
+//        //스레드풀에서 작업 시작
+//        //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
+//        for (int i = 0; i < threadCount; i++) {
+//            executorService.submit(
+//                    () ->  {
+//                        try {
+//                            product.removeStock(orderRequestDto.getQuantity());
+//                        }finally {
+//                            latch.countDown();
+//                        }
+//                    }
+//            );
+//        }
+//
+//        //모든 작업이 끝날때까지 기다림
+//        //countDownLatch가 0이 되기 전에 끝나지 않도록 함.
+//        //스레드 풀에서 아직 작업 중인데 for 문 끝나고 재고 조회로 넘어가지 않도록
+//        latch.await();
+//
+//
+//        //then
+//        Assertions.assertEquals(0, product.getStock());
+//    }
+}
