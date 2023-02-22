@@ -267,27 +267,4 @@ public class ProductService {
         productRedisService.addClickCount(key, productId);
         productQueryRepository.updateClickCount(productId);
     }
-
-    //todo 삭제하기
-    public String save() {
-        ProductDoc product = new ProductDoc();
-        product.setId(2L);
-        product.setName("상품명");
-        product.setIntroduction("소개글");
-        product.setDescription("상세글");
-        product.setPages(100);
-        product.setStock(1000);
-        product.setImgurl(1);
-        product.setPrice(19900);
-        product.setShippingFee(2500);
-        product.setClickCount(0L);
-        product.setDiscount(10);
-        product.setOrderCount(0L);
-
-        productElasticRepository.save(product);
-        log.info("여기까지는 잘 되나?");
-        //ProductDoc product1 = productElasticRepository.findById(save.getId()).orElseThrow();
-
-        return "success";
-    }
 }
