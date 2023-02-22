@@ -30,7 +30,7 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private static final List<String> permitOrigin =
-            List.of("http://localhost:3000","http://localhost:8080");
+            List.of("http://localhost:3000","http://localhost:8080","https://sts-system.vercel.app","https://sts-system-front-product.vercel.app");
 
     /**
      * BCrypt로 패스워드 인코딩 수행<br>
