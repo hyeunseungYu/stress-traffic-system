@@ -91,7 +91,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
     //redisson
-    implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.19.3'
+    //implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.19.3'
 
 
     //MySQL log
