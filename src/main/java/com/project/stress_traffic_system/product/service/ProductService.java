@@ -1,26 +1,23 @@
+/*
 package com.project.stress_traffic_system.product.service;
 
 import com.project.stress_traffic_system.members.entity.Members;
-import com.project.stress_traffic_system.product.model.Category;
-import com.project.stress_traffic_system.product.model.Product;
-import com.project.stress_traffic_system.product.model.Review;
-import com.project.stress_traffic_system.product.model.SubCategory;
+import com.project.stress_traffic_system.product.model.*;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
 import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
-import com.project.stress_traffic_system.product.repository.CategoryRepository;
-import com.project.stress_traffic_system.product.repository.ProductRepository;
-import com.project.stress_traffic_system.product.repository.ReviewRepository;
-import com.project.stress_traffic_system.product.repository.SubCategoryRepository;
+import com.project.stress_traffic_system.product.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +27,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class ProductService {
+    */
+/*private final ProductElasticRepository productElasticRepository;
+    private final ProductQueryRepository productQueryRepository;*//*
+
     private final ReviewRepository reviewRepository;
 
     private final ProductRepository productRepository;
@@ -51,14 +52,15 @@ public class ProductService {
 
     //상품 id로 상세정보 가져오기 (레디스에서 먼저 조회하기)
     @Transactional
-    public ProductResponseDto getProduct(Long productId) {
+    public ProductResponseDto getProduct(Long productId) throws IOException {
 
         Optional<ProductResponseDto> redisProduct = productRedisService.getProduct(productId);
         if (redisProduct.isEmpty()) {
+            log.info("Redis에 상품정보 없음 -> RDS에서 검색 실행");
             Product product = findProduct(productId);
 
             //조회수 늘리기
-            productRepository.setClickCount(productId, product.getClickCount() + 1);
+            addClickCount(productId);
 
             return ProductResponseDto.builder()
                     .id(product.getId())
@@ -89,20 +91,57 @@ public class ProductService {
         //저장된 조회수가 있으면 해당 값 +1 을 dto에 세팅해준다
         responseDto.setClickCount(clickCount + 1);
 
-        //해당 상품 id의 조회수를 증가시켜서 레디스에 저장한다
+        // 해당 상품 id의 조회수를 증가시켜서 레디스와 ElasticSearch 두곳에 저장한다
+        // 레디스에 저장된 조회수는 주기적으로 RDS에 업데이트한다
         addClickCount(productId);
+
         return responseDto;
     }
 
-    // 상품 검색하기 (이름, 가격 필터링)
+    */
+/*
+        //todo Elasticsearch 검색 추후 검토 및 수정 요망
+     *//*
 
+    // 상품 검색하기 (이름, 가격 필터링)
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
-        return productRepository.searchProducts(condition);
+
+        //조회수 내림차순으로 정렬한다
+        Sort sort = Sort.by(Sort.Direction.DESC, "clickCount");
+        Pageable pageable = PageRequest.of(condition.getPage(), PAGE_SIZE, sort);
+
+        //Elasticsearch에서 검색 조건에 맞는 ProductDoc 리스트를 찾아온다
+        List<ProductDoc> list = productQueryRepository.findByCondition(condition, pageable);
+
+        log.info("Elasticsearch에서 찾아온 상품 검색 list size = {}", list.size());
+
+        //ProductDoc를 Dto리스트로 변환한다
+        List<ProductResponseDto> collect = list.stream().map(product -> ProductResponseDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .description(product.getDescription())
+                .shippingFee(product.getShippingFee())
+                .imgurl(product.getImgurl())
+                .clickCount(product.getClickCount() + 1)
+                .orderCount(product.getOrderCount())
+                .stock(product.getStock())
+                .introduction(product.getIntroduction())
+                .pages(product.getPages())
+                .date(product.getDate())
+                .build()).collect(Collectors.toList());
+
+        return new PageImpl<>(collect);
+
+        // RDS에서 직접 검색해서 가져온다
+//        return productRepository.searchProducts(condition);
     }
-    /*
+    */
+/*
         카테고리 1~5 각각 조회하는 Api
-     */
+     *//*
+
 
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
@@ -115,9 +154,11 @@ public class ProductService {
         return productRepository.searchByCategory(categoryId, page);
     }
 
-    /*
+    */
+/*
         카테고리(대분류) API - 국내도서, 해외도서, E-Book
-     */
+     *//*
+
 
     //카테고리별 상품리스트 가져오기
     // Redis에서 조회하고 없을 경우에는 DB 조회하기
@@ -183,9 +224,11 @@ public class ProductService {
         return productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다"));
     }
 
-    /*
+    */
+/*
         캐싱
-     */
+     *//*
+
 
     //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
@@ -229,9 +272,34 @@ public class ProductService {
     }
 
     // 상품 조회수 추가로직
-    public void addClickCount(Long productId) {
+    public void addClickCount(Long productId) throws IOException {
         String key = "clickCount::" + productId;
         log.info("조회수 증가 메서드 실행");
         productRedisService.addClickCount(key, productId);
+        productQueryRepository.updateClickCount(productId);
+    }
+
+    //todo 삭제하기
+    public String save() {
+        ProductDoc product = new ProductDoc();
+        product.setId(2L);
+        product.setName("상품명");
+        product.setIntroduction("소개글");
+        product.setDescription("상세글");
+        product.setPages(100);
+        product.setStock(1000);
+        product.setImgurl(1);
+        product.setPrice(19900);
+        product.setShippingFee(2500);
+        product.setClickCount(0L);
+        product.setDiscount(10);
+        product.setOrderCount(0L);
+
+        productElasticRepository.save(product);
+        log.info("여기까지는 잘 되나?");
+        //ProductDoc product1 = productElasticRepository.findById(save.getId()).orElseThrow();
+
+        return "success";
     }
 }
+*/

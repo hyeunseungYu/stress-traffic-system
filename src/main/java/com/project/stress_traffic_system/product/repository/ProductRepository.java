@@ -1,7 +1,4 @@
 package com.project.stress_traffic_system.product.repository;
-
-import com.project.stress_traffic_system.product.model.Category;
-import com.project.stress_traffic_system.product.model.SubCategory;
 import com.project.stress_traffic_system.product.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

@@ -127,8 +127,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCT_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCT_AWS_SECRET_ACCESS_KEY }}
-        run: aws deploy create-deployment --application-name asg_sts_product
-          --deployment-group-name stsProductCodeDeploy
+        run: aws deploy create-deployment --application-name sts_develop
+          --deployment-group-name sts_product_codedeploy
           --file-exists-behavior OVERWRITE
           --s3-location bucket=product-traffic,bundleType=zip,key=sts_product.zip
           --region ap-northeast-2

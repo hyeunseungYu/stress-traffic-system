@@ -127,8 +127,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DEVELOP_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DEVELOP_AWS_SECRET_ACCESS_KEY }}
-        run: aws deploy create-deployment --application-name ci_cd_develop
-          --deployment-group-name ci_cd_group
+        run: aws deploy create-deployment --application-name ci_cd_deploy
+          --deployment-group-name ci_cd_deploy
           --file-exists-behavior OVERWRITE
           --s3-location bucket=yogiyoclone,bundleType=zip,key=cicdtest.zip
           --region ap-northeast-2
