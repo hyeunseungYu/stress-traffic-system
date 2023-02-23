@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,9 +29,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class ProductService {
-    */
-/*private final ProductElasticRepository productElasticRepository;
-    private final ProductQueryRepository productQueryRepository;*//*
+
+private final ProductElasticRepository productElasticRepository;
+    private final ProductQueryRepository productQueryRepository;
 
     private final ReviewRepository reviewRepository;
 
@@ -98,27 +100,29 @@ public class ProductService {
         return responseDto;
     }
 
-    */
-/*
+
+
         //todo Elasticsearch 검색 추후 검토 및 수정 요망
-     *//*
+
 
     // 상품 검색하기 (이름, 가격 필터링)
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
 
         //조회수 내림차순으로 정렬한다
-        Sort sort = Sort.by(Sort.Direction.DESC, "clickCount");
+        Sort sort = Sort.by(Sort.Direction.DESC, "click_count");
         Pageable pageable = PageRequest.of(condition.getPage(), PAGE_SIZE, sort);
 
         //Elasticsearch에서 검색 조건에 맞는 ProductDoc 리스트를 찾아온다
-        List<ProductDoc> list = productQueryRepository.findByCondition(condition, pageable);
+//        List<ProductDoc> list = productQueryRepository.findByCondition(condition, pageable);
+//        List<ProductDoc> list = productElasticRepository.findTopByNameAndPriceBetween(condition.getName(), condition.getPriceFrom(), condition.getPriceTo());
+        Page<ProductDoc> list = productElasticRepository.findTopByNameAndPriceBetween(condition.getName(), condition.getPriceFrom(), condition.getPriceTo(), pageable);
 
-        log.info("Elasticsearch에서 찾아온 상품 검색 list size = {}", list.size());
+//        log.info("Elasticsearch에서 찾아온 상품 검색 list size = {}", list.size());
 
         //ProductDoc를 Dto리스트로 변환한다
         List<ProductResponseDto> collect = list.stream().map(product -> ProductResponseDto.builder()
-                .id(product.getId())
+                .id(product.getProductId())
                 .name(product.getName())
                 .price(product.getPrice())
                 .description(product.getDescription())
@@ -129,7 +133,7 @@ public class ProductService {
                 .stock(product.getStock())
                 .introduction(product.getIntroduction())
                 .pages(product.getPages())
-                .date(product.getDate())
+                .date(convertDate(product.getDate()))
                 .build()).collect(Collectors.toList());
 
         return new PageImpl<>(collect);
@@ -137,10 +141,10 @@ public class ProductService {
         // RDS에서 직접 검색해서 가져온다
 //        return productRepository.searchProducts(condition);
     }
-    */
-/*
-        카테고리 1~5 각각 조회하는 Api
-     *//*
+
+
+      //  카테고리 1~5 각각 조회하는 Api
+
 
 
     @Transactional(readOnly = true)
@@ -154,12 +158,12 @@ public class ProductService {
         return productRepository.searchByCategory(categoryId, page);
     }
 
-    */
+
 /*
         카테고리(대분류) API - 국내도서, 해외도서, E-Book
-     *//*
+     */
 
-
+/*
     //카테고리별 상품리스트 가져오기
     // Redis에서 조회하고 없을 경우에는 DB 조회하기
     @Transactional(readOnly = true)
@@ -224,12 +228,12 @@ public class ProductService {
         return productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다"));
     }
 
-    */
+
 /*
         캐싱
-     *//*
+     */
 
-
+/*
     //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
@@ -276,30 +280,12 @@ public class ProductService {
         String key = "clickCount::" + productId;
         log.info("조회수 증가 메서드 실행");
         productRedisService.addClickCount(key, productId);
-        productQueryRepository.updateClickCount(productId);
     }
 
-    //todo 삭제하기
-    public String save() {
-        ProductDoc product = new ProductDoc();
-        product.setId(2L);
-        product.setName("상품명");
-        product.setIntroduction("소개글");
-        product.setDescription("상세글");
-        product.setPages(100);
-        product.setStock(1000);
-        product.setImgurl(1);
-        product.setPrice(19900);
-        product.setShippingFee(2500);
-        product.setClickCount(0L);
-        product.setDiscount(10);
-        product.setOrderCount(0L);
-
-        productElasticRepository.save(product);
-        log.info("여기까지는 잘 되나?");
-        //ProductDoc product1 = productElasticRepository.findById(save.getId()).orElseThrow();
-
-        return "success";
+    //Elasticsearch에서 date가 String 타입이므로 변환해준다
+    public LocalDateTime convertDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.parse(date, formatter);
     }
 }
 */
