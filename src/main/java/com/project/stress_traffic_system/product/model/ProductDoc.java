@@ -4,15 +4,11 @@ package com.project.stress_traffic_system.product.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.Setting;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -21,33 +17,35 @@ import java.time.LocalDateTime;
 public class ProductDoc {
 
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "product_id", updatable = false)
-    private Long id;
+    private String id;
 
-    @Field(type = FieldType.Keyword)
+    @Field(name = "product_id")
+    private Long productId;
+
+    @Field(type = FieldType.Text)
     private String name; //상품이름
     private int price; //가격
     private String description; //상세설명
+    @Field(name = "shipping_fee")
     private int shippingFee; // 배송료
     private int imgurl; //상품이미지
+    @Field(name = "click_count")
     private Long clickCount; // 조회수
     private int stock; //상품수량
     private int discount; //할인(금액할인, 퍼센트할인)
 
     private String introduction; //책소개
     private int pages; //쪽수
+    @Field(name = "order_count")
     private Long orderCount;// 누적주문수량
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private SubCategory subCategory;
+    @Field(name = "sub_category_category_id")
+    private String subCategory;
 
-//    private Long category_id;
+    @Field(name = "category_category_id")
+    private String category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Category category;
-
-    @CreatedDate
-    private LocalDateTime date;
+    private String date;
 
     public void setClickCount(Long clickCount) {
         this.clickCount = clickCount;
