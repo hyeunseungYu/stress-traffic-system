@@ -30,4 +30,5 @@ public interface ProductRepositoryCustom {
     Long getClickCount(Long productId);
 
     void setClickCount(Long productId, long clickCount);
+
 }

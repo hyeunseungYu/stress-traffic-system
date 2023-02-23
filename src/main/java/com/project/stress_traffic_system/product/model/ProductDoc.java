@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -14,14 +17,14 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-@Entity
-public class Product {
+@Document(indexName = "product")
+public class ProductDoc {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "product_id", updatable = false)
     private Long id;
 
+    @Field(type = FieldType.Keyword)
     private String name; //상품이름
     private int price; //가격
     private String description; //상세설명
@@ -71,12 +74,5 @@ public class Product {
             //dc가 "할인율"일 경우는 정가에 (100-할인율)% 을 곱한다.
             return (int) (price * ( (100.0 - dc) / 100.0));
         }
-    }
-
-
-    //테스트를 위한 생성자 추가
-    public Product(Long id, int stock) {
-        this.id = id;
-        this.stock = stock;
     }
 }
