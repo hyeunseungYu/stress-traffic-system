@@ -124,11 +124,5 @@ public class ProductController {
     public void cacheProductsDetail() {
         productService.cacheProductsDetail();
     }
-
-    //todo 삭제하기
-    @PostMapping("/products/save")
-    public String save() {
-        return productService.save();
-    }
 }
 */

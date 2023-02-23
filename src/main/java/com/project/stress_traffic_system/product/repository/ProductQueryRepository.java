@@ -30,7 +30,7 @@ public class ProductQueryRepository {
 
     private final ElasticsearchOperations operations;
     private final RestHighLevelClient client;
-    private final ProductElasticRepository productElasticRepository;
+//    private final ProductElasticRepository productElasticRepository;
 
     public List<ProductDoc> findByCondition(ProductSearchCondition searchCondition, Pageable pageable) {
         log.info("Repository - findByCondition 메서드 접근");
@@ -43,36 +43,25 @@ public class ProductQueryRepository {
                 .collect(Collectors.toList());
     }
 
-    public void updateClickCount(Long productId) throws IOException {
-        log.info("Elasticsearch clickCount 업데이트 메서드 실행");
-
-        ProductDoc productDoc = productElasticRepository.findById(productId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 상품입니다")
-        );
-
-        Map<String, Object> source = new HashMap<>();
-        source.put("clickCount", productDoc.getClickCount() + 1);
-
-        UpdateRequest request = new UpdateRequest("product", String.valueOf(productId)).doc(source);
-        client.update(request, RequestOptions.DEFAULT);
-    }
-
     private CriteriaQuery createConditionCriteriaQuery(ProductSearchCondition searchCondition) {
         CriteriaQuery query = new CriteriaQuery(new Criteria());
 
         if (searchCondition == null)
             return query;
 
-        if (searchCondition.getName() != null)
+        //todo 책이름 검색하는 방법..개선할 것(match 되는 경우 검색이 안 됨)
+        if (searchCondition.getName() != null){
             query.addCriteria(Criteria.where("name").contains(searchCondition.getName()));
+        }
 
-        if(searchCondition.getPriceTo() > 0)
+        if(searchCondition.getPriceTo() != null && searchCondition.getPriceTo() > 0)
             query.addCriteria(Criteria.where("price").lessThanEqual(searchCondition.getPriceTo()));
 
-        if(searchCondition.getPriceFrom() > 0)
+        if(searchCondition.getPriceFrom() != null && searchCondition.getPriceFrom() > 0)
             query.addCriteria(Criteria.where("price").greaterThanEqual(searchCondition.getPriceFrom()));
 
         return query;
     }
 }
+
 */
