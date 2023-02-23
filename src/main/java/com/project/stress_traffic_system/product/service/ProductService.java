@@ -1,4 +1,3 @@
-/*
 package com.project.stress_traffic_system.product.service;
 
 import com.project.stress_traffic_system.members.entity.Members;
@@ -30,8 +29,8 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
 
-private final ProductElasticRepository productElasticRepository;
-    private final ProductQueryRepository productQueryRepository;
+    /*private final ProductElasticRepository productElasticRepository;
+    private final ProductQueryRepository productQueryRepository;*/
 
     private final ReviewRepository reviewRepository;
 
@@ -104,7 +103,7 @@ private final ProductElasticRepository productElasticRepository;
 
         //todo Elasticsearch 검색 추후 검토 및 수정 요망
 
-
+/*
     // 상품 검색하기 (이름, 가격 필터링)
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
@@ -141,7 +140,7 @@ private final ProductElasticRepository productElasticRepository;
         // RDS에서 직접 검색해서 가져온다
 //        return productRepository.searchProducts(condition);
     }
-
+*/
 
       //  카테고리 1~5 각각 조회하는 Api
 
@@ -163,7 +162,7 @@ private final ProductElasticRepository productElasticRepository;
         카테고리(대분류) API - 국내도서, 해외도서, E-Book
      */
 
-/*
+
     //카테고리별 상품리스트 가져오기
     // Redis에서 조회하고 없을 경우에는 DB 조회하기
     @Transactional(readOnly = true)
@@ -233,7 +232,7 @@ private final ProductElasticRepository productElasticRepository;
         캐싱
      */
 
-/*
+
     //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
@@ -288,4 +287,4 @@ private final ProductElasticRepository productElasticRepository;
         return LocalDateTime.parse(date, formatter);
     }
 }
-*/
+

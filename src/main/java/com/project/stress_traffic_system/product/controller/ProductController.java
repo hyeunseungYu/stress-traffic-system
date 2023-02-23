@@ -1,4 +1,3 @@
-/*
 package com.project.stress_traffic_system.product.controller;
 
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
@@ -38,12 +37,12 @@ public class ProductController {
         return productService.getProduct(productId);
     }
 
-    @ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
+    /*@ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
             @RequestBody ProductSearchCondition condition) {
         return productService.searchProducts(condition);
-    }
+    }*/
 
     @ApiOperation(value = "카테고리1 상품조회")
     @GetMapping("/products/category-1")
@@ -125,4 +124,4 @@ public class ProductController {
         productService.cacheProductsDetail();
     }
 }
-*/
+
