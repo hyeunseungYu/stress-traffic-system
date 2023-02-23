@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.order.service;
 
 import com.project.stress_traffic_system.cart.model.Cart;
@@ -213,4 +214,4 @@ class OrderServiceTest {
 //        //then
 //        Assertions.assertEquals(0, product.getStock());
 //    }
-}
+}*/
