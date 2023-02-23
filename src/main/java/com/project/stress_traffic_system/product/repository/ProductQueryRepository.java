@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.product.repository;
 
 import org.elasticsearch.action.update.UpdateRequest;
@@ -74,3 +75,4 @@ public class ProductQueryRepository {
         return query;
     }
 }
+*/
