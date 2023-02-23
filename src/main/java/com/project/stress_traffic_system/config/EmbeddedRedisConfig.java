@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.config;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,3 +43,4 @@ public class EmbeddedRedisConfig {
     }
 
 }
+*/
