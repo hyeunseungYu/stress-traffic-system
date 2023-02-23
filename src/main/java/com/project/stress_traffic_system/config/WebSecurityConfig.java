@@ -94,6 +94,7 @@ public class WebSecurityConfig {
                 .antMatchers("/signup").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/main").permitAll()
+                .antMatchers("/test/**").permitAll()
 
                 //swagger 관련해서 인증 통과
                 .antMatchers(PERMIT_URL_ARRAY).permitAll()
