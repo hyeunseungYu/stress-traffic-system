@@ -1,6 +1,5 @@
 package com.project.stress_traffic_system;
 
-import com.project.stress_traffic_system.product.repository.ProductElasticRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration;
@@ -12,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableScheduling
+/*@EnableScheduling
 @EnableCaching
 @EnableJpaAuditing
 @EnableJpaRepositories(
@@ -21,7 +20,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableElasticsearchRepositories(
         includeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE, classes = ProductElasticRepository.class))
-@SpringBootApplication(exclude = {ElasticsearchRepositoriesAutoConfiguration.class})
+@SpringBootApplication(exclude = {ElasticsearchRepositoriesAutoConfiguration.class})*/
+@SpringBootApplication
 public class StressTrafficSystemApplication {
 
     public static void main(String[] args) {

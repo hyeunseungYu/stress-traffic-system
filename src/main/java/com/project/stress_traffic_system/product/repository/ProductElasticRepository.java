@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.product.repository;
 
 import com.project.stress_traffic_system.product.model.ProductDoc;
@@ -11,3 +12,4 @@ public interface ProductElasticRepository extends ElasticsearchRepository<Produc
 
 //    List<ProductDoc> findByName(String name);
 }
+*/
