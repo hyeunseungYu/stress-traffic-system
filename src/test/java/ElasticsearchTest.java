@@ -1,3 +1,4 @@
+/*
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.repository.ProductElasticRepository;
 import org.junit.jupiter.api.Test;
@@ -24,3 +25,4 @@ public class ElasticsearchTest {
         productElasticRepository.save(product);
     }
 }
+*/

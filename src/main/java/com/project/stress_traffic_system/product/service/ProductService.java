@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.product.service;
 
 import com.project.stress_traffic_system.members.entity.Members;
@@ -26,8 +27,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class ProductService {
-    private final ProductElasticRepository productElasticRepository;
-    private final ProductQueryRepository productQueryRepository;
+    */
+/*private final ProductElasticRepository productElasticRepository;
+    private final ProductQueryRepository productQueryRepository;*//*
+
     private final ReviewRepository reviewRepository;
 
     private final ProductRepository productRepository;
@@ -95,9 +98,11 @@ public class ProductService {
         return responseDto;
     }
 
-    /*
+    */
+/*
         //todo Elasticsearch 검색 추후 검토 및 수정 요망
-     */
+     *//*
+
     // 상품 검색하기 (이름, 가격 필터링)
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchProducts(ProductSearchCondition condition) {
@@ -132,9 +137,11 @@ public class ProductService {
         // RDS에서 직접 검색해서 가져온다
 //        return productRepository.searchProducts(condition);
     }
-    /*
+    */
+/*
         카테고리 1~5 각각 조회하는 Api
-     */
+     *//*
+
 
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
@@ -147,9 +154,11 @@ public class ProductService {
         return productRepository.searchByCategory(categoryId, page);
     }
 
-    /*
+    */
+/*
         카테고리(대분류) API - 국내도서, 해외도서, E-Book
-     */
+     *//*
+
 
     //카테고리별 상품리스트 가져오기
     // Redis에서 조회하고 없을 경우에는 DB 조회하기
@@ -215,9 +224,11 @@ public class ProductService {
         return productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다"));
     }
 
-    /*
+    */
+/*
         캐싱
-     */
+     *//*
+
 
     //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
@@ -268,3 +279,4 @@ public class ProductService {
         productQueryRepository.updateClickCount(productId);
     }
 }
+*/
