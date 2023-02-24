@@ -13,6 +13,14 @@ plugins {
     id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
+//application-local 적용
+bootRun {
+    String activeProfile = System.properties['spring.profiles.active']
+    if (activeProfile == null){
+        activeProfile = "local"
+    }
+    systemProperty "spring.profiles.active", activeProfile
+}
 group = 'com.project'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'

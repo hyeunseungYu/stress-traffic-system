@@ -1,10 +1,8 @@
-/*
 package com.project.stress_traffic_system.members;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.stress_traffic_system.members.dto.LoginRequestDto;
 import com.project.stress_traffic_system.members.dto.SignupRequestDto;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,6 +27,7 @@ public class MembersControllerTest {
     ObjectMapper objectMapper;
 
     @Test
+    @Transactional //회원가입 후 데이터 롤백 ->실제 DB에 저장 안됨
     @DisplayName("회원가입 테스트")
     public void signup() throws Exception{
         //given
@@ -69,4 +69,3 @@ public class MembersControllerTest {
     }
 
 }
-*/
