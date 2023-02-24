@@ -1,4 +1,3 @@
-/*
 package com.project.stress_traffic_system.members;
 
 import com.project.stress_traffic_system.members.entity.Members;
@@ -8,14 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-//@DataJpaTest //h2 DB가 default
-@SpringBootTest
+@DataJpaTest // 모든 테스트가 끝난 뒤 롤백
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //h2 DB가 아닌 실제 DB이용
 public class MembersRepositoryTest {
 
     @Autowired //회원을 조회할 때는 실제 DB 사용
@@ -78,4 +78,4 @@ public class MembersRepositoryTest {
         assertThat(findMember.getAddress()).isEqualTo(savedMockMember.getAddress());
         assertThat(findMember.getRole()).isEqualTo(savedMockMember.getRole());
     }
-}*/
+}
