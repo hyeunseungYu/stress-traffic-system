@@ -101,7 +101,6 @@ public class CartRepositoryTest {
             CartItem findCartItem = cartItemRepository.findByCartAndProduct(cart, product)
                     .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId:<>"));
 
-            System.out.println("findCartItem : " + findCartItem.getId());
 
             // then
             //카트 아이템이 상품과 카트와 일치하는지 확인
@@ -114,7 +113,7 @@ public class CartRepositoryTest {
         public void testSave() {
             //given
             Members member = new Members("usertest","abcde123?","서울",MembersRoleEnum.MEMBER);
-            Product product = new Product(1L,30);
+            Product product = new Product(1L,30,"testName",16000,1);
             Cart cart = new Cart(member);
             CartItem cartItem = new CartItem(cart, product);
 

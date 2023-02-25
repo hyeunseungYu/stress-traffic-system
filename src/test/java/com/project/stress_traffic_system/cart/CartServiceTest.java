@@ -7,150 +7,169 @@ import com.project.stress_traffic_system.cart.repository.CartItemRepository;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.cart.service.CartService;
 import com.project.stress_traffic_system.members.entity.Members;
-import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
+import com.project.stress_traffic_system.product.model.Product;
+import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-/*@Transactional을 사용하여 실제 DB에 영향을 주지 않는다*/
-@Slf4j
-@SpringBootTest
+//Mock객체를 만들어 단위테스트로 진행
+@ExtendWith(MockitoExtension.class)
 public class CartServiceTest {
 
-    @Autowired
-    private CartRepository cartRepository;
+    @Mock
+    CartRepository cartRepository;
 
-    @Autowired
-    private CartItemRepository cartItemRepository;
+    @Mock
+    CartItemRepository cartItemRepository;
 
-    @Autowired
-    private MembersRepository membersRepository;
+    @Mock
+    ProductRepository productRepository;
 
-    @Autowired
-    private CartService cartService;
+    //모든 테스트에 반복되는 변수를 전역변수로 선언
+    Members member;
+    Cart cart;
+    Product product;
+    CartItem cartItem;
+
+    //테스트를 실행하기 전마다 전역변수에 값을 할당
+    @BeforeEach
+    void beforeEach(){
+        member  = new Members("user", "1234", "지역", MembersRoleEnum.MEMBER);
+        cart = new Cart(member);
+        product = new Product(1L,30,"testName",16000,50);
+        cartItem = new CartItem(cart,product);
+    }
 
     @Nested
     @DisplayName("서비스 Layer Test")
     class cartServiceTest {
 
-        @Transactional //메서드가 실행될 동안만 세션 유지
         @DisplayName("서비스 getCartItems 메서드 테스트")
         @Test
         void getCartItems() {
             //given
-            Long findMemberId = 2000084L; //사용할 멤버 아이디
-            Long ProductId = 10L; //저장할 상품 id
-            Members member = membersRepository.findById(findMemberId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            cartService.addToCart(member, ProductId); //장바구니 추가
+            //Mock Service
+            CartService cartService = new CartService(cartRepository,cartItemRepository,productRepository);
+
+            //findAllByCart 수행시 반환할 List<CartItem>생성
+            List<CartItem> cartItems = new ArrayList<>();
+            for (int i=0; i<5; i++) {
+                Product newProduct = new Product(1L+i,30+i,"testName"+i,16000+i,10+i);
+                CartItem newCartItem = new CartItem(cart,newProduct);
+                cartItems.add(newCartItem);
+            }
+
+            //cartService에 필요한 리포지토리 custom (실제 서비스와 동일하게 구현)
+            when(cartRepository.findByMember(member)).thenReturn(cart);
+            when(cartItemRepository.findAllByCart(cart)).thenReturn(cartItems);
 
             //when
-            //해당 멤버의 장바구니 리스트를 가져온다.
             List<CartResponseDto> cartResponseDtos = cartService.getCartItems(member);
 
             //then
-            //가장 최근에 추가한 아이템을 조회
-            assertThat(cartResponseDtos.get(cartResponseDtos.size()-1).getItemName()).isEqualTo("Monika Will");
-            assertThat(cartResponseDtos.get(cartResponseDtos.size()-1).getImgurl()).isEqualTo(2);
-            assertThat(cartResponseDtos.get(cartResponseDtos.size()-1).getPrice()).isEqualTo(32209);
+            //addToCart 메서드를 수행하면 cartItemRepository.save 가 한 번 수행됐는지 확인한다.
+            assertThat(cartResponseDtos.get(1).getPrice()).isEqualTo(16000+1);
+            assertThat(cartResponseDtos.get(2).getItemName()).isEqualTo("testName"+2);
+            assertThat(cartResponseDtos.get(3).getImgurl()).isEqualTo(10+3);
+            assertThat(cartResponseDtos.get(4).getQuantity()).isEqualTo(1);
         }
 
-        @Transactional //메서드가 실행될 동안만 세션 유지
-        @DisplayName("서비스 addToCart 메서드 테스트")
+        @DisplayName("서비스 getCartItems 메서드 테스트")
         @Test
         void addToCart() {
             //given
-            Long findMemberId = 2000084L; //사용할 멤버 아이디
-            Members member = membersRepository.findById(findMemberId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            Cart cart = cartRepository.findByMember(member);
-            Long ProductId = 1000L; //추가할 상품 id
+            //Mock Service
+            CartService cartService = new CartService(cartRepository,cartItemRepository,productRepository);
+
+            //cartService에 필요한 리포지토리 custom (실제 서비스와 동일하게 구현)
+            when(cartRepository.findByMember(member)).thenReturn(cart);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            //해당 상품을 처음 등록한다고 가정
+            when(cartItemRepository.findByCartAndProduct(cart,product)).thenReturn(Optional.empty());
 
             //when
-            cartService.addToCart(member, ProductId);
-            //추가한 상품 찾기
-            CartItem findCartItem = cartItemRepository.findByProductId(ProductId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
+            cartService.addToCart(member,1L);
 
-            assertThat(findCartItem.getProduct().getId()).isEqualTo(ProductId);
-            assertThat(findCartItem.getCart()).isEqualTo(cart);
-            assertThat(findCartItem.getCart().getMember()).isEqualTo(member);
+            //then
+            //addToCart 메서드를 수행하면 cartItemRepository.save 가 한 번 수행됐는지 확인한다.
+            verify(cartItemRepository, times(1)).save(any(CartItem.class));
         }
 
-        @Transactional //메서드가 실행될 동안만 세션 유지
-        @DisplayName("서비스 updateQuantity 메서드 테스트")
+        @DisplayName("서비스 getCartItems 메서드 테스트")
         @Test
         void updateQuantity() {
             //given
-            Long findMemberId = 2000084L; //사용할 멤버 아이디
-            Members member = membersRepository.findById(findMemberId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            Long ProductId = 1L; //수량을 변경할 상품 id
-            int UpdateQuantity = 5; //변경할 수량 사이즈
+            //Mock Service
+            CartService cartService = new CartService(cartRepository,cartItemRepository,productRepository);
 
-            CartItem CartItem = cartItemRepository.findByProductId(ProductId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            log.info("변경 전 상품 수량: " + CartItem.getQuantity());
+            //cartService에 필요한 리포지토리 custom (실제 서비스와 동일하게 구현)
+            when(cartRepository.findByMember(member)).thenReturn(cart);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            //해당 상품이 한 개 이상 있다고 가정( cartItem은 리턴 )
+            when(cartItemRepository.findByCartAndProduct(cart,product)).thenReturn(Optional.ofNullable(cartItem));
 
             //when
-            cartService.updateQuantity(member, ProductId, UpdateQuantity);
+
+            cartService.updateQuantity(member,1L,3);
 
             //then
-            //수량 변경한 상품 찾기
-            CartItem findCartItem = cartItemRepository.findByProductId(ProductId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            log.info("변경 후 상품 수량: " + findCartItem.getQuantity());
-
-            assertThat(findCartItem.getQuantity()).isEqualTo(UpdateQuantity);
+            //cartItem의 개수가 3인지 확인
+            assertThat(cartItem.getQuantity()).isEqualTo(3);
         }
 
-        @Transactional
-        @DisplayName("서비스 deleteProduct 메서드 테스트")
+        @DisplayName("서비스 getCartItems 메서드 테스트")
         @Test
         void deleteProduct() {
             //given
-            Long findMemberId = 2000084L; //사용할 멤버 아이디
-            Members member = membersRepository.findById(findMemberId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            Long ProductId = 1L; //삭제할 상품 id
+            //Mock Service
+            CartService cartService = new CartService(cartRepository,cartItemRepository,productRepository);
+
+            //cartService에 필요한 리포지토리 custom (실제 서비스와 동일하게 구현)
+            when(cartRepository.findByMember(member)).thenReturn(cart);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
             //when
-            cartService.deleteProduct(member, ProductId);
+            cartService.deleteProduct(member, product.getId());
 
             //then
-            //삭제한 상품 찾기
-            Optional<CartItem> findCartItem = cartItemRepository.findByProductId(ProductId);
-
-            assertThat(findCartItem).isEmpty(); //해당 상품이 삭제가 됐는지 확인
+            //deleteProduct 메서드 실행시 deleteByCartAndProduct가 한 번 수행됐는지 검증한다.
+            verify(cartItemRepository, times(1)).deleteByCartAndProduct(cart, product);
         }
 
-        @Transactional
-        @DisplayName("서비스 emptyCart 메서드 테스트")
+        @DisplayName("서비스 getCartItems 메서드 테스트")
         @Test
         void emptyCart() {
             //given
-            Long findMemberId = 2000084L; //사용할 멤버 아이디
-            Members member = membersRepository.findById(findMemberId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong MemberId"));
-            Cart cart = cartRepository.findByMember(member); //해당 멤버의 카트
+            //Mock Service
+            CartService cartService = new CartService(cartRepository,cartItemRepository,productRepository);
+
+            //cartService에 필요한 리포지토리 custom (실제 서비스와 동일하게 구현)
+            when(cartRepository.findByMember(member)).thenReturn(cart);
 
             //when
             cartService.emptyCart(member);
 
             //then
-            //삭제한 카트 찾기
-            List<CartItem> cartItem = cartItemRepository.findAllByCart(cart);
-
-            assertThat(cartItem).isEmpty(); //카트가 삭제됐는지 확인
+            //deleteProduct 메서드 실행시 deleteByCartAndProduct가 한 번 수행됐는지 검증한다.
+            verify(cartItemRepository, times(1)).deleteAllByCart(cart);
         }
 
     }

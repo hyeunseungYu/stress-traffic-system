@@ -2,6 +2,7 @@ package com.project.stress_traffic_system.cart.model;
 
 import com.project.stress_traffic_system.cart.model.Cart;
 import com.project.stress_traffic_system.product.model.Product;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;

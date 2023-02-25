@@ -61,6 +61,7 @@ public class MembersService {
 
         //회원 중복 확인
         Optional<Members> found = membersRepository.findByUsername(username);
+
         if (found.isPresent()) {
             return handleMemberException("중복된 사용자가 존재합니다", HttpStatus.BAD_REQUEST, response);
         }

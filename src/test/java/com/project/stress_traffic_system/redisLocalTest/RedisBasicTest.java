@@ -1,4 +1,4 @@
-/*
+
 package com.project.stress_traffic_system.redisLocalTest;
 
 import org.assertj.core.api.Assertions;
@@ -25,14 +25,14 @@ public class RedisBasicTest {
         final String key = "a";
         final String data = "1";
 
-        */
-/*
-         * when
+
+
+         /* when
          * Valueoperations -> 레디스를 하나의 밸류로 구성된 키, 밸류의 쌍을 저장할 때
          * HashOperations -> 여러 밸류가 있는 키, 밸류 쌍을 저장할 때
          * ListOperations -> 리스트 타입의 데이터 다룰 떄
          * SetOperations -> set으로 데이터 다룰 때
-         *//*
+         */
 
 
         final ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
@@ -47,4 +47,5 @@ public class RedisBasicTest {
         //서로 일치하는지 확인
         Assertions.assertThat(s).isEqualTo(data);
     }
-}*/
+
+}
