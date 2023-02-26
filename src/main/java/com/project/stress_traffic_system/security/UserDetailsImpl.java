@@ -2,6 +2,7 @@ package com.project.stress_traffic_system.security;
 
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
+import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ public class UserDetailsImpl implements UserDetails {
     private final String password;
 
     //생성자
+    @Builder
     public UserDetailsImpl(Members members, String username, String password) {
         this.members = members;
         this.username = username;
