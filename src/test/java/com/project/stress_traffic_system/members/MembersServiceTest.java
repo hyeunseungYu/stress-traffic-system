@@ -55,10 +55,11 @@ public class MembersServiceTest {
         SignupRequestDto signupRequestDto = SignupRequestDto.builder()
                 .username("usertest")
                 .password("abc1234!")
-                .address("서울")
+                .email("test@test.com")
+                .nickname("test")
                 .build();
 
-        Members members = new Members("usertest","abc1234!","서울", MembersRoleEnum.MEMBER);
+        Members members = new Members("usertest","abc1234!","test@test.com","test", MembersRoleEnum.MEMBER);
 
         //실제 리포지터리를 따라서 custom 레포지터리를 구현
         //Mock 레포지터리에 멤버클래스를 저장하면 멤버를 반환한다.

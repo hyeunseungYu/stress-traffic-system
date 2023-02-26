@@ -37,10 +37,12 @@ public class MembersRepositoryTest {
         String username = "usertest";
         String password = "abcde123?";
         String address = "서울";
+        String email = "test@test.com";
+        String nickname = "test";
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
         //가짜 멤버
-        MockMember = new Members(username, password, address, role);
+        MockMember = new Members(username, password, email,nickname, role);
         //custom한 리포지터리 ->MockmembersRepository에 멤버를 저장하면 MockMember를 반환
         when(MockmembersRepository.save(any(Members.class))).thenReturn(MockMember);
 
@@ -64,9 +66,11 @@ public class MembersRepositoryTest {
         String username = "usertest";
         String password = "abcde123?";
         String address = "서울";
+        String email = "test@test.com";
+        String nickname = "test";
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
-        savedMockMember = new Members(username, password, address, role);
+        savedMockMember = new Members(username, password, email,nickname, role);
 
         // when
         Members findMember = membersRepository.findById(findId)
