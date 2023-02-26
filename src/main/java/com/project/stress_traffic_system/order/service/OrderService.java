@@ -171,7 +171,7 @@ public class OrderService {
     }
 
     //상품이 존재하는지 확인
-    private Product checkProduct(OrderRequestDto requestDto) {
+    public Product checkProduct(OrderRequestDto requestDto) {
         return productRepository.findByIdWithPessimisticLock(requestDto.getProductId());
 //      return productRepository.findById(requestDto.getProductId()).orElseThrow(
 //                () -> new IllegalArgumentException("상품이 존재하지 않습니다")
