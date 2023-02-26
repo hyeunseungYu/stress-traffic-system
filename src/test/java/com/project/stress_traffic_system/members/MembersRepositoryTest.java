@@ -1,4 +1,3 @@
-/*
 package com.project.stress_traffic_system.members;
 
 import com.project.stress_traffic_system.members.entity.Members;
@@ -8,14 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-//@DataJpaTest //h2 DB가 default
-@SpringBootTest
+@DataJpaTest // 모든 테스트가 끝난 뒤 롤백
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //h2 DB가 아닌 실제 DB이용
 public class MembersRepositoryTest {
 
     @Autowired //회원을 조회할 때는 실제 DB 사용
@@ -37,10 +37,12 @@ public class MembersRepositoryTest {
         String username = "usertest";
         String password = "abcde123?";
         String address = "서울";
+        String email = "test@test.com";
+        String nickname = "test";
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
         //가짜 멤버
-        MockMember = new Members(username, password, address, role);
+        MockMember = new Members(username, password, email,nickname, role);
         //custom한 리포지터리 ->MockmembersRepository에 멤버를 저장하면 MockMember를 반환
         when(MockmembersRepository.save(any(Members.class))).thenReturn(MockMember);
 
@@ -50,7 +52,6 @@ public class MembersRepositoryTest {
         // then
         assertThat(savedMember.getUsername()).isEqualTo(MockMember.getUsername());
         assertThat(savedMember.getPassword()).isEqualTo(MockMember.getPassword());
-        assertThat(savedMember.getAddress()).isEqualTo(MockMember.getAddress());
         assertThat(savedMember.getRole()).isEqualTo(MockMember.getRole());
     }
 
@@ -64,9 +65,11 @@ public class MembersRepositoryTest {
         String username = "usertest";
         String password = "abcde123?";
         String address = "서울";
+        String email = "test@test.com";
+        String nickname = "test";
         MembersRoleEnum role = MembersRoleEnum.MEMBER;
 
-        savedMockMember = new Members(username, password, address, role);
+        savedMockMember = new Members(username, password, email,nickname, role);
 
         // when
         Members findMember = membersRepository.findById(findId)
@@ -75,7 +78,6 @@ public class MembersRepositoryTest {
         // then
         assertThat(findMember.getUsername()).isEqualTo(savedMockMember.getUsername());
         assertThat(findMember.getPassword()).isEqualTo(savedMockMember.getPassword());
-        assertThat(findMember.getAddress()).isEqualTo(savedMockMember.getAddress());
         assertThat(findMember.getRole()).isEqualTo(savedMockMember.getRole());
     }
-}*/
+}

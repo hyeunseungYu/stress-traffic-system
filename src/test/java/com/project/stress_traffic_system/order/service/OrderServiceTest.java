@@ -1,217 +1,140 @@
-/*
-package com.project.stress_traffic_system.order.service;
-
-import com.project.stress_traffic_system.cart.model.Cart;
-import com.project.stress_traffic_system.cart.model.CartItem;
-import com.project.stress_traffic_system.cart.repository.CartItemRepository;
-import com.project.stress_traffic_system.cart.repository.CartRepository;
-import com.project.stress_traffic_system.cart.service.CartService;
-import com.project.stress_traffic_system.facade.RedissonLockStockFacade;
-import com.project.stress_traffic_system.members.entity.Members;
-import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
-import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
-import com.project.stress_traffic_system.order.repository.OrderRepository;
-import com.project.stress_traffic_system.product.model.Product;
-import com.project.stress_traffic_system.product.repository.ProductRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
-
-@SpringBootTest
-@Slf4j
-@Nested
-
-
-@DisplayName("orderService 테스트")
-class OrderServiceTest {
-
-
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private CartRepository cartRepository;
-    @Autowired
-    private CartService cartService;
-
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private RedissonLockStockFacade redissonLockStockFacade;
-
-    @BeforeEach
-    public void before() {
-        Product product = new Product(1L, 100);
-        productRepository.saveAndFlush(product);
-    }
-
-//    @AfterEach
-//    public void after() {
-//        productRepository.deleteAll();
+//package com.project.stress_traffic_system.order.service;
+//
+//import com.project.stress_traffic_system.cart.model.Cart;
+//import com.project.stress_traffic_system.cart.model.CartItem;
+//import com.project.stress_traffic_system.cart.repository.CartItemRepository;
+//import com.project.stress_traffic_system.cart.repository.CartRepository;
+//import com.project.stress_traffic_system.cart.service.CartService;
+//import com.project.stress_traffic_system.members.entity.Members;
+//import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
+//import com.project.stress_traffic_system.members.repository.MembersRepository;
+//import com.project.stress_traffic_system.order.model.dto.OrderDto;
+//import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
+//import com.project.stress_traffic_system.order.repository.OrderRepository;
+//import com.project.stress_traffic_system.product.model.Product;
+//import com.project.stress_traffic_system.product.repository.ProductRepository;
+//import lombok.extern.slf4j.Slf4j;
+//import org.junit.jupiter.api.*;
+//import org.junit.jupiter.api.extension.ExtendWith;
+//import org.mockito.Mock;
+//import org.mockito.junit.jupiter.MockitoExtension;
+//
+//import java.util.Optional;
+//
+//import static org.junit.jupiter.api.Assertions.*;
+//import static org.mockito.Mockito.*;
+//
+//@ExtendWith(MockitoExtension.class)
+//@Slf4j
+//@DisplayName("orderService 테스트")
+//class OrderServiceTest {
+//
+//    @Mock
+//    private OrderRepository orderRepository;
+//
+//    @Mock
+//    private CartRepository cartRepository;
+//
+//    @Mock
+//    private ProductRepository productRepository;
+//
+//    @Mock
+//    private MembersRepository membersRepository;
+//    @Mock
+//    private CartItemRepository cartItemRepository;
+//
+//    Members member;
+//    Cart cart;
+//
+//    Product product;
+//    CartItem cartItem;
+//    OrderRequestDto orderRequestDto;
+//
+//    @BeforeEach
+//    void beforeEach() {
+//        member = new Members("user", "1234", "test@test.com", "test", MembersRoleEnum.MEMBER);
+//        cart = new Cart(member);
+//        product = new Product(1L, 30, "testName", 16000, 50);
+//        cartItem = new CartItem(cart, product);
+//
+//        orderRequestDto = new OrderRequestDto();
+//        orderRequestDto.setProductId(1L);
+//        orderRequestDto.setQuantity(10);
+//        orderRequestDto.setDiscount(1000f);
+//        orderRequestDto.setDcType("none");
 //    }
-
-    @Nested
-    @DisplayName("성공 케이스")
-
-    class successCase {
-        @Test
-        @DisplayName("동시성 제어 - redisson (pub-sub기반)")
-        void decreaseTest_redisson() throws InterruptedException {
-            int threadCount = 100;
-
-            //스레드 테스트를 진행할 때 아래 코드를 사용합니다.
-            //스레드 풀 설정과 관련해서는 깊게 생각하지 않았습니다. 적정 스레드풀 설정과 관련해서는 자료들이 있긴 했으나, 지금 단계에서 볼 것은 아니라고 판단했습니다.
-            ExecutorService executorService = Executors.newFixedThreadPool(30);
-            //스레드 100개가 작업을 완료할때까지 대기
-            //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
-            CountDownLatch latch = new CountDownLatch(threadCount);
-            //스레드풀에서 작업 시작
-            //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
-            for (int i = 0; i < threadCount; i++) {
-                executorService.submit(
-                        () ->  {
-                            try {
-                                redissonLockStockFacade.decrease(1L, 1);
-                            } finally {
-                                latch.countDown();
-                            }
-                        }
-                );
-            }
-
-            latch.await();
-            Product product = productRepository.findById(1L).orElseThrow();
-            Assertions.assertEquals(0, product.getStock());
-        }
-        @Test
-        @DisplayName("동시성 제어 - pessimistic lock")
-        void decreaseTest_pessimisticLock() throws InterruptedException {
-
-            int threadCount = 100;
-            ExecutorService executorService = Executors.newFixedThreadPool(30);
-
-            //스레드 100개가 작업을 완료할때까지 대기
-            //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
-            CountDownLatch latch = new CountDownLatch(threadCount);
-
-            //스레드풀에서 작업 시작
-            //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
-            for (int i = 0; i < threadCount; i++) {
-                executorService.submit(
-                        () ->  {
-                            try {
-                                orderService.decrease(1L,1);
-                            }finally {
-                                latch.countDown();
-                            }
-                        }
-                );
-            }
-
-            //모든 작업이 끝날때까지 기다림
-            //countDownLatch가 0이 되기 전에 끝나지 않도록 함.
-            //스레드 풀에서 아직 작업 중인데 for 문 끝나고 재고 조회로 넘어가지 않도록
-            latch.await();
-            Product product = productRepository.findById(1L).orElseThrow();
-            Assertions.assertEquals(0, product.getStock());
-        }
-    }
-
-    @Nested
-    @DisplayName("실패 케이스")
-    class failCase{
-        @Test
-        @DisplayName("동시성 제어 - locking 설정하지 않았을 때")
-        void decrease() throws InterruptedException {
-            int threadCount = 100;
-            ExecutorService executorService = Executors.newFixedThreadPool(30);
-
-            //스레드 100개가 작업을 완료할때까지 대기
-            //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
-            CountDownLatch latch = new CountDownLatch(threadCount);
-
-            //스레드풀에서 작업 시작
-            //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
-            for (int i = 0; i < threadCount; i++) {
-                executorService.submit(
-                        () ->  {
-                            try {
-                                Product product = productRepository.findById(1L).orElseThrow();
-                                product.removeStock(1);
-                                productRepository.save(product);;
-                            }finally {
-                                latch.countDown();
-                            }
-                        }
-                );
-            }
-
-            //모든 작업이 끝날때까지 기다림
-            //countDownLatch가 0이 되기 전에 끝나지 않도록 함.
-            //스레드 풀에서 아직 작업 중인데 for 문 끝나고 재고 조회로 넘어가지 않도록
-            latch.await();
-            Product product = productRepository.findById(1L).orElseThrow();
-            Assertions.assertNotEquals(0, product.getStock());
-        }
-
-    }
-
-
-
-//
-//    @Test
-//    void orderOne() throws InterruptedException {
-//
-//        int threadCount = 100;
-//        ExecutorService executorService = Executors.newFixedThreadPool(32);
-//
-//        //스레드 100개가 작업을 완료할때까지 대기
-//        //countDownLatch는 멀티스레드 환경에서 작업의 시작, 완료 신호를 보내는데 사용됨
-//        CountDownLatch latch = new CountDownLatch(threadCount);
 //
 //
-//        //given
-//        when(cartRepository.findByMember(member)).thenReturn(cart);
-//        when(productRepository.findByIdWithPessimisticLock(orderRequestDto.getProductId())).thenReturn(product);
+//    @Nested
+//    @DisplayName("성공 케이스")
+//    class successCase {
+//        @Test
+//        @DisplayName("checkProduct")
+//        void checkProductTest() {
+//            //given
+//            when(productRepository.findByIdWithPessimisticLock(orderRequestDto.getProductId())).thenReturn(product);
+//            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository);
+//            //when
+//            Product findResult = orderService.checkProduct(orderRequestDto);
+//            //then
+//            Assertions.assertEquals(product, findResult);
 //
-//        //when
-//
-//        //스레드풀에서 작업 시작
-//        //스레드 하나가 작업 끝내면 countDown으로 작업 끝냈다고 알림
-//        for (int i = 0; i < threadCount; i++) {
-//            executorService.submit(
-//                    () ->  {
-//                        try {
-//                            product.removeStock(orderRequestDto.getQuantity());
-//                        }finally {
-//                            latch.countDown();
-//                        }
-//                    }
-//            );
 //        }
 //
-//        //모든 작업이 끝날때까지 기다림
-//        //countDownLatch가 0이 되기 전에 끝나지 않도록 함.
-//        //스레드 풀에서 아직 작업 중인데 for 문 끝나고 재고 조회로 넘어가지 않도록
-//        latch.await();
+//        @Test
+//        @DisplayName("checkStock")
+//        void checkStockTest() {
+//            //given
+//            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository);
+//            //when
 //
+//            //then
+//            Assertions.assertDoesNotThrow(() -> orderService.checkStock(orderRequestDto, product));
+//        }
 //
-//        //then
-//        Assertions.assertEquals(0, product.getStock());
 //    }
-}*/
+//
+//
+//    @Nested
+//    @DisplayName("실패 케이스")
+//    class failCase {
+//        @Test
+//        @DisplayName("checkStock - orderRequestDto가 null일 때")
+//        void checkStockFail1() {
+//            //given
+//            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository);
+//            OrderRequestDto orderRequestDto = null;
+//            //when
+//
+//            //then
+//            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> orderService.checkStock(orderRequestDto, product));
+//            assertEquals("주문 정보가 존재하지 않습니다.", exception.getMessage());
+//        }
+//
+//        @Test
+//        @DisplayName("checkStock - product가 null일 때")
+//        void checkStockFail2() {
+//            //given
+//            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository);
+//            Product product = null;
+//            //when
+//
+//            //then
+//            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> orderService.checkStock(orderRequestDto, product));
+//            assertEquals("상품 정보가 존재하지 않습니다.", exception.getMessage());
+//        }
+//
+//        @Test
+//        @DisplayName("checkStock - 주문 수량이 재고보다 많을 때")
+//        void checkStockFail3() {
+//            //given
+//            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository);
+//            orderRequestDto.setQuantity(100);
+//            //when
+//
+//            //then
+//            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> orderService.checkStock(orderRequestDto, product));
+//            assertEquals("주문 가능 수량을 초과하였습니다", exception.getMessage());
+//        }
+//    }
+//}
