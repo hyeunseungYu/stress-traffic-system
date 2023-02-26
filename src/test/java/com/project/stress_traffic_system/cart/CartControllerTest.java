@@ -53,9 +53,10 @@ public class CartControllerTest {
         //인증,인가 및 장바구니 조회를 할 유저정보
         String username = "zser28";
         String password = "abcd1234?";
-        String address = "동두천";
+        String email = "test@test.com";
+        String nickname = "test";
 
-        Members member  = new Members(username, password, address, MembersRoleEnum.MEMBER);
+        Members member  = new Members(username, password, email,nickname, MembersRoleEnum.MEMBER);
 
         userDetails = UserDetailsImpl
                 .builder()

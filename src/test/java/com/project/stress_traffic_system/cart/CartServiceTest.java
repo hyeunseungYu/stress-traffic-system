@@ -52,7 +52,7 @@ public class CartServiceTest {
     //테스트를 실행하기 전마다 전역변수에 값을 할당
     @BeforeEach
     void beforeEach(){
-        member  = new Members("user", "1234", "지역", MembersRoleEnum.MEMBER);
+        member  = new Members("user", "1234", "test@test.com","test", MembersRoleEnum.MEMBER);
         cart = new Cart(member);
         product = new Product(1L,30,"testName",16000,50);
         cartItem = new CartItem(cart,product);
