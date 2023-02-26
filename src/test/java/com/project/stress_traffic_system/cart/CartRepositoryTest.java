@@ -112,7 +112,7 @@ public class CartRepositoryTest {
         @Test
         public void testSave() {
             //given
-            Members member = new Members("usertest","abcde123?","서울",MembersRoleEnum.MEMBER);
+            Members member = new Members("usertest","abcde123?","test@test.com", "test",MembersRoleEnum.MEMBER);
             Product product = new Product(1L,30,"testName",16000,1);
             Cart cart = new Cart(member);
             CartItem cartItem = new CartItem(cart, product);
