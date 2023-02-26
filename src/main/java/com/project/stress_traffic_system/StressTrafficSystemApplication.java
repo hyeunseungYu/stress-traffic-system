@@ -26,5 +26,7 @@ public class StressTrafficSystemApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(StressTrafficSystemApplication.class, args);
+
+
     }
 }
