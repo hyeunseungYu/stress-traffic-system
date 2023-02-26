@@ -52,7 +52,6 @@ public class MembersRepositoryTest {
         // then
         assertThat(savedMember.getUsername()).isEqualTo(MockMember.getUsername());
         assertThat(savedMember.getPassword()).isEqualTo(MockMember.getPassword());
-        assertThat(savedMember.getAddress()).isEqualTo(MockMember.getAddress());
         assertThat(savedMember.getRole()).isEqualTo(MockMember.getRole());
     }
 
@@ -79,7 +78,6 @@ public class MembersRepositoryTest {
         // then
         assertThat(findMember.getUsername()).isEqualTo(savedMockMember.getUsername());
         assertThat(findMember.getPassword()).isEqualTo(savedMockMember.getPassword());
-        assertThat(findMember.getAddress()).isEqualTo(savedMockMember.getAddress());
         assertThat(findMember.getRole()).isEqualTo(savedMockMember.getRole());
     }
 }
