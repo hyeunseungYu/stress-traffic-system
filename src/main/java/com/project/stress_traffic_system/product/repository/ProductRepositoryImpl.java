@@ -146,7 +146,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                         member.setUsername(userInfo[0].isEmpty() ? UUID.randomUUID().toString() : userInfo[0]);
                         member.setPassword("$2a$10$8aYgCESquxcDpVSMTGHGEOawngL3UncAMpBwcux.Zr4WbpClUYerG");
                         member.setRole(MembersRoleEnum.MEMBER);
-                        member.setAddress(userInfo[3].isEmpty() ? "서울" : userInfo[3]);
                     }
                     members.add(member);
                 }
