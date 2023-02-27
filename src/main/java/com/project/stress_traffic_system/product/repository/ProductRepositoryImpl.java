@@ -449,6 +449,85 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .execute();
     }
 
+    // 키워드별로 조회수 상위 1000건 조회 - like 검색
+    @Override
+    public List<ProductResponseDto> findByKeyword(String keyword) {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.orderCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .where(product.name.contains(keyword))
+                .orderBy(product.clickCount.desc())
+                .limit(100)
+                .fetch();
+    }
+
+    //full text 검색
+    @Override
+    public List<ProductResponseDto> findByFullKeyword(String keyword) {
+            BooleanBuilder builder = new BooleanBuilder();
+            NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
+                    "function('match',{0},{1})",product.name, keyword + "*");
+            builder.and(booleanTemplate.gt(0));
+
+            return queryFactory
+                    .select(new QProductResponseDto(
+                            product.id,
+                            product.name,
+                            product.price,
+                            product.description,
+                            product.shippingFee,
+                            product.imgurl,
+                            product.clickCount,
+                            product.orderCount,
+                            product.stock,
+                            product.introduction,
+                            product.pages,
+                            product.date
+                    ))
+                    .from(product)
+                    .where(builder)
+                    .orderBy(product.clickCount.desc())
+                    .limit(100)
+                    .fetch();
+    }
+
+    //상위 1000건 검색
+    @Override
+    public List<ProductResponseDto> findTop1000() {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        product.id,
+                        product.name,
+                        product.price,
+                        product.description,
+                        product.shippingFee,
+                        product.imgurl,
+                        product.clickCount,
+                        product.orderCount,
+                        product.stock,
+                        product.introduction,
+                        product.pages,
+                        product.date
+                ))
+                .from(product)
+                .orderBy(product.clickCount.desc())
+                .limit(1000)
+                .fetch();
+    }
+
     private BooleanExpression nameLike(String name) {
         return StringUtils.isEmpty(name) ? null : product.name.contains(name);
     }
