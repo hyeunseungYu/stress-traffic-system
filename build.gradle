@@ -98,9 +98,9 @@ dependencies {
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.8'
 
     //Elasticsearch
-    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch:2.7.8'
-    implementation 'org.springframework.data:spring-data-elasticsearch:4.4.7'
-    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.9'
+//    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch:2.7.8'
+//    implementation 'org.springframework.data:spring-data-elasticsearch:4.4.7'
+//    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.9'
 
 }
 

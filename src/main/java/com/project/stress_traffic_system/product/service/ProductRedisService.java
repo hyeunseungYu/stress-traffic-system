@@ -1,5 +1,6 @@
 package com.project.stress_traffic_system.product.service;
 
+import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -73,7 +71,33 @@ public class ProductRedisService {
 
             // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
             list.forEach(i -> {
-                String key = "product::" + i.getId(); //Redis에 저장할 키
+                String key = "product::" + i.getId(); //Redis에 저장할 키 (product::1)
+                connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
+                        valueSerializer.serialize(i)); // 랭킹 정보 객체를 직렬화하여 저장
+            });
+            return null;
+        });
+    }
+
+    //상품이름으로 검색하기 위한 캐싱데이터(1000건)
+    public void cacheProductsTop1000(List<ProductResponseDto> list) {
+
+        // RedisTemplate에서 직렬화에 사용될 키 밸류 직렬화 객체를 가져온다.
+        RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
+        RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
+
+        //기존 데이터 삭제 로직
+        Set<String> keys = productRedisTemplate.keys("product-name::*");
+        for (String key : keys) {
+            productRedisTemplate.delete(key);
+        }
+
+        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
+        productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+
+            // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
+            list.forEach(i -> {
+                String key = "product-name::" + i.getName(); //Redis에 저장할 키 (product-name::name)
                 connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
                         valueSerializer.serialize(i)); // 랭킹 정보 객체를 직렬화하여 저장
             });
@@ -159,5 +183,46 @@ public class ProductRedisService {
             clickCountRedisTemplate.delete(key);
         }
         log.info("조회수 RDS에 업데이트 실행 종료");
+    }
+
+    // 키워드별로 조회수 상위 100건 캐싱(zset으로 저장하여 조회해올 때 순차적으로 가져오도록 함)
+    public void cacheProductsByKeyword(List<ProductResponseDto> list, String keyword) {
+        String key = keyword + "::";
+
+        // RedisTemplate에서 직렬화에 사용될 키 밸류 직렬화 객체를 가져온다.
+        RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
+        RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
+
+        productRedisTemplate.delete(key);
+
+        // 파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
+        productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+
+            AtomicReference<Double> score = new AtomicReference<>((double) 0);
+            // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
+            list.forEach(i -> {
+                connection.zSetCommands().zAdd(keySerializer.serialize(key), // 랭킹 정보를 저장할 Redis의 키
+                        score.getAndSet(new Double((double) (score.get() + 1))), // 랭킹 score 값 (조회수 순서)
+                        valueSerializer.serialize(i)); // value - 랭킹 정보 객체를 직렬화하여 저장
+            });
+            return null;
+        });
+    }
+
+    //redis 에서 상품이름으로 검색하기
+    public List<ProductResponseDto> searchProductsByRedis(String keyword) {
+        Set<String> keys = clickCountRedisTemplate.keys("product_name::*");
+
+        List<ProductResponseDto> result = new ArrayList<>();
+        for (String key : keys) {
+            result.add(productRedisTemplate.opsForValue().get(key));
+        }
+        return result;
+    }
+
+    //캐싱된 키워드로 조회하기
+    public Set<ZSetOperations.TypedTuple<ProductResponseDto>> searchCacheKeyword(String keyword) {
+        ZSetOperations<String, ProductResponseDto> ZSetOperations = productRedisTemplate.opsForZSet();
+        return ZSetOperations.rangeWithScores(keyword + "::", 0L, 99L);
     }
 }
