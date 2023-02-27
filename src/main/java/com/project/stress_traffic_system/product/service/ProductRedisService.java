@@ -6,10 +6,7 @@ import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -211,8 +208,8 @@ public class ProductRedisService {
 
     //redis 에서 상품이름으로 검색하기
     public List<ProductResponseDto> searchProductsByRedis(String keyword) {
-        Set<String> keys = clickCountRedisTemplate.keys("product_name::*");
-
+        Set<String> keys = productRedisTemplate.keys("product-name" + "*" + keyword + "*");
+        
         List<ProductResponseDto> result = new ArrayList<>();
         for (String key : keys) {
             result.add(productRedisTemplate.opsForValue().get(key));
