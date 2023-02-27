@@ -283,7 +283,7 @@ public class ProductService {
     // 키워드별로 조회수 상위 1000건 캐싱
     @Transactional
     public void cacheProductsByKeyword(String keyword) {
-        List<ProductResponseDto> products = productRepository.findByKeyword(keyword);
+        List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
         log.info("키워드는 = {}, 결과 size = {}", keyword, products.size());
         productRedisService.cacheProductsByKeyword(products, keyword);
     }
