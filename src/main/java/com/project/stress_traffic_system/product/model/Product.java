@@ -74,11 +74,12 @@ public class Product {
 
 
     //테스트를 위한 생성자 추가
-    public Product(Long id, int stock, String name, int price, int imgurl) {
+    public Product(Long id, int stock, String name, int price, int imgurl,Long orderCount) {
         this.id = id;
         this.stock = stock;
         this.name = name;
         this.price = price;
         this.imgurl = imgurl;
+        this.orderCount = orderCount;
     }
 }
