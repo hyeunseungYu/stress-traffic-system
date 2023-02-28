@@ -317,15 +317,14 @@ public class OrderService {
     }
 
     //주문수량이 적정한지
-    private void checkQuantity(OrderRequestDto requestDto) {
+    protected void checkQuantity(OrderRequestDto requestDto) {
         if (requestDto.getQuantity() < 1) {
             throw new IllegalArgumentException("최소 1개 이상 주문해주세요");
         }
     }
 
     //상품이 존재하는지 확인
-    public Product checkProduct(OrderRequestDto requestDto) {
-//        return productRepository.findByIdWithPessimisticLock(requestDto.getProductId());
+    protected Product checkProduct(OrderRequestDto requestDto) {
       return productRepository.findById(requestDto.getProductId()).orElseThrow(
                 () -> new IllegalArgumentException("상품이 존재하지 않습니다")
         );
@@ -337,7 +336,7 @@ public class OrderService {
     }
 
     //재고수량 확인하기
-    public void checkStock(OrderRequestDto orderRequestDto, Product product) {
+    protected void checkStock(OrderRequestDto orderRequestDto, Product product) {
         if (orderRequestDto == null) {
             throw new IllegalArgumentException("주문 정보가 존재하지 않습니다.");
         }
@@ -350,7 +349,7 @@ public class OrderService {
     }
 
     //회원 장바구니 가져오기
-    private Cart findCart(Members member) {
+    protected Cart findCart(Members member) {
         return cartRepository.findByMember(member);
     }
 
@@ -364,6 +363,7 @@ public class OrderService {
         }
     }
 
+    //스레드 테스트를 위한 메서드
     @Transactional
     public void decrease(Long id, int quantity) {
         Product product = productRepository.findByIdWithPessimisticLock(id);

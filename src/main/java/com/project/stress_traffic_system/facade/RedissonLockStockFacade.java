@@ -4,14 +4,12 @@ import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.order.model.dto.OrderDto;
 import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
 import com.project.stress_traffic_system.order.service.OrderService;
-import com.project.stress_traffic_system.product.repository.ProductRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
