@@ -94,7 +94,7 @@ public class ProductRedisService {
 
             // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
             list.forEach(i -> {
-                String key = "product-name::" + i.getName(); //Redis에 저장할 키 (product-name::name)
+                String key = "product-name::" + i.getName().toLowerCase(); //Redis에 저장할 키 (product-name::name)
                 connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
                         valueSerializer.serialize(i)); // 랭킹 정보 객체를 직렬화하여 저장
             });
@@ -209,7 +209,8 @@ public class ProductRedisService {
     //redis 에서 상품이름으로 검색하기
     public List<ProductResponseDto> searchProductsByRedis(String keyword) {
         Set<String> keys = productRedisTemplate.keys("product-name" + "*" + keyword + "*");
-        
+//        Set<String> keys = productRedisTemplate.keys("*" + keyword + "*");
+
         List<ProductResponseDto> result = new ArrayList<>();
         for (String key : keys) {
             result.add(productRedisTemplate.opsForValue().get(key));
