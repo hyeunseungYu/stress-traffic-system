@@ -173,11 +173,17 @@ public class ProductController {
     @ApiOperation(value = "키워드 20가지 상위 1000건 데이터 캐싱 및 상품이름 검색을 위한 데이터 캐싱")
     @GetMapping("/products/cache/keyword")
     public void cacheProductsByKeyword() {
+
+        //캐싱 키워드 20가지
         String[] keywords = new String[]{"Federic", "Levi", "Victor", "Robbie", "Jeffery", "Isaac", "Monika", "Jade", "Harber", "Matthew",
                 "Gayle", "Ami", "Paris", "Shenna", "Celia", "Ted", "Elicia", "Debora", "Coy", "Violette"};
+
+        //키워드 20가지 캐싱
         for (String keyword : keywords) {
             productService.cacheProductsByKeyword(keyword.toLowerCase());
         }
+
+        //키워드가 아닌 일반 1000건 캐싱
         productService.cacheProductsTop1000();
     }
 
