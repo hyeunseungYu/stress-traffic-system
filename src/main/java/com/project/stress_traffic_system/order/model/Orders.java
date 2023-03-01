@@ -80,4 +80,11 @@ public class Orders {
         }
         return order;
     }
+
+    public Orders(Long orderid, Members members, List<OrderItem> orderItem) {
+        this.id = orderid;
+        this.members = members;
+        this.orderItems = orderItem;
+
+    }
 }
