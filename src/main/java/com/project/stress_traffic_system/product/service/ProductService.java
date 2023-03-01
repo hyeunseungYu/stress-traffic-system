@@ -99,10 +99,35 @@ public class ProductService {
         return responseDto;
     }
 
-
-
         //todo Elasticsearch 검색 추후 검토 및 수정 요망
 
+    //like 검색해오기
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> searchProductsByLike(String keyword) {
+        return productRepository.findByKeyword(keyword);
+    }
+
+    //full text 검색해오기
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> searchProductsByFull(String keyword) {
+        return productRepository.findByFullKeyword(keyword);
+    }
+
+    //redis 검색해오기
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> searchProductsByRedis(String keyword) {
+        return productRedisService.searchProductsByRedis(keyword);
+    }
+
+    //캐싱 키워드 20가지로 검색하기
+    public List<ProductResponseDto> searchCacheKeyword(String keyword) {
+        Set<ZSetOperations.TypedTuple<ProductResponseDto>> products =  productRedisService.searchCacheKeyword(keyword);
+
+        if (products.size() == 0) {
+            throw new IllegalArgumentException("등록되지 않은 키워드입니다");
+        }
+        return products.stream().map(ProductResponseDto::convertToResponseRankingDto).collect(Collectors.toList());
+    }
 /*
     // 상품 검색하기 (이름, 가격 필터링)
     @Transactional(readOnly = true)
@@ -143,9 +168,6 @@ public class ProductService {
 */
 
       //  카테고리 1~5 각각 조회하는 Api
-
-
-
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
 
@@ -256,7 +278,20 @@ public class ProductService {
     public void cacheProductsDetail() {
         List<ProductResponseDto> list = productRepository.findProductDetail();
         productRedisService.cacheProductsDetail(list);
+    }
 
+    // 키워드별로 조회수 상위 1000건 캐싱
+    @Transactional
+    public void cacheProductsByKeyword(String keyword) {
+        List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
+        log.info("키워드는 = {}, 결과 size = {}", keyword, products.size());
+        productRedisService.cacheProductsByKeyword(products, keyword);
+    }
+
+    //상품이름 검색을 위한 상위 1000건 캐싱
+    public void cacheProductsTop1000() {
+        List<ProductResponseDto> list = productRepository.findTop1000();
+        productRedisService.cacheProductsTop1000(list);
     }
 
     //한글 대분류 이름을 영어로 변환

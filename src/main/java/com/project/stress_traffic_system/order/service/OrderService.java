@@ -16,12 +16,15 @@ import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,6 +36,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
+    private final RedissonClient redissonClient;
 
     //단일 상품 주문하기
     @Transactional
@@ -48,6 +52,7 @@ public class OrderService {
         product.setOrderCount(product.getOrderCount() + requestDto.getQuantity());
 
         //주문상품 객체 만들기(생성메서드)
+        //주문 수량만큼 재고 차감
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
@@ -60,13 +65,50 @@ public class OrderService {
 
         deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
 
-        //주문 수량만큼 재고 차감.
-        product.removeStock(requestDto.getQuantity());
+
 
         //주문내역 반환 (주문번호와, 주문일자)
         return OrderDto.builder()
                 .orderId(savedOrders.getId())
                 .orderDate(savedOrders.getCreatedAt())
+                .resultStock(product.getStock())
+                .build();
+    }
+
+    //단일 상품 주문하기 - pessimistic lock
+    @Transactional
+    public OrderDto orderOneWithPessimisticLock(Members member, OrderRequestDto requestDto) {
+
+
+        Cart cart = findCart(member);   //회원의 장바구니 가져오기
+        Product product = checkProductWithPessimisticLock(requestDto); //상품정보
+        checkStock(requestDto, product); //재고가 있는지 확인
+        checkQuantity(requestDto);  //주문수량이 유효한지 확인
+
+        //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
+        product.setOrderCount(product.getOrderCount() + requestDto.getQuantity());
+
+        //주문상품 객체 만들기(생성메서드)
+        //주문 수량만큼 재고 차감
+        OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
+        List<OrderItem> orderItems = new ArrayList<>();
+        orderItems.add(orderItem);
+
+        //주문 객체 생성해서 회원정보와 주문상품 정보 저장
+        Orders order = Orders.createOrder(member, orderItems);
+
+        //주문정보 저장
+        Orders savedOrders = orderRepository.save(order);
+
+        deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
+
+
+
+        //주문내역 반환 (주문번호와, 주문일자)
+        return OrderDto.builder()
+                .orderId(savedOrders.getId())
+                .orderDate(savedOrders.getCreatedAt())
+                .resultStock(product.getStock())
                 .build();
     }
 
@@ -77,6 +119,7 @@ public class OrderService {
         Cart cart = findCart(member); //회원의 장바구니 가져오기
 
         List<OrderItem> orderItems = new ArrayList<>(); //주문상품 목록
+        List<Integer> resultStock = new ArrayList<>(); //차감된 재고 수량을 담을 목록
 
         //주문상품 리스트에 주문상품 목록을 담아준다
         for (OrderRequestDto orderRequestDto : requestDtoList) {
@@ -89,8 +132,13 @@ public class OrderService {
             product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
 
             //주문상품 객체 생성해서 list에 추가
+            //주문 수량만큼 재고 차감
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
             orderItems.add(orderItem);
+
+//            //주문 수량만큼 재고 차감.
+//            product.removeStock(orderRequestDto.getQuantity());
+            resultStock.add(product.getStock());
 
             deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
         }
@@ -104,6 +152,111 @@ public class OrderService {
         return OrderDto.builder()
                 .orderId(savedOrder.getId())
                 .orderDate(savedOrder.getCreatedAt())
+                .resultStockList(resultStock)
+                .build();
+    }
+
+    //여러 상품 주문하기 - pessimistic lock
+    @Transactional
+    public OrderDto orderManyWithPessimisticLock(Members member, List<OrderRequestDto> requestDtoList) {
+
+        Cart cart = findCart(member); //회원의 장바구니 가져오기
+
+        List<OrderItem> orderItems = new ArrayList<>(); //주문상품 목록
+        List<Integer> resultStock = new ArrayList<>(); //차감된 재고 수량을 담을 목록
+
+        //주문상품 리스트에 주문상품 목록을 담아준다
+        for (OrderRequestDto orderRequestDto : requestDtoList) {
+
+            Product product = checkProductWithPessimisticLock(orderRequestDto); //상품정보 가져오기
+            checkStock(orderRequestDto, product);   //재고확인하기
+            checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
+
+            //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
+            product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
+
+            //주문상품 객체 생성해서 list에 추가
+            //주문 수량만큼 재고 차감
+            OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
+            orderItems.add(orderItem);
+
+//            //주문 수량만큼 재고 차감.
+//            product.removeStock(orderRequestDto.getQuantity());
+            resultStock.add(product.getStock());
+
+            deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
+        }
+
+        //주문 객체 생성해서 회원정보와 주문상품 정보 저장
+        Orders order = Orders.createOrder(member, orderItems);
+
+        Orders savedOrder = orderRepository.save(order);
+
+        //주문내역 반환(주문번호와 주문일자)
+        return OrderDto.builder()
+                .orderId(savedOrder.getId())
+                .orderDate(savedOrder.getCreatedAt())
+                .resultStockList(resultStock)
+                .build();
+    }
+
+    @Transactional
+    public OrderDto orderManyWithRedissonLock(Members member, List<OrderRequestDto> requestDtoList) {
+
+        Cart cart = findCart(member); //회원의 장바구니 가져오기
+
+        List<OrderItem> orderItems = new ArrayList<>(); //주문상품 목록
+        List<Integer> resultStock = new ArrayList<>(); //차감된 재고 수량을 담을 목록
+
+
+
+        //주문상품 리스트에 주문상품 목록을 담아준다
+        for (OrderRequestDto orderRequestDto : requestDtoList) {
+
+            RLock lock = redissonClient.getLock(orderRequestDto.getProductId().toString()); //lock 생성
+
+            try {
+                boolean available = lock.tryLock(5, 1, TimeUnit.SECONDS);
+                if (!available) {
+                    log.info("lock 획득 실패");
+                }
+
+                Product product = checkProductWithPessimisticLock(orderRequestDto); //상품정보 가져오기
+                checkStock(orderRequestDto, product);   //재고확인하기
+                checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
+
+                //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
+                product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
+
+                //주문상품 객체 생성해서 list에 추가
+                //주문 수량만큼 재고 차감
+                OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
+                orderItems.add(orderItem);
+
+                resultStock.add(product.getStock());
+
+                deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
+
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+
+            }finally {
+                if (lock != null && lock.isHeldByCurrentThread()){
+                    lock.unlock();
+                }
+            }
+        }
+
+        //주문 객체 생성해서 회원정보와 주문상품 정보 저장
+        Orders order = Orders.createOrder(member, orderItems);
+
+        Orders savedOrder = orderRepository.save(order);
+
+        //주문내역 반환(주문번호와 주문일자)
+        return OrderDto.builder()
+                .orderId(savedOrder.getId())
+                .orderDate(savedOrder.getCreatedAt())
+                .resultStockList(resultStock)
                 .build();
     }
 
@@ -164,22 +317,26 @@ public class OrderService {
     }
 
     //주문수량이 적정한지
-    private void checkQuantity(OrderRequestDto requestDto) {
+    protected void checkQuantity(OrderRequestDto requestDto) {
         if (requestDto.getQuantity() < 1) {
             throw new IllegalArgumentException("최소 1개 이상 주문해주세요");
         }
     }
 
     //상품이 존재하는지 확인
-    public Product checkProduct(OrderRequestDto requestDto) {
+    protected Product checkProduct(OrderRequestDto requestDto) {
+      return productRepository.findById(requestDto.getProductId()).orElseThrow(
+                () -> new IllegalArgumentException("상품이 존재하지 않습니다")
+        );
+    }
+
+    //상품이 존재하는지 확인 - pessimisticLock
+    public Product checkProductWithPessimisticLock(OrderRequestDto requestDto) {
         return productRepository.findByIdWithPessimisticLock(requestDto.getProductId());
-//      return productRepository.findById(requestDto.getProductId()).orElseThrow(
-//                () -> new IllegalArgumentException("상품이 존재하지 않습니다")
-//        );
     }
 
     //재고수량 확인하기
-    public void checkStock(OrderRequestDto orderRequestDto, Product product) {
+    protected void checkStock(OrderRequestDto orderRequestDto, Product product) {
         if (orderRequestDto == null) {
             throw new IllegalArgumentException("주문 정보가 존재하지 않습니다.");
         }
@@ -192,7 +349,7 @@ public class OrderService {
     }
 
     //회원 장바구니 가져오기
-    private Cart findCart(Members member) {
+    protected Cart findCart(Members member) {
         return cartRepository.findByMember(member);
     }
 
@@ -206,6 +363,7 @@ public class OrderService {
         }
     }
 
+    //스레드 테스트를 위한 메서드
     @Transactional
     public void decrease(Long id, int quantity) {
         Product product = productRepository.findByIdWithPessimisticLock(id);

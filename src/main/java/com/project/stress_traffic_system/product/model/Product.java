@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -75,11 +74,12 @@ public class Product {
 
 
     //테스트를 위한 생성자 추가
-    public Product(Long id, int stock, String name, int price, int imgurl) {
+    public Product(Long id, int stock, String name, int price, int imgurl,Long orderCount) {
         this.id = id;
         this.stock = stock;
         this.name = name;
         this.price = price;
         this.imgurl = imgurl;
+        this.orderCount = orderCount;
     }
 }

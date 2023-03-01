@@ -1,9 +1,11 @@
 package com.project.stress_traffic_system.product.controller;
 
+import com.google.common.base.Stopwatch;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
 import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
 import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
+import com.project.stress_traffic_system.product.response.Response;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import com.project.stress_traffic_system.product.service.ProductService;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -37,6 +40,48 @@ public class ProductController {
         return productService.getProduct(productId);
     }
 
+    //todo like, full, redis
+    @ApiOperation(value = "like 검색")
+    @GetMapping("/products/search/like/{keyword}")
+    public Response searchProductsByLike(@PathVariable String keyword) {
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
+
+        List<ProductResponseDto> data = productService.searchProductsByLike(keyword);
+
+        stopwatch.stop();
+        long totalTime = stopwatch.getTotalTimeMillis();
+
+        return Response.success(totalTime, data);
+    }
+
+    @ApiOperation(value = "full text 검색")
+    @GetMapping("/products/search/full/{keyword}")
+    public Response searchProductsByFull(@PathVariable String keyword) {
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
+
+        List<ProductResponseDto> data = productService.searchProductsByFull(keyword.toLowerCase());
+
+        stopwatch.stop();
+        long totalTime = stopwatch.getTotalTimeMillis();
+
+        return Response.success(totalTime, data);
+    }
+    @ApiOperation(value = "redis 검색")
+    @GetMapping("/products/search/redis/{keyword}")
+    public Response searchProductsByRedis(@PathVariable String keyword) {
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
+
+        List<ProductResponseDto> data = productService.searchProductsByRedis(keyword.toLowerCase());
+
+        stopwatch.stop();
+        long totalTime = stopwatch.getTotalTimeMillis();
+
+        return Response.success(totalTime, data);
+    }
+
     /*@ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
     @GetMapping("/products/search")
     public Page<ProductResponseDto> searchProducts(
@@ -47,6 +92,7 @@ public class ProductController {
     @ApiOperation(value = "카테고리1 상품조회")
     @GetMapping("/products/category-1")
     public Page<ProductResponseDto> searchByCategory1(@RequestParam("page") int page) {
+
         return productService.searchByCategory(1L, page);
     }
 
@@ -122,6 +168,53 @@ public class ProductController {
     @GetMapping("/products/cache/detail")
     public void cacheProductsDetail() {
         productService.cacheProductsDetail();
+    }
+
+    @ApiOperation(value = "키워드 20가지 상위 1000건 데이터 캐싱 및 상품이름 검색을 위한 데이터 캐싱")
+    @GetMapping("/products/cache/keyword")
+    public void cacheProductsByKeyword() {
+
+        //캐싱 키워드 20가지
+        String[] keywords = new String[]{"Federic", "Levi", "Victor", "Robbie", "Jeffery", "Isaac", "Monika", "Jade", "Harber", "Matthew",
+                "Gayle", "Ami", "Paris", "Shenna", "Celia", "Ted", "Elicia", "Debora", "Coy", "Violette"};
+
+        //키워드 20가지 캐싱
+        for (String keyword : keywords) {
+            productService.cacheProductsByKeyword(keyword.toLowerCase());
+        }
+
+        //키워드가 아닌 일반 1000건 캐싱
+        productService.cacheProductsTop1000();
+    }
+
+    //캐싱 키워드 20가지 API
+    @ApiOperation(value = "캐싱된 키워드 20가지 검색 API")
+    @GetMapping("/products/search/cache/{keyword}")
+    public Response searchCacheKeyword(@PathVariable String keyword) {
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
+
+        List<ProductResponseDto> data = productService.searchCacheKeyword(keyword.toLowerCase());
+
+        stopwatch.stop();
+        long totalTime = stopwatch.getTotalTimeMillis();
+
+        return Response.success(totalTime, data);
+    }
+
+    //normal 키워드 20가지 API
+    @ApiOperation(value = "normal 키워드 20가지 검색 API")
+    @GetMapping("/products/search/normal/{keyword}")
+    public Response searchNormalKeyword(@PathVariable String keyword) {
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
+
+        List<ProductResponseDto> data = productService.searchProductsByFull(keyword.toLowerCase());
+
+        stopwatch.stop();
+        long totalTime = stopwatch.getTotalTimeMillis();
+
+        return Response.success(totalTime, data);
     }
 }
 

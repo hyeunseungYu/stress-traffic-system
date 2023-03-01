@@ -54,7 +54,7 @@
 //    void beforeEach(){
 //        member  = new Members("user", "1234", "test@test.com","test", MembersRoleEnum.MEMBER);
 //        cart = new Cart(member);
-//        product = new Product(1L,30,"testName",16000,50);
+//        product = new Product(1L,30,"testName",16000,50,0L);
 //        cartItem = new CartItem(cart,product);
 //    }
 //

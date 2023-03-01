@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface ProductRepositoryCustom {
 
-
-
     Page<ProductResponseDto> searchProducts(ProductSearchCondition condition);
 
     void bulkInsert();
@@ -31,4 +29,9 @@ public interface ProductRepositoryCustom {
 
     void setClickCount(Long productId, long clickCount);
 
+    List<ProductResponseDto> findByKeyword(String keyword); //like 검색 (100건)
+
+    List<ProductResponseDto> findByFullKeyword(String keyword); // full text 검색 (100건)
+
+    List<ProductResponseDto> findTop1000(); //조회수 상위 1000건 검색
 }
