@@ -102,6 +102,31 @@ public class ProductRedisService {
         });
     }
 
+    //cache aside 전용 캐싱 데이터 저장
+    public void cacheProductsCacheAside(List<ProductResponseDto> list) {
+        // RedisTemplate에서 직렬화에 사용될 키 밸류 직렬화 객체를 가져온다.
+        RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
+        RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
+
+        //기존 데이터 삭제 로직
+        Set<String> keys = productRedisTemplate.keys("product-name-aside::*");
+        for (String key : keys) {
+            productRedisTemplate.delete(key);
+        }
+
+        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
+        productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+
+            // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
+            list.forEach(i -> {
+                String key = "product-name::" + i.getName().toLowerCase(); //Redis에 저장할 키 (product-name::name)
+                connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
+                        valueSerializer.serialize(i)); // 랭킹 정보 객체를 직렬화하여 저장
+            });
+            return null;
+        });
+    }
+
     //카테고리별 top 10000 조회
     public Set<ZSetOperations.TypedTuple<ProductResponseDto>> findProductsByCategory(String key, int page) {
         log.info("sorted set에서 검색할 key 값은 = {}", key);
@@ -218,9 +243,22 @@ public class ProductRedisService {
         return result;
     }
 
+    //redis 에서 상품이름으로 검색하기 - cache aside
+    public List<ProductResponseDto> searchProductsByRedisCacheAside(String keyword) {
+        Set<String> keys = productRedisTemplate.keys("product-name-aside" + "*" + keyword + "*");
+//        Set<String> keys = productRedisTemplate.keys("*" + keyword + "*");
+
+        List<ProductResponseDto> result = new ArrayList<>();
+        for (String key : keys) {
+            result.add(productRedisTemplate.opsForValue().get(key));
+        }
+        return result;
+    }
+
     //캐싱된 키워드로 조회하기
     public Set<ZSetOperations.TypedTuple<ProductResponseDto>> searchCacheKeyword(String keyword) {
         ZSetOperations<String, ProductResponseDto> ZSetOperations = productRedisTemplate.opsForZSet();
         return ZSetOperations.rangeWithScores(keyword + "::", 0L, 99L);
     }
+
 }

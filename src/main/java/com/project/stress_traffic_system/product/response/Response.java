@@ -11,10 +11,11 @@ import org.springframework.http.HttpStatus;
 public class Response {
     private long totalTime;
     private HttpStatus httpStatus;
+    private String msg;
     private Result result;
 
-    public static <T> Response success(long totalTime, T data) {
-        return new Response(totalTime, HttpStatus.OK, new Success<>(data));
+    public static <T> Response success(long totalTime, String msg, T data) {
+        return new Response(totalTime, HttpStatus.OK, msg, new Success<>(data));
     }
 }
 
