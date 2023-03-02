@@ -500,7 +500,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     .from(product)
                     .where(builder)
                     .orderBy(product.clickCount.desc())
-                    .limit(100)
+                    .limit(1000)
                     .fetch();
     }
 

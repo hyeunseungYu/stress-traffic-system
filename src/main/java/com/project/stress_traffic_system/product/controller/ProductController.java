@@ -68,6 +68,7 @@ public class ProductController {
 
         return Response.success(totalTime, data);
     }
+
     @ApiOperation(value = "redis 검색")
     @GetMapping("/products/search/redis/{keyword}")
     public Response searchProductsByRedis(@PathVariable String keyword) {
@@ -79,7 +80,21 @@ public class ProductController {
         stopwatch.stop();
         long totalTime = stopwatch.getTotalTimeMillis();
 
-        return Response.success(totalTime, data);
+        return Response.success(totalTime, "redis - read through", data);
+    }
+
+    @ApiOperation(value = "redis 검색 - cache aside")
+    @GetMapping("/products/search/redis/{keyword}")
+    public Response searchProductsByRedisCacheAside(@PathVariable String keyword) {
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
+
+        List<ProductResponseDto> data = productService.searchProductsByRedisCacheAside(keyword.toLowerCase());
+
+        stopwatch.stop();
+        long totalTime = stopwatch.getTotalTimeMillis();
+
+        return Response.success(totalTime, "redis - cache aside", data);
     }
 
     /*@ApiOperation(value = "상품검색", notes = "이름, 가격 범위로 필터링")
@@ -174,14 +189,8 @@ public class ProductController {
     @GetMapping("/products/cache/keyword")
     public void cacheProductsByKeyword() {
 
-        //캐싱 키워드 20가지
-        String[] keywords = new String[]{"Federic", "Levi", "Victor", "Robbie", "Jeffery", "Isaac", "Monika", "Jade", "Harber", "Matthew",
-                "Gayle", "Ami", "Paris", "Shenna", "Celia", "Ted", "Elicia", "Debora", "Coy", "Violette"};
-
-        //키워드 20가지 캐싱
-        for (String keyword : keywords) {
-            productService.cacheProductsByKeyword(keyword.toLowerCase());
-        }
+        //키워드 20가지 상위 1000건 데이터 캐싱
+        productService.cacheProductsByKeyword();
 
         //키워드가 아닌 일반 1000건 캐싱
         productService.cacheProductsTop1000();
