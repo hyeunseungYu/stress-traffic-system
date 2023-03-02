@@ -38,6 +38,16 @@ public class Members implements Serializable{
     private MembersRoleEnum role;
 
     public Members(String username, String password, String email, String nickname, MembersRoleEnum role) {
+
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.nickname = nickname;
+        this.role = role;
+    }
+
+    public Members(Long id, String username, String password, String email, String nickname, MembersRoleEnum role) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
