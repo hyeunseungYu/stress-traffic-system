@@ -208,7 +208,7 @@ public class ProductController {
         stopwatch.stop();
         long totalTime = stopwatch.getTotalTimeMillis();
 
-        return Response.success(totalTime, data);
+        return Response.success(totalTime, "cache search", data);
     }
 
     //normal 키워드 20가지 API
@@ -223,7 +223,7 @@ public class ProductController {
         stopwatch.stop();
         long totalTime = stopwatch.getTotalTimeMillis();
 
-        return Response.success(totalTime, data);
+        return Response.success(totalTime, "normal search", data);
     }
 }
 
