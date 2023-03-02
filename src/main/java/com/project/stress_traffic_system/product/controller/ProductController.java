@@ -52,7 +52,7 @@ public class ProductController {
         stopwatch.stop();
         long totalTime = stopwatch.getTotalTimeMillis();
 
-        return Response.success(totalTime, data);
+        return Response.success(totalTime, "like 검색", data);
     }
 
     @ApiOperation(value = "full text 검색")
@@ -66,7 +66,7 @@ public class ProductController {
         stopwatch.stop();
         long totalTime = stopwatch.getTotalTimeMillis();
 
-        return Response.success(totalTime, data);
+        return Response.success(totalTime, "full text 검색", data);
     }
 
     @ApiOperation(value = "redis 검색")
