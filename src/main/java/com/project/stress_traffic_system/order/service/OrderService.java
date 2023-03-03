@@ -27,6 +27,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -406,4 +407,28 @@ public class OrderService {
             return build;
         }
     }
+
+    //==============Write-through 테스트를 위한 메서드==============
+    @Transactional
+    public ProductResponseDto saveProductInCache(ProductResponseDto request) {
+        Product product = new Product(request);
+
+        ProductResponseDto build = ProductResponseDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .build();
+
+        productRepository.save(product);
+
+        //캐시 객체 생성
+        //캐시가 없으면 productId라는 이름으로 캐시를 생성하고, 존재하면 productId에 이어서 추가하기 위해 getCache로 객체를 만들어줌.
+        Cache productCache = redisCacheManager.getCache("productId");
+
+        productCache.put(String.valueOf(product.getId()), build);
+
+        return build;
+    }
+
+
+
 }

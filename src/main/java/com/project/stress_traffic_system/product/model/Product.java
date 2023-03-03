@@ -1,6 +1,7 @@
 package com.project.stress_traffic_system.product.model;
 
 
+import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -81,5 +82,11 @@ public class Product {
         this.price = price;
         this.imgurl = imgurl;
         this.orderCount = orderCount;
+    }
+
+    public Product(ProductResponseDto productResponseDto) {
+        this.name = productResponseDto.getName();
+        this.stock = productResponseDto.getStock();
+        this.price = productResponseDto.getPrice();
     }
 }
