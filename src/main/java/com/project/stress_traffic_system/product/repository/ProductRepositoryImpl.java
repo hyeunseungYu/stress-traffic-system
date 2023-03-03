@@ -71,7 +71,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     Product product = new Product();   //Product 객체 생성하기
 
                     if (data != null) {
-//                        product.setCategory_id(productInfo[0].isEmpty() ? 1 : Long.parseLong(productInfo[0]));  //todo category
+                        //product.setSubCategory(productInfo[0].isEmpty() ? 1 : Long.parseLong(productInfo[0]));  //todo category
                         product.setName(productInfo[1].isEmpty() ? "" : productInfo[1]);
                         product.setPrice(productInfo[2].isEmpty() ? 10000 : Integer.parseInt(productInfo[2]));
                         product.setDescription(productInfo[3].isEmpty() ? "" : productInfo[3]);
@@ -118,7 +118,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
     }
 
-    //Product bulk 데이터 입력하기
+    //user bulk 데이터 입력하기
     public void bulkInsertMembers() {
         String path = "E:\\프로그래밍\\항해99\\5. final\\stress-traffic-system\\user.csv"; //csv 경로
         FileReader in = null;

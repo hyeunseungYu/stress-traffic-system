@@ -1,4 +1,4 @@
-/*
+
 package com.project.stress_traffic_system.bulk_data;
 
 import com.github.javafaker.Faker;
@@ -78,7 +78,7 @@ class BulkInsertTest {
 
         for (int i = 0; i < 1000000; i++) {
             StringBuilder builder = new StringBuilder();
-            builder.append(random.nextInt(15) + 1) //카테고리id
+            builder.append(random.nextInt(15) + 1) //sub_카테고리id
                     .append(",")
                     .append(faker.name().fullName())
                     .append(",")
@@ -96,7 +96,13 @@ class BulkInsertTest {
                     .append(",")
                     .append(faker.lorem().sentence())
                     .append(",")
-                    .append(random.nextInt(1000) + 100);
+                    .append(random.nextInt(1000) + 100)
+                    .append(",")
+                    .append(random.nextInt(3) + 1) // category id
+                    .append(",")
+                    .append(0)
+                    .append(",")
+                    .append(random.nextInt(1000));
 
             dataList.add(builder.toString());
         }
@@ -112,4 +118,4 @@ class BulkInsertTest {
             System.out.println(e.getMessage());
         }
     }
-}*/
+}
