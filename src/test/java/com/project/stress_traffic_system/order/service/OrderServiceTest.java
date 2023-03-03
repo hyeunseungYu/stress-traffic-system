@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.cache.RedisCacheManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,6 +53,9 @@ class OrderServiceTest {
 
     @Mock
     private RedissonClient redissonClient;
+
+    @Mock
+    private RedisCacheManager redisCacheManager;
 
     Members member;
     Cart cart;
@@ -93,7 +97,7 @@ class OrderServiceTest {
             //회원의 장바구니를 찾을 때 내가 미리 만들어둔 cart를 리턴해주기 위해
             Map<Members, Cart> testCartMap = new HashMap<>();
             testCartMap.put(member, cart);
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient) {
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient, redisCacheManager) {
 
                 //findCart라는 메서드가 사용되면 내가 지정한 cart를 바로 가져오게 하기 위해
                 //그냥 원래 service에 있던 코드를 그대로 가져와도 되는데, 그러면 when으로 가로채야 하는 코드가 더 생겨서 이렇게 작성함
@@ -152,7 +156,8 @@ class OrderServiceTest {
 
             //findAllByMembersOrderByCreatedAtAsc 호출되면 미리 생성한 주문 리스트 반환
             when(orderRepository.findAllByMembersOrderByCreatedAtAsc(member)).thenReturn(ordersList);
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
 
             //when
             List<OrderListDto> orders = orderService.getOrders(member);
@@ -180,7 +185,8 @@ class OrderServiceTest {
 
             Orders order = new Orders(1L, member, orderItems); //member가 주문한 orderItem들이 들어간 order생성
 
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
             //when
@@ -198,7 +204,8 @@ class OrderServiceTest {
         void checkProductWithPessimisticLock() {
             //given
             when(productRepository.findByIdWithPessimisticLock(orderRequestDto.getProductId())).thenReturn(product);
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             //when
             Product findResult = orderService.checkProductWithPessimisticLock(orderRequestDto);
             //then
@@ -210,7 +217,8 @@ class OrderServiceTest {
         void checkProductTest() {
             //given
             when(productRepository.findById(orderRequestDto.getProductId())).thenReturn(Optional.ofNullable(product));
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             //when
             Product findResult = orderService.checkProduct(orderRequestDto);
             //then
@@ -222,7 +230,8 @@ class OrderServiceTest {
         @DisplayName("checkStock")
         void checkStockTest() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             //when
 
             //then
@@ -239,7 +248,8 @@ class OrderServiceTest {
         @DisplayName("checkStock - orderRequestDto가 null일 때")
         void checkStockFail1() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             OrderRequestDto orderRequestDto = null;
             //when
 
@@ -252,7 +262,8 @@ class OrderServiceTest {
         @DisplayName("checkStock - product가 null일 때")
         void checkStockFail2() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             Product product = null;
             //when
 
@@ -265,7 +276,8 @@ class OrderServiceTest {
         @DisplayName("checkStock - 주문 수량이 재고보다 많을 때")
         void checkStockFail3() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository,redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    ,redissonClient, redisCacheManager);
             orderRequestDto.setQuantity(100);
             //when
 
