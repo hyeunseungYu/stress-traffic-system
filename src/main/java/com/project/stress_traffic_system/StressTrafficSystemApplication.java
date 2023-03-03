@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /*@EnableScheduling
-@EnableCaching
+
 @EnableJpaAuditing
 @EnableJpaRepositories(
         excludeFilters = @ComponentScan.Filter(
@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
                 type = FilterType.ASSIGNABLE_TYPE, classes = ProductElasticRepository.class))
 @SpringBootApplication(exclude = {ElasticsearchRepositoriesAutoConfiguration.class})*/
 @SpringBootApplication
+@EnableCaching
 public class StressTrafficSystemApplication {
 
     public static void main(String[] args) {
