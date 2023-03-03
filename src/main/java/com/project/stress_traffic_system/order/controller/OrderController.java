@@ -6,6 +6,8 @@ import com.project.stress_traffic_system.order.model.dto.OrderDto;
 import com.project.stress_traffic_system.order.model.dto.OrderListDto;
 import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
 import com.project.stress_traffic_system.order.service.OrderService;
+import com.project.stress_traffic_system.product.model.Product;
+import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -85,5 +87,9 @@ public class OrderController {
         return orderService.getOrderDetail(userDetails.getMember(), orderId);
     }
 
-
+    //look-aside 테스트를 위한 api
+    @GetMapping("/cacheTest/look-aside/{productId}")
+    public ProductResponseDto getCache(@PathVariable Long productId) {
+        return orderService.findProductInCache(productId);
+    }
 }
