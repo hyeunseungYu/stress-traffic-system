@@ -84,7 +84,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "redis 검색 - cache aside")
-    @GetMapping("/products/search/redis/{keyword}")
+    @GetMapping("/products/search/redis/cacheaside/{keyword}")
     public Response searchProductsByRedisCacheAside(@PathVariable String keyword) {
         StopWatch stopwatch = new StopWatch();
         stopwatch.start();
