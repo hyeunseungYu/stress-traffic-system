@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -91,5 +92,10 @@ public class OrderController {
     @GetMapping("/cacheTest/look-aside/{productId}")
     public ProductResponseDto getCache(@PathVariable Long productId) {
         return orderService.findProductInCache(productId);
+    }
+
+    @PostMapping("/cacheTest/write-through")
+    public ProductResponseDto writeCache(@RequestBody ProductResponseDto productResponseDto) {
+        return orderService.saveProductInCache(productResponseDto);
     }
 }
