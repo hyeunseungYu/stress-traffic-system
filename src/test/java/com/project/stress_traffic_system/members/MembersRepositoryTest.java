@@ -59,9 +59,9 @@ public class MembersRepositoryTest {
     @DisplayName("저장된 멤버가 제대로 조회되는지 확인")
     void findMember() {
         //given
-        //2000073 Id의 회원을 조회
+        //2000072 Id의 회원을 조회
         Long findId = 2000072L;
-        //2000073 Id의 정보
+        //2000072 Id의 정보
         String username = "usertest";
         String password = "abcde123?";
         String address = "서울";
