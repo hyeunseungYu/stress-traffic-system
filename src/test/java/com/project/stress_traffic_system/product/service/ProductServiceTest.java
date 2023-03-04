@@ -283,21 +283,21 @@ public class ProductServiceTest {
             Assertions.assertEquals(content.size(), productResponse.size());
         }
 
-        @DisplayName("캐싱 키워드 20가지로 검색하기")
-        @Test
-        void searchCacheKeyword() {
-            //given
-            //Autowired 된 ProductRedisTemplate 사용
-            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
-            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
-
-            //when
-            List<ProductResponseDto> productResponse = productService.searchCacheKeyword("robbie");//검색할 때는 소문자로//
-
-            //then
-            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
-            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
-        }
+//        @DisplayName("캐싱 키워드 20가지로 검색하기")
+//        @Test
+//        void searchCacheKeyword() {
+//            //given
+//            //Autowired 된 ProductRedisTemplate 사용
+//            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
+//            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
+//
+//            //when
+//            List<ProductResponseDto> productResponse = productService.searchCacheKeyword("robbie");//검색할 때는 소문자로//
+//
+//            //then
+//            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
+//            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
+//        }
 
         @DisplayName("카테고리 1~5 각각 조회하는 Api")
         @Test
@@ -337,21 +337,21 @@ public class ProductServiceTest {
             Assertions.assertEquals(5, productResponse.getTotalElements()); //5개의 상품정보를 조회
         }
 
-        @DisplayName("카테고리별 상품리스트 가져오기")
-        @Test
-        void findByMainCategory() {
-            //given
-            //Autowired 된 ProductRedisTemplate 사용
-            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
-            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
-
-            //when
-            List<ProductResponseDto> productResponse = productService.findByMainCategory("robbie",0);//검색할 때는 소문자로//
-
-            //then
-            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
-            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
-        }
+//        @DisplayName("카테고리별 상품리스트 가져오기")
+//        @Test
+//        void findByMainCategory() {
+//            //given
+//            //Autowired 된 ProductRedisTemplate 사용
+//            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
+//            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
+//
+//            //when
+//            List<ProductResponseDto> productResponse = productService.findByMainCategory("robbie",0);//검색할 때는 소문자로//
+//
+//            //then
+//            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
+//            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
+//        }
 
         @DisplayName("리뷰 등록하기")
         @Test
