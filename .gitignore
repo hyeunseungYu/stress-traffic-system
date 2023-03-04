@@ -203,8 +203,10 @@ gradle-app.setting
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,java,gradle,macos,windows
 
-#application.properties
 application.properties
 application-testDB.properties
 application-productDB.properties
 application-localDB.properties
+
+product.csv
+test.csv

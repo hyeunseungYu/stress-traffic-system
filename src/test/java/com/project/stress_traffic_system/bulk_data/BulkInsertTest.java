@@ -8,6 +8,8 @@ import com.project.stress_traffic_system.product.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
@@ -17,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@SpringBootTest
+@DataJpaTest /*모든 테스트가 끝난 뒤 롤백*/
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //h2 DB가 아닌 실제 DB이용
 class BulkInsertTest {
 
     @Autowired

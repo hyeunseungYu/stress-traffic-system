@@ -31,13 +31,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 //@SpringBootTest
 //@AutoConfigureMockMvc
-//원석 생각 : WebMvcTest는 controller 및 mvcTest에 필요한 최소의 bean들만 스캔하여
+//WebMvcTest는 controller 및 mvcTest에 필요한 최소의 bean들만 스캔하여
 //WebSecurityConfig의 인가("/api/members/**")를 인식하지 못하는 것 같아 Spring Security를 제외했다.
 @WebMvcTest(controllers = MembersController.class,
         excludeAutoConfiguration = SecurityAutoConfiguration.class, // 추가
         excludeFilters = {
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfig.class)})
-public class MembersControllerTest2 {
+public class MembersControllerTest {
 
     @Autowired
     MockMvc mockMvc;
