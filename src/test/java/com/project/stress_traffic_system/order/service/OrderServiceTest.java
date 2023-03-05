@@ -76,7 +76,7 @@ class OrderServiceTest {
         orderRequestDto = new OrderRequestDto();
         orderRequestDto.setProductId(1L);
         orderRequestDto.setQuantity(10);
-        orderRequestDto.setDiscount(1000f);
+        orderRequestDto.setDiscount(1000F);
         orderRequestDto.setDcType("none");
     }
 
