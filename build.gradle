@@ -109,6 +109,10 @@ dependencies {
 
     //redis test-container
     testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.17.2'
+
+    //spring-actuator + prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
