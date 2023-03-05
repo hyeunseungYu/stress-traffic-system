@@ -32,7 +32,7 @@ public class ViewController {
     }
     @GetMapping("/main")
     public String mainPage() {
-        return "성공ㅋ";
+        return "swagger 삭제 반영";
     }
 
     @GetMapping("/api/main")

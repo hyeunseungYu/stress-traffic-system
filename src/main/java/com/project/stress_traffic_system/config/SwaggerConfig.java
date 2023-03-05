@@ -1,3 +1,4 @@
+/*
 package com.project.stress_traffic_system.config;
 
 import org.springframework.context.annotation.Bean;
@@ -38,3 +39,4 @@ public class SwaggerConfig {
         // 완료가 되었으면 오른쪽 URL 로 접속 => http://localhost:8080/swagger-ui.html
     }
 }
+*/

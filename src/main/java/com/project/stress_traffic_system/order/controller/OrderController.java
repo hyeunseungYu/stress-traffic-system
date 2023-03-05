@@ -9,7 +9,6 @@ import com.project.stress_traffic_system.order.service.OrderService;
 import com.project.stress_traffic_system.product.model.Product;
 import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,7 @@ public class OrderController {
     private final OrderService orderService;
     private final RedissonLockStockFacade redissonLockStockFacade;
 
-    @ApiOperation(value = "단일상품 주문하기")
+    //@ApiOperation(value = "단일상품 주문하기")
     @PostMapping("/products/order-one")
     public OrderDto orderOne(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -34,7 +33,7 @@ public class OrderController {
         return orderService.orderOne(userDetails.getMember(), requestDto);
     }
 
-    @ApiOperation(value = "단일상품 주문하기 - pessimistic lock")
+    //@ApiOperation(value = "단일상품 주문하기 - pessimistic lock")
     @PostMapping("/products/order-one/pessimisticLock")
     public OrderDto orderOneWithPessimisticLock(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -43,7 +42,7 @@ public class OrderController {
         return orderService.orderOneWithPessimisticLock(userDetails.getMember(), requestDto);
     }
 
-    @ApiOperation(value = "단일상품 주문하기 - redisson")
+    //@ApiOperation(value = "단일상품 주문하기 - redisson")
     @PostMapping("/products/order-one/redissonLock")
     public OrderDto orderOneWithRedissonLock(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -52,7 +51,7 @@ public class OrderController {
         return redissonLockStockFacade.orderOne(userDetails.getMember(), requestDto);
     }
 
-    @ApiOperation(value = "여러상품 주문하기(장바구니에서)")
+    //@ApiOperation(value = "여러상품 주문하기(장바구니에서)")
     @PostMapping("/products/order-many")
     public OrderDto orderMany(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -60,7 +59,7 @@ public class OrderController {
         return orderService.orderMany(userDetails.getMember(), requestDtoList);
     }
 
-    @ApiOperation(value = "여러상품 주문하기(장바구니에서) - pessimistic lock")
+    //@ApiOperation(value = "여러상품 주문하기(장바구니에서) - pessimistic lock")
     @PostMapping("/products/order-many/pessimisticLock")
     public OrderDto orderManyWithPessimisticLock(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -68,7 +67,7 @@ public class OrderController {
         return orderService.orderManyWithPessimisticLock(userDetails.getMember(), requestDtoList);
     }
 
-    @ApiOperation(value = "여러상품 주문하기(장바구니에서) - redisson lock")
+    //@ApiOperation(value = "여러상품 주문하기(장바구니에서) - redisson lock")
     @PostMapping("/products/order-many/redissonLock")
     public OrderDto orderManyWithRedissonLock(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -76,13 +75,13 @@ public class OrderController {
         return orderService.orderManyWithRedissonLock(userDetails.getMember(), requestDtoList);
     }
 
-    @ApiOperation(value = "주문내역 리스트보기")
+    //@ApiOperation(value = "주문내역 리스트보기")
     @GetMapping("/products/order-list")
     public List<OrderListDto> getOrders(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return orderService.getOrders(userDetails.getMember());
     }
 
-    @ApiOperation(value = "주문 상세내역 보기")
+    //@ApiOperation(value = "주문 상세내역 보기")
     @GetMapping("/products/order-detail/{orderId}")
     public List<OrderDetailDto> getOrderDetail(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long orderId) {
         return orderService.getOrderDetail(userDetails.getMember(), orderId);
