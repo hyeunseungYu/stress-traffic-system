@@ -68,9 +68,11 @@ public class RedisConfig {
                 //키 앞에 붙는 prefix 형식 지정. 여기서는 '이름::' 이렇게 되도록 설정되어 있음
                 .computePrefixWith(CacheKeyPrefix.simple())
                 // redis 캐시 데이터 저장방식을 StringSeriallizer로 지정
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
-                //value 직렬화 기본 옵션이 jdk 직렬화라 이상하게 나옴. 사람이 읽을 수 있게 json으로
-//                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                //value 직렬화 기본 옵션이 jdk 직렬화임. 우리 엔티티 클래스들을 json형식으로 직렬화 하려면 이 설정을 꼭 넣어줘야 함.
+                //아니면 이 에러가 나옴. product 엔티티 클래스를 예시로 들어봄
+                // "errorMessage": "DefaultSerializer requires a Serializable payload but received an object of type [com.project.stress_traffic_system.product.model.Product]"
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
         // 캐시키별 유효시간 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();

@@ -5,11 +5,15 @@ import com.project.stress_traffic_system.cart.model.CartItem;
 import com.project.stress_traffic_system.cart.repository.CartItemRepository;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.cart.service.CartService;
+import com.project.stress_traffic_system.facade.RedissonLockStockFacade;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.order.model.OrderItem;
 import com.project.stress_traffic_system.order.model.Orders;
+import com.project.stress_traffic_system.order.model.dto.OrderDetailDto;
 import com.project.stress_traffic_system.order.model.dto.OrderDto;
+import com.project.stress_traffic_system.order.model.dto.OrderListDto;
 import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
 import com.project.stress_traffic_system.order.repository.OrderRepository;
 import com.project.stress_traffic_system.product.model.Product;
@@ -21,14 +25,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.cache.RedisCacheManager;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -52,6 +61,9 @@ class OrderServiceTest {
     @Mock
     private RedissonClient redissonClient;
 
+    @Mock
+    private RedisCacheManager redisCacheManager;
+
     Members member;
     Cart cart;
 
@@ -59,19 +71,19 @@ class OrderServiceTest {
     CartItem cartItem;
     OrderRequestDto orderRequestDto;
 
+
     @BeforeEach
     void beforeEach() {
-        member = new Members("user", "1234", "test@test.com", "test", MembersRoleEnum.MEMBER);
+        member = new Members(1L,"user", "1234", "test@test.com", "test", MembersRoleEnum.MEMBER);
         cart = new Cart(member);
-        product = new Product(1L, 30, "testName", 16000, 50,0L){
+        product = new Product(1L, 30, "testName", 16000, 50,0L);
 
-        };
         cartItem = new CartItem(cart, product);
 
         orderRequestDto = new OrderRequestDto();
         orderRequestDto.setProductId(1L);
         orderRequestDto.setQuantity(10);
-        orderRequestDto.setDiscount(1000f);
+        orderRequestDto.setDiscount(1000F);
         orderRequestDto.setDcType("none");
     }
 
@@ -92,7 +104,7 @@ class OrderServiceTest {
             //회원의 장바구니를 찾을 때 내가 미리 만들어둔 cart를 리턴해주기 위해
             Map<Members, Cart> testCartMap = new HashMap<>();
             testCartMap.put(member, cart);
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient) {
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient, redisCacheManager) {
 
                 //findCart라는 메서드가 사용되면 내가 지정한 cart를 바로 가져오게 하기 위해
                 //그냥 원래 service에 있던 코드를 그대로 가져와도 되는데, 그러면 when으로 가로채야 하는 코드가 더 생겨서 이렇게 작성함
@@ -100,7 +112,6 @@ class OrderServiceTest {
                 protected Cart findCart(Members members) {
                     return testCartMap.get(member);
                 }
-
 
                 @Override
                 protected Product checkProduct(OrderRequestDto requestDto) {
@@ -135,6 +146,8 @@ class OrderServiceTest {
             //then
             //재고가 차감되었는지 확인
             Assertions.assertEquals(20, product.getStock());
+            //장바구니가 다 지워졌는지
+            Assertions.assertEquals(0,cartItemRepository.findByCartAndProduct(cart,product).stream().count());
 
 
 
@@ -143,11 +156,52 @@ class OrderServiceTest {
         @Test
         @DisplayName("주문내역 리스트 가져오기")
         void getOrders() {
+            //given
+
+            //회원의 주문 리스트 생성
+            List<Orders> ordersList = new ArrayList<>();
+
+            //findAllByMembersOrderByCreatedAtAsc 호출되면 미리 생성한 주문 리스트 반환
+            when(orderRepository.findAllByMembersOrderByCreatedAtAsc(member)).thenReturn(ordersList);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
+
+            //when
+            List<OrderListDto> orders = orderService.getOrders(member);
+
+            //then
+            //두 코드가 어짜피 같은 의미인 것 같아 하나는 주석처리. 테스트 내용 더 생각해보고 없으면 지우기
+            //미리 생성한 주문 리스트가 비어있으니, 비어있는 지 확인
+            //Assertions.assertEquals(0,orders.size());
+            Assertions.assertTrue(orders.isEmpty());
         }
 
         @Test
         @DisplayName("주문 상세내역 가져오기")
         void getOrderDetail() {
+
+
+            //given
+            List<OrderItem> orderItems = new ArrayList<>(); //orderItem들을 담아둘 리스트 생성
+
+            //두 번 주문하기
+            OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
+            OrderItem orderItem2 = OrderItem.createOrderItem(product, orderRequestDto);
+            orderItems.add(orderItem);
+            orderItems.add(orderItem2);
+
+            Orders order = new Orders(1L, member, orderItems); //member가 주문한 orderItem들이 들어간 order생성
+
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
+            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+            //when
+            List<OrderDetailDto> orderDetail = orderService.getOrderDetail(member, 1L);
+
+            //then
+            Assertions.assertEquals(1L, orderDetail.get(0).getOrderId()); //해당 메서드를 통해 생성된 orderDetail의 첫번째 주문 제품의 id와 내가 처음에 넣어둔 id가 같은지 비교
+            Assertions.assertEquals(20, orderDetail.get(0).getQuantity() + orderDetail.get(1).getQuantity()); //각 주문 수량들의 합이 내가 설정한 주문들의 수량들의 합과 같은지 비교
 
 
         }
@@ -157,7 +211,8 @@ class OrderServiceTest {
         void checkProductWithPessimisticLock() {
             //given
             when(productRepository.findByIdWithPessimisticLock(orderRequestDto.getProductId())).thenReturn(product);
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             //when
             Product findResult = orderService.checkProductWithPessimisticLock(orderRequestDto);
             //then
@@ -169,7 +224,8 @@ class OrderServiceTest {
         void checkProductTest() {
             //given
             when(productRepository.findById(orderRequestDto.getProductId())).thenReturn(Optional.ofNullable(product));
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             //when
             Product findResult = orderService.checkProduct(orderRequestDto);
             //then
@@ -181,13 +237,13 @@ class OrderServiceTest {
         @DisplayName("checkStock")
         void checkStockTest() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             //when
 
             //then
             Assertions.assertDoesNotThrow(() -> orderService.checkStock(orderRequestDto, product));
         }
-
     }
 
 
@@ -198,7 +254,8 @@ class OrderServiceTest {
         @DisplayName("checkStock - orderRequestDto가 null일 때")
         void checkStockFail1() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             OrderRequestDto orderRequestDto = null;
             //when
 
@@ -211,7 +268,8 @@ class OrderServiceTest {
         @DisplayName("checkStock - product가 null일 때")
         void checkStockFail2() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    , redissonClient, redisCacheManager);
             Product product = null;
             //when
 
@@ -224,7 +282,8 @@ class OrderServiceTest {
         @DisplayName("checkStock - 주문 수량이 재고보다 많을 때")
         void checkStockFail3() {
             //given
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository,redissonClient);
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
+                    ,redissonClient, redisCacheManager);
             orderRequestDto.setQuantity(100);
             //when
 

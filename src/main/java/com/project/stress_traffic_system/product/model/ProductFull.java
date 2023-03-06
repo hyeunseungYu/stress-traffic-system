@@ -1,7 +1,6 @@
 package com.project.stress_traffic_system.product.model;
 
 
-import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Product {
+public class ProductFull {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id", updatable = false)
@@ -75,18 +74,12 @@ public class Product {
 
 
     //테스트를 위한 생성자 추가
-    public Product(Long id, int stock, String name, int price, int imgurl,Long orderCount) {
+    public ProductFull(Long id, int stock, String name, int price, int imgurl, Long orderCount) {
         this.id = id;
         this.stock = stock;
         this.name = name;
         this.price = price;
         this.imgurl = imgurl;
         this.orderCount = orderCount;
-    }
-
-    public Product(ProductResponseDto productResponseDto) {
-        this.name = productResponseDto.getName();
-        this.stock = productResponseDto.getStock();
-        this.price = productResponseDto.getPrice();
     }
 }

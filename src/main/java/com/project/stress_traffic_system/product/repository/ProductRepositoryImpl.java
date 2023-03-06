@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.project.stress_traffic_system.product.model.QProduct.product;
+import static com.project.stress_traffic_system.product.model.QProductFull.productFull;
 
 @Slf4j
 public class ProductRepositoryImpl implements ProductRepositoryCustom{
@@ -71,7 +71,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     Product product = new Product();   //Product 객체 생성하기
 
                     if (data != null) {
-//                        product.setCategory_id(productInfo[0].isEmpty() ? 1 : Long.parseLong(productInfo[0]));  //todo category
+                        //product.setSubCategory(productInfo[0].isEmpty() ? 1 : Long.parseLong(productInfo[0]));  //todo category
                         product.setName(productInfo[1].isEmpty() ? "" : productInfo[1]);
                         product.setPrice(productInfo[2].isEmpty() ? 10000 : Integer.parseInt(productInfo[2]));
                         product.setDescription(productInfo[3].isEmpty() ? "" : productInfo[3]);
@@ -118,7 +118,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         log.info("쿼리 실행 시간 = {}", queryStopwatch.getTotalTimeSeconds());
     }
 
-    //Product bulk 데이터 입력하기
+    //user bulk 데이터 입력하기
     public void bulkInsertMembers() {
         String path = "E:\\프로그래밍\\항해99\\5. final\\stress-traffic-system\\user.csv"; //csv 경로
         FileReader in = null;
@@ -222,27 +222,27 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
         if (!condition.getName().trim().equals("")) {
             BooleanBuilder builder = new BooleanBuilder();
             NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
-                    "function('match',{0},{1})",product.name, condition.getName() + "*");
+                    "function('match',{0},{1})", productFull.name, condition.getName() + "*");
             builder.and(booleanTemplate.gt(0));
             content = queryFactory
                     .select(new QProductResponseDto(
-                            product.id,
-                            product.name,
-                            product.price,
-                            product.description,
-                            product.shippingFee,
-                            product.imgurl,
-                            product.clickCount,
-                            product.orderCount,
-                            product.stock,
-                            product.introduction,
-                            product.pages,
-                            product.date
+                            productFull.id,
+                            productFull.name,
+                            productFull.price,
+                            productFull.description,
+                            productFull.shippingFee,
+                            productFull.imgurl,
+                            productFull.clickCount,
+                            productFull.orderCount,
+                            productFull.stock,
+                            productFull.introduction,
+                            productFull.pages,
+                            productFull.date
                     ))
-                    .from(product)
+                    .from(productFull)
                     .where(builder,priceFrom(condition.getPriceFrom()),
                             priceTo(condition.getPriceTo()))
-                    .orderBy(product.clickCount.desc())
+                    .orderBy(productFull.clickCount.desc())
                     .offset(condition.getPage())
                     .limit(PAGE_LIMIT)
                     .fetch();
@@ -254,21 +254,21 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public Page<ProductResponseDto> findAllOrderByClickCountDesc(int page) {
         List<ProductResponseDto> content = queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .orderBy(productFull.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
@@ -281,22 +281,22 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public Page<ProductResponseDto> searchByCategory(Long categoryId, int page) {
         List<ProductResponseDto> content = queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .where(product.subCategory.id.eq(categoryId))
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .where(productFull.subCategory.id.eq(categoryId))
+                .orderBy(productFull.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
@@ -310,22 +310,22 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findByMainCategory(Category category, int page) {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .where(product.category.eq(category))
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .where(productFull.category.eq(category))
+                .orderBy(productFull.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
@@ -337,21 +337,21 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findBestSeller(int page) {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .orderBy(product.orderCount.desc(), product.clickCount.desc())
+                .from(productFull)
+                .orderBy(productFull.orderCount.desc(), productFull.clickCount.desc())
                 .offset(page)
                 .limit(PAGE_LIMIT)
                 .fetch();
@@ -362,21 +362,21 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findBestSeller() {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .orderBy(product.orderCount.desc(), product.clickCount.desc())
+                .from(productFull)
+                .orderBy(productFull.orderCount.desc(), productFull.clickCount.desc())
                 .limit(10000)
                 .fetch();
 
@@ -387,23 +387,48 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findByMainCategory(Long categoryId) {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .where(product.category.id.eq(categoryId))
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .where(productFull.category.id.eq(categoryId))
+                .orderBy(productFull.clickCount.desc())
                 .limit(10000)
+                .fetch();
+    }
+
+    //카테고리 id로 상품상세정보 가져오기 - 테스트 캐싱용도
+    @Override
+    public List<ProductResponseDto> TestFindByMainCategory(Long categoryId) {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
+                ))
+                .from(productFull)
+                .where(productFull.category.id.eq(categoryId))
+                .orderBy(productFull.clickCount.desc())
+                .limit(100)
                 .fetch();
     }
 
@@ -411,21 +436,21 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findProductDetail() {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .orderBy(productFull.clickCount.desc())
                 .limit(10000)
                 .fetch();
     }
@@ -433,9 +458,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     // 상품 조회수 Return
     @Override
     public Long getClickCount(Long productId) {
-        return queryFactory.select(product.clickCount)
-                .from(product)
-                .where(product.id.eq(productId))
+        return queryFactory.select(productFull.clickCount)
+                .from(productFull)
+                .where(productFull.id.eq(productId))
                 .fetchOne();
     }
 
@@ -443,9 +468,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     @Override
     public void setClickCount(Long productId, long clickCount) {
         queryFactory
-                .update(product)
-                .set(product.clickCount, clickCount)
-                .where(product.id.eq(productId))
+                .update(productFull)
+                .set(productFull.clickCount, clickCount)
+                .where(productFull.id.eq(productId))
                 .execute();
     }
 
@@ -454,22 +479,22 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findByKeyword(String keyword) {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .where(product.name.contains(keyword))
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .where(productFull.name.contains(keyword))
+                .orderBy(productFull.clickCount.desc())
                 .limit(100)
                 .fetch();
     }
@@ -479,28 +504,28 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findByFullKeyword(String keyword) {
             BooleanBuilder builder = new BooleanBuilder();
             NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
-                    "function('match',{0},{1})",product.name, keyword + "*");
+                    "function('match',{0},{1})", productFull.name, keyword + "*");
             builder.and(booleanTemplate.gt(0));
 
             return queryFactory
                     .select(new QProductResponseDto(
-                            product.id,
-                            product.name,
-                            product.price,
-                            product.description,
-                            product.shippingFee,
-                            product.imgurl,
-                            product.clickCount,
-                            product.orderCount,
-                            product.stock,
-                            product.introduction,
-                            product.pages,
-                            product.date
+                            productFull.id,
+                            productFull.name,
+                            productFull.price,
+                            productFull.description,
+                            productFull.shippingFee,
+                            productFull.imgurl,
+                            productFull.clickCount,
+                            productFull.orderCount,
+                            productFull.stock,
+                            productFull.introduction,
+                            productFull.pages,
+                            productFull.date
                     ))
-                    .from(product)
+                    .from(productFull)
                     .where(builder)
-                    .orderBy(product.clickCount.desc())
-                    .limit(100)
+                    .orderBy(productFull.clickCount.desc())
+                    .limit(1000)
                     .fetch();
     }
 
@@ -509,34 +534,34 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findTop1000() {
         return queryFactory
                 .select(new QProductResponseDto(
-                        product.id,
-                        product.name,
-                        product.price,
-                        product.description,
-                        product.shippingFee,
-                        product.imgurl,
-                        product.clickCount,
-                        product.orderCount,
-                        product.stock,
-                        product.introduction,
-                        product.pages,
-                        product.date
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
                 ))
-                .from(product)
-                .orderBy(product.clickCount.desc())
+                .from(productFull)
+                .orderBy(productFull.clickCount.desc())
                 .limit(1000)
                 .fetch();
     }
 
     private BooleanExpression nameLike(String name) {
-        return StringUtils.isEmpty(name) ? null : product.name.contains(name);
+        return StringUtils.isEmpty(name) ? null : productFull.name.contains(name);
     }
 
     private BooleanExpression priceFrom(Integer priceFrom) {
-        return priceFrom == null ? null : product.price.goe(priceFrom);
+        return priceFrom == null ? null : productFull.price.goe(priceFrom);
     }
 
     private BooleanExpression priceTo(Integer priceTo) {
-        return priceTo == null ? null : product.price.loe(priceTo);
+        return priceTo == null ? null : productFull.price.loe(priceTo);
     }
 }

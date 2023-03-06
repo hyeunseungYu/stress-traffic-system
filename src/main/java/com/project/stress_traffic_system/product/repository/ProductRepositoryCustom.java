@@ -23,6 +23,8 @@ public interface ProductRepositoryCustom {
 
     List<ProductResponseDto> findByMainCategory(Long categoryId); // 카테고리(대분류) 상위 1만건 검색
 
+    List<ProductResponseDto> TestFindByMainCategory(Long categoryId); // 카테고리(대분류) 상위 100건 검색
+
     List<ProductResponseDto> findProductDetail();
 
     Long getClickCount(Long productId);

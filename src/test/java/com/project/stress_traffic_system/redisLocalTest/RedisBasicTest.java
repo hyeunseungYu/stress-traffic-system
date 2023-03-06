@@ -1,6 +1,7 @@
 //
 //package com.project.stress_traffic_system.redisLocalTest;
 //
+//import com.project.stress_traffic_system.StressTrafficSystemApplication;
 //import org.assertj.core.api.Assertions;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;

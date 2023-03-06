@@ -2,7 +2,6 @@ package com.project.stress_traffic_system.event.controller;
 
 import com.project.stress_traffic_system.event.service.EventService;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,7 @@ public class EventController {
 
     private final EventService eventService;
 
-    @ApiOperation(value = "선착순 이벤트 신청하기")
+    //@ApiOperation(value = "선착순 이벤트 신청하기")
     @PostMapping("/event/{eventId}")
     public ResponseEntity<String> event(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -28,7 +27,7 @@ public class EventController {
         return new ResponseEntity<>(msg, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "선착순 이벤트 상품 등록하기")
+    //@ApiOperation(value = "선착순 이벤트 상품 등록하기")
     @PostMapping("/event-register/{productId}")
     public ResponseEntity<String> createEvent(
             @AuthenticationPrincipal UserDetailsImpl userDetails,

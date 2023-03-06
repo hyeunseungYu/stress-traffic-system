@@ -31,6 +31,7 @@ public class EmbeddedRedisConfig {
                 .setting("maxmemory 128M")
                 .build();
         redisServer.start();
+        log.info("시작");
     }
 
     //객체가 삭제될 때 실행됨

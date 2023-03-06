@@ -119,6 +119,19 @@ public class ProductService {
         return productRedisService.searchProductsByRedis(keyword);
     }
 
+    //redis 검색해오기 - cache aside
+    public List<ProductResponseDto> searchProductsByRedisCacheAside(String keyword) {
+        List<ProductResponseDto> list = productRedisService.searchProductsByRedisCacheAside(keyword);
+
+        //redis에 값이 없으면 db에서 직접 찾아와서 redis에 저장한다
+        if (list.size() == 0) {
+            List<ProductResponseDto> dbList = productRepository.findByFullKeyword(keyword);
+            productRedisService.cacheProductsCacheAside(dbList);
+            return dbList;
+        }
+        return list;
+    }
+
     //캐싱 키워드 20가지로 검색하기
     public List<ProductResponseDto> searchCacheKeyword(String keyword) {
         Set<ZSetOperations.TypedTuple<ProductResponseDto>> products =  productRedisService.searchCacheKeyword(keyword);
@@ -256,7 +269,7 @@ public class ProductService {
 
 
     //카테고리id로 국내도서, 해외도서, EBook 캐싱하기(조휘수 상위 1만개)
-    @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
+//    @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
     public void cacheProducts() {
         List<ProductResponseDto> domesticProducts = productRepository.findByMainCategory(1L);
@@ -272,6 +285,13 @@ public class ProductService {
         productRedisService.cacheProducts(BestSellers, "best");
     }
 
+    //테스트용 캐싱
+    @Transactional
+    public void TestCacheProducts() {
+        List<ProductResponseDto> domesticProducts = productRepository.TestFindByMainCategory(1L);
+        productRedisService.cacheProducts(domesticProducts, "domestic");
+    }
+
     //상품 상세페이지 상위 1만건 캐싱하기
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
@@ -282,13 +302,33 @@ public class ProductService {
 
     // 키워드별로 조회수 상위 1000건 캐싱
     @Transactional
-    public void cacheProductsByKeyword(String keyword) {
-        List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
-        log.info("키워드는 = {}, 결과 size = {}", keyword, products.size());
-        productRedisService.cacheProductsByKeyword(products, keyword);
+    public void cacheProductsByKeyword() {
+
+        String[] keywords = new String[]{"Federic", "Levi", "Victor", "Robbie", "Jeffery", "Isaac", "Monika", "Jade", "Harber", "Matthew",
+                "Gayle", "Ami", "Paris", "Shenna", "Celia", "Ted", "Elicia", "Debora", "Coy", "Violette"};
+
+        //키워드 20가지 캐싱
+        for (String keyword : keywords) {
+            List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
+            productRedisService.cacheProductsByKeyword(products, keyword);
+        }
+    }
+
+    // 테스트용 100건 캐싱
+    @Transactional
+    public void TestCacheProductsByKeyword() {
+
+        String[] keywords = new String[]{"Robbie"};
+
+        //키워드 20가지 캐싱
+        for (String keyword : keywords) {
+            List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
+            productRedisService.cacheProductsByKeyword(products, keyword);
+        }
     }
 
     //상품이름 검색을 위한 상위 1000건 캐싱
+    @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     public void cacheProductsTop1000() {
         List<ProductResponseDto> list = productRepository.findTop1000();
         productRedisService.cacheProductsTop1000(list);
