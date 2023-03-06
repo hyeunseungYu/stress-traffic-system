@@ -407,6 +407,31 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .fetch();
     }
 
+    //카테고리 id로 상품상세정보 가져오기 - 테스트 캐싱용도
+    @Override
+    public List<ProductResponseDto> TestFindByMainCategory(Long categoryId) {
+        return queryFactory
+                .select(new QProductResponseDto(
+                        productFull.id,
+                        productFull.name,
+                        productFull.price,
+                        productFull.description,
+                        productFull.shippingFee,
+                        productFull.imgurl,
+                        productFull.clickCount,
+                        productFull.orderCount,
+                        productFull.stock,
+                        productFull.introduction,
+                        productFull.pages,
+                        productFull.date
+                ))
+                .from(productFull)
+                .where(productFull.category.id.eq(categoryId))
+                .orderBy(productFull.clickCount.desc())
+                .limit(100)
+                .fetch();
+    }
+
     @Override
     public List<ProductResponseDto> findProductDetail() {
         return queryFactory

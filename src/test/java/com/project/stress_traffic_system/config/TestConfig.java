@@ -23,22 +23,22 @@ public class TestConfig {
         return new JPAQueryFactory(entityManager);
     }
 
-    @TestConfiguration
-    public class TestConfig2 {
-
-        @Bean
-        public RedisConnectionFactory redisConnectionFactory() {
-            return new LettuceConnectionFactory("localhost", 6379);
-        }
-
-        @Bean
-        public RedisTemplate<?, ?> redisTemplate() {
-            RedisTemplate<byte[], byte[]> redisTemplate = new RedisTemplate<>();
-            redisTemplate.setConnectionFactory(redisConnectionFactory());
-            redisTemplate.setKeySerializer(new StringRedisSerializer());
-            redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-            return redisTemplate;
-        }
-
-    }
+//    @TestConfiguration
+//    public class TestConfig2 {
+//
+//        @Bean
+//        public RedisConnectionFactory redisConnectionFactory() {
+//            return new LettuceConnectionFactory("localhost", 6379);
+//        }
+//
+//        @Bean
+//        public RedisTemplate<?, ?> redisTemplate() {
+//            RedisTemplate<byte[], byte[]> redisTemplate = new RedisTemplate<>();
+//            redisTemplate.setConnectionFactory(redisConnectionFactory());
+//            redisTemplate.setKeySerializer(new StringRedisSerializer());
+//            redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+//            return redisTemplate;
+//        }
+//
+//    }
 }

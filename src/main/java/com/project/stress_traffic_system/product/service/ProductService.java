@@ -285,6 +285,13 @@ public class ProductService {
         productRedisService.cacheProducts(BestSellers, "best");
     }
 
+    //테스트용 캐싱
+    @Transactional
+    public void TestCacheProducts() {
+        List<ProductResponseDto> domesticProducts = productRepository.TestFindByMainCategory(1L);
+        productRedisService.cacheProducts(domesticProducts, "domestic");
+    }
+
     //상품 상세페이지 상위 1만건 캐싱하기
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     @Transactional
@@ -299,6 +306,19 @@ public class ProductService {
 
         String[] keywords = new String[]{"Federic", "Levi", "Victor", "Robbie", "Jeffery", "Isaac", "Monika", "Jade", "Harber", "Matthew",
                 "Gayle", "Ami", "Paris", "Shenna", "Celia", "Ted", "Elicia", "Debora", "Coy", "Violette"};
+
+        //키워드 20가지 캐싱
+        for (String keyword : keywords) {
+            List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
+            productRedisService.cacheProductsByKeyword(products, keyword);
+        }
+    }
+
+    // 테스트용 100건 캐싱
+    @Transactional
+    public void TestCacheProductsByKeyword() {
+
+        String[] keywords = new String[]{"Robbie"};
 
         //키워드 20가지 캐싱
         for (String keyword : keywords) {
