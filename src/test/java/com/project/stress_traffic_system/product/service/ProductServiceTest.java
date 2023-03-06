@@ -1,7 +1,5 @@
 package com.project.stress_traffic_system.product.service;
 
-import com.project.stress_traffic_system.cart.model.Cart;
-import com.project.stress_traffic_system.cart.model.CartItem;
 import com.project.stress_traffic_system.config.TestConfig;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
@@ -16,8 +14,7 @@ import com.project.stress_traffic_system.product.repository.CategoryRepository;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import com.project.stress_traffic_system.product.repository.ReviewRepository;
 import com.project.stress_traffic_system.product.repository.SubCategoryRepository;
-import com.project.stress_traffic_system.product.service.ProductRedisService;
-import com.project.stress_traffic_system.product.service.ProductService;
+
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
@@ -28,14 +25,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,9 +41,8 @@ import static com.project.stress_traffic_system.product.model.QProductFull.produ
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@DataJpaTest //모든 테스트가 끝난 뒤 롤백
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //실제 DB사용
-@ExtendWith(MockitoExtension.class) //Mock객체를 만들어 단위테스트로 진행
+@SpringBootTest //레디스 도커를 띄우기 위해 통합테스트로 진행
+@ExtendWith(MockitoExtension.class) //Mock객체 생성
 @Import(TestConfig.class) //JPAQueryFactory 사용
 public class ProductServiceTest {
 
@@ -60,6 +56,7 @@ public class ProductServiceTest {
     @Mock private ReviewRepository reviewRepository;
     @Mock private CategoryRepository categoryRepository;
     @Mock private SubCategoryRepository subCategoryRepository;
+
     //ProductRedisService에 필요한 생성자 매개변수
     @Mock private RedisTemplate<String, ProductResponseDto> productRedisTemplate;
     @Mock private RedisTemplate<String, String> clickCountRedisTemplate;
@@ -73,24 +70,22 @@ public class ProductServiceTest {
     //Mock Service
     @InjectMocks
     ProductRedisService productRedisService;
+
     @InjectMocks
     ProductService productService;
 
-    //모든 테스트에 반복되는 변수를 전역변수로 선언
-    Members member;
-    Cart cart;
-    Product product;
-    Product redisProduct;
-    CartItem cartItem;
+    @Autowired
+    ProductService AutowiredProductService;
+
+    //테스트에 반복되는 변수를 전역변수로 선언
     Integer page = 0;
     ProductResponseDto redisProductDto = ProductResponseDto.builder().id(1L).imgurl(20).name("Robbie").build();
 
 
-    //테스트를 실행하기 전마다 전역변수에 값을 할당
+    //테스트를 실행하기 전마다 Mock Service 생성
     @BeforeEach
     void beforeEach(){
 
-        //Mock Service 생성
         productRedisService = new ProductRedisService(productRepository,productRedisTemplate,clickCountRedisTemplate);
         productService = new ProductService(reviewRepository,productRepository,categoryRepository,subCategoryRepository,productRedisService);
     }
@@ -165,25 +160,25 @@ public class ProductServiceTest {
             //given
 
             List<ProductResponseDto> content = queryFactory
-                        .select(new QProductResponseDto(
-                                productFull.id,
-                                productFull.name,
-                                productFull.price,
-                                productFull.description,
-                                productFull.shippingFee,
-                                productFull.imgurl,
-                                productFull.clickCount,
-                                productFull.orderCount,
-                                productFull.stock,
-                                productFull.introduction,
-                                productFull.pages,
-                                productFull.date
-                        ))
-                        .from(productFull)
-                        .where(productFull.name.contains("Robbie"))
-                        .orderBy(productFull.clickCount.desc())
-                        .limit(5)
-                        .fetch();
+                    .select(new QProductResponseDto(
+                            productFull.id,
+                            productFull.name,
+                            productFull.price,
+                            productFull.description,
+                            productFull.shippingFee,
+                            productFull.imgurl,
+                            productFull.clickCount,
+                            productFull.orderCount,
+                            productFull.stock,
+                            productFull.introduction,
+                            productFull.pages,
+                            productFull.date
+                    ))
+                    .from(productFull)
+                    .where(productFull.name.contains("Robbie"))
+                    .orderBy(productFull.clickCount.desc())
+                    .limit(5)
+                    .fetch();
 
             //ProductService 에 필요한 리포지토리를 따라서 구현
             when(productRepository.findByKeyword(any(String.class))).thenReturn(content);
@@ -283,21 +278,26 @@ public class ProductServiceTest {
             Assertions.assertEquals(content.size(), productResponse.size());
         }
 
-//        @DisplayName("캐싱 키워드 20가지로 검색하기")
-//        @Test
-//        void searchCacheKeyword() {
-//            //given
-//            //Autowired 된 ProductRedisTemplate 사용
-//            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
-//            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
-//
-//            //when
-//            List<ProductResponseDto> productResponse = productService.searchCacheKeyword("robbie");//검색할 때는 소문자로//
-//
-//            //then
+        @DisplayName("캐싱 키워드 20가지로 검색하기")
+        @Transactional
+        @Test
+        void searchCacheKeyword() {
+            //given
+            //도커로 실행한 레디스에 일정 상품 캐싱
+            AutowiredProductService.TestCacheProductsByKeyword();
+
+            //Autowired 된 ProductRedisTemplate 사용
+            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
+            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
+
+            //when
+            List<ProductResponseDto> productResponse = productService.searchCacheKeyword("Robbie");//검색할 때는 소문자로//
+            System.out.println("productResponse.get(0).getName()"+productResponse.get(0).getName());
+            //then
 //            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
-//            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
-//        }
+            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
+        }
+
 
         @DisplayName("카테고리 1~5 각각 조회하는 Api")
         @Test
@@ -337,21 +337,25 @@ public class ProductServiceTest {
             Assertions.assertEquals(5, productResponse.getTotalElements()); //5개의 상품정보를 조회
         }
 
-//        @DisplayName("카테고리별 상품리스트 가져오기")
-//        @Test
-//        void findByMainCategory() {
-//            //given
-//            //Autowired 된 ProductRedisTemplate 사용
-//            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
-//            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
-//
-//            //when
-//            List<ProductResponseDto> productResponse = productService.findByMainCategory("robbie",0);//검색할 때는 소문자로//
-//
-//            //then
+        @DisplayName("카테고리별 상품리스트 가져오기")
+        @Test
+        void findByMainCategory() {
+            //given
+            //도커로 실행한 레디스에 카테고리 캐싱
+            AutowiredProductService.TestCacheProducts();
+
+            //Autowired 된 ProductRedisTemplate 사용
+            ZSetOperations<String, ProductResponseDto> ZSetOperations = AutowiredProductRedisTemplate.opsForZSet();
+            when(productRedisTemplate.opsForZSet()).thenReturn(ZSetOperations);
+
+            //when
+            List<ProductResponseDto> productResponse = productService.findByMainCategory("국내도서",0);//검색할 때는 소문자로//
+
+            //then
+            System.out.println("productResponse.get(0).getName()"+productResponse.get(0).getName());
 //            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
-//            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
-//        }
+            Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
+        }
 
         @DisplayName("리뷰 등록하기")
         @Test
