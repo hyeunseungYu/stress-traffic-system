@@ -5,6 +5,7 @@ import com.project.stress_traffic_system.cart.model.CartItem;
 import com.project.stress_traffic_system.cart.repository.CartItemRepository;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.cart.service.CartService;
+import com.project.stress_traffic_system.facade.RedissonLockStockFacade;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
@@ -24,13 +25,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.cache.RedisCacheManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -237,7 +244,6 @@ class OrderServiceTest {
             //then
             Assertions.assertDoesNotThrow(() -> orderService.checkStock(orderRequestDto, product));
         }
-
     }
 
 
