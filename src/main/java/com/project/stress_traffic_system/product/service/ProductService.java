@@ -127,6 +127,7 @@ public class ProductService {
         if (list.size() == 0) {
             List<ProductResponseDto> dbList = productRepository.findByFullKeyword(keyword);
             productRedisService.cacheProductsCacheAside(dbList);
+            log.info("db에서 찾아온 검색어 사이즈 = {}", dbList.size());
             return dbList;
         }
         return list;

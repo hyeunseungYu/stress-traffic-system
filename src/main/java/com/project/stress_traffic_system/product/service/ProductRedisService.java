@@ -58,10 +58,17 @@ public class ProductRedisService {
         RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
 
         //기존 데이터 삭제 로직
-        Set<String> keys = productRedisTemplate.keys("product::*");
-        for (String key : keys) {
-            productRedisTemplate.delete(key);
+        ScanOptions options = ScanOptions.scanOptions().match("product::*").build();
+        Cursor<byte[]> keys = scanKeys(options);
+
+        while (keys.hasNext()) {
+            productRedisTemplate.delete(new String(keys.next()));
         }
+
+//        Set<String> keys = productRedisTemplate.keys("product::*");
+//        for (String key : keys) {
+//            productRedisTemplate.delete(key);
+//        }
 
         //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
         productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -84,10 +91,16 @@ public class ProductRedisService {
         RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
 
         //기존 데이터 삭제 로직
-        Set<String> keys = productRedisTemplate.keys("product-name::*");
-        for (String key : keys) {
-            productRedisTemplate.delete(key);
+        ScanOptions options = ScanOptions.scanOptions().match("product-name::*").build();
+        Cursor<byte[]> keys = scanKeys(options);
+
+        while (keys.hasNext()) {
+            productRedisTemplate.delete(new String(keys.next()));
         }
+//        Set<String> keys = productRedisTemplate.keys("product-name::*");
+//        for (String key : keys) {
+//            productRedisTemplate.delete(key);
+//        }
 
         //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
         productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -108,18 +121,12 @@ public class ProductRedisService {
         RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
         RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
 
-        //기존 데이터 삭제 로직
-        Set<String> keys = productRedisTemplate.keys("product-name-aside::*");
-        for (String key : keys) {
-            productRedisTemplate.delete(key);
-        }
-
         //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
         productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
 
             // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
             list.forEach(i -> {
-                String key = "product-name::" + i.getName().toLowerCase(); //Redis에 저장할 키 (product-name::name)
+                String key = "product-name-aside::" + i.getName().toLowerCase(); //Redis에 저장할 키 (product-name::name)
                 connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
                         valueSerializer.serialize(i)); // 랭킹 정보 객체를 직렬화하여 저장
             });
@@ -186,11 +193,17 @@ public class ProductRedisService {
     @Scheduled(cron = "0 30 * * * *")
     @Transactional
     public void updateClickCount() {
-        Set<String> keys = clickCountRedisTemplate.keys("clickCount::*");
+
+//        Set<String> keys = clickCountRedisTemplate.keys("clickCount::*");
+
+        ScanOptions options = ScanOptions.scanOptions().match("clickCount::").build();
+        Cursor<byte[]> keys = clickCountRedisTemplate.getConnectionFactory().getConnection().scan(options);
+
         log.info("조회수 RDS에 업데이트 실행 시작");
 
         // key가 존재하는 경우, 각각의 key에 대하여 조회수 정보를 DB에 업데이트한다.
-        for (String key : keys) {
+        while (keys.hasNext()) {
+            String key = new String(keys.next());
 
             //key에서 productId 추출
             long productId = Long.parseLong(key.split("::")[1]);
@@ -204,6 +217,7 @@ public class ProductRedisService {
             // 해당 key에 대한 조회수 정보가 DB에 반영되었으므로, Redis에서 해당 key를 삭제한다.
             clickCountRedisTemplate.delete(key);
         }
+
         log.info("조회수 RDS에 업데이트 실행 종료");
     }
 
@@ -233,25 +247,37 @@ public class ProductRedisService {
 
     //redis 에서 상품이름으로 검색하기
     public List<ProductResponseDto> searchProductsByRedis(String keyword) {
-        Set<String> keys = productRedisTemplate.keys("product-name" + "*" + keyword + "*");
-//        Set<String> keys = productRedisTemplate.keys("*" + keyword + "*");
+
+//        Set<String> keys = productRedisTemplate.keys("product-name" + "*" + keyword + "*");
+
+        ScanOptions options = ScanOptions.scanOptions().match("product-name" + "*" + keyword + "*").build();
+        Cursor<byte[]> keys = scanKeys(options);
 
         List<ProductResponseDto> result = new ArrayList<>();
-        for (String key : keys) {
-            result.add(productRedisTemplate.opsForValue().get(key));
+        while (keys.hasNext()) {
+            result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
         }
+//        for (String key : keys) {
+//            result.add(productRedisTemplate.opsForValue().get(key));
+//        }
         return result;
     }
 
     //redis 에서 상품이름으로 검색하기 - cache aside
     public List<ProductResponseDto> searchProductsByRedisCacheAside(String keyword) {
-        Set<String> keys = productRedisTemplate.keys("product-name-aside" + "*" + keyword + "*");
-//        Set<String> keys = productRedisTemplate.keys("*" + keyword + "*");
+//        Set<String> keys = productRedisTemplate.keys("product-name-aside" + "*" + keyword + "*");
+
+        ScanOptions options = ScanOptions.scanOptions().match("product-name-aside" + "*" + keyword + "*").build();
+        Cursor<byte[]> keys = scanKeys(options);
 
         List<ProductResponseDto> result = new ArrayList<>();
-        for (String key : keys) {
-            result.add(productRedisTemplate.opsForValue().get(key));
+        while (keys.hasNext()) {
+            result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
         }
+
+//        for (String key : keys) {
+//            result.add(productRedisTemplate.opsForValue().get(key));
+//        }
         return result;
     }
 
@@ -259,6 +285,10 @@ public class ProductRedisService {
     public Set<ZSetOperations.TypedTuple<ProductResponseDto>> searchCacheKeyword(String keyword) {
         ZSetOperations<String, ProductResponseDto> ZSetOperations = productRedisTemplate.opsForZSet();
         return ZSetOperations.rangeWithScores(keyword + "::", 0L, 99L);
+    }
+
+    private Cursor<byte[]> scanKeys(ScanOptions options) {
+        return productRedisTemplate.getConnectionFactory().getConnection().scan(options);
     }
 
 }
