@@ -26,9 +26,9 @@ public class Product {
     private int price; //가격
     private String description; //상세설명
     private int shippingFee; // 배송료
-    private int imgurl; //상품이미지
     private Long clickCount; // 조회수
     private int stock; //상품수량
+    private int imgurl; // 상품이미지
     private int discount; //할인(금액할인, 퍼센트할인)
 
     private String introduction; //책소개

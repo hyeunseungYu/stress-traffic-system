@@ -38,6 +38,7 @@ public class CartService {
 
         return cartItems.stream().map(cartItem ->
                         CartResponseDto.builder()
+                                .product_id(cartItem.getProduct().getId())
                                 .itemName(cartItem.getProduct().getName())
                                 .imgurl(cartItem.getProduct().getImgurl())
                                 .price(cartItem.getProduct().getDiscount(cartItem.getProduct().getPrice(), cartItem.getProduct().getDiscount()))
