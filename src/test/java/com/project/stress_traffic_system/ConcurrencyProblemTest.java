@@ -1,6 +1,6 @@
-/*
 package com.project.stress_traffic_system;
 
+import com.project.stress_traffic_system.StressTrafficSystemApplication;
 import com.project.stress_traffic_system.cart.repository.CartRepository;
 import com.project.stress_traffic_system.cart.service.CartService;
 import com.project.stress_traffic_system.facade.RedissonLockStockFacade;
@@ -19,8 +19,6 @@ import java.util.concurrent.Executors;
 @SpringBootTest
 @Slf4j
 @Nested
-
-
 @DisplayName("동시성 이슈 테스트")
 class ConcurrencyProblemTest {
 
@@ -40,7 +38,7 @@ class ConcurrencyProblemTest {
 
     @BeforeEach
     public void before() {
-        Product product = new Product(1L, 100,"test",12000,1);
+        Product product = new Product(1L, 100,"test",12000,1,1L);
         productRepository.saveAndFlush(product);
     }
 
@@ -82,6 +80,7 @@ class ConcurrencyProblemTest {
             Product product = productRepository.findById(1L).orElseThrow();
             Assertions.assertEquals(0, product.getStock());
         }
+
         @Test
         @DisplayName("동시성 제어 - pessimistic lock")
         void decreaseTest_pessimisticLock() throws InterruptedException {
@@ -119,6 +118,7 @@ class ConcurrencyProblemTest {
     @Nested
     @DisplayName("실패 케이스")
     class failCase{
+
         @Test
         @DisplayName("동시성 제어 - locking 설정하지 않았을 때")
         void decrease() throws InterruptedException {
@@ -137,7 +137,7 @@ class ConcurrencyProblemTest {
                             try {
                                 Product product = productRepository.findById(1L).orElseThrow();
                                 product.removeStock(1);
-                                productRepository.save(product);;
+                                productRepository.save(product);
                             }finally {
                                 latch.countDown();
                             }
@@ -154,4 +154,4 @@ class ConcurrencyProblemTest {
         }
     }
 }
-*/
+
