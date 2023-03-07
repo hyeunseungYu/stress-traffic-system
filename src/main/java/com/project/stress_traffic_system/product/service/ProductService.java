@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -327,6 +328,15 @@ public class ProductService {
             List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
             productRedisService.cacheProductsByKeyword(products, keyword);
         }
+    }
+
+    //레디스 테스트용 캐시
+    public void TestCacheProduct() {
+        List<ProductResponseDto> list = new ArrayList<>();
+        ProductResponseDto productResponseDto = new ProductResponseDto();
+        productResponseDto.setName("test");
+        list.add(productResponseDto);
+        productRedisService.testCacheProduct(list);
     }
 
     //상품이름 검색을 위한 상위 1000건 캐싱

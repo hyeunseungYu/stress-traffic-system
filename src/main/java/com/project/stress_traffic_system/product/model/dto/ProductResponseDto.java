@@ -59,4 +59,8 @@ public class ProductResponseDto {
     public void setClickCount(Long clickCount) {
         this.clickCount = clickCount;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
