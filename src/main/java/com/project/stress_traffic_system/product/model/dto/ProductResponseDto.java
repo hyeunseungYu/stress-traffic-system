@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -27,7 +28,6 @@ public class ProductResponseDto {
     private Long clickCount; // 조회수
     private Long orderCount;// 주문수량
     private int stock; //상품수량
-
     private String introduction; //책소개
     private int pages; //쪽수
 
@@ -58,5 +58,9 @@ public class ProductResponseDto {
 
     public void setClickCount(Long clickCount) {
         this.clickCount = clickCount;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
