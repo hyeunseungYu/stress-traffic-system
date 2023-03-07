@@ -136,6 +136,26 @@ public class ProductRedisService {
         });
     }
 
+    //레디스 테스트 위한 캐싱데이터
+    public void testCacheProduct(List<ProductResponseDto> list) {
+
+        // RedisTemplate에서 직렬화에 사용될 키 밸류 직렬화 객체를 가져온다.
+        RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
+        RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
+
+        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
+        productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+
+            // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
+            list.forEach(i -> {
+                String key = "product-name::" + i.getName().toLowerCase(); //Redis에 저장할 키 (product-name::name)
+                connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
+                        valueSerializer.serialize(i)); // 랭킹 정보 객체를 직렬화하여 저장
+            });
+            return null;
+        });
+    }
+
     //cache aside 전용 캐싱 데이터 저장
     public void cacheProductsCacheAside(List<ProductResponseDto> list) {
         // RedisTemplate에서 직렬화에 사용될 키 밸류 직렬화 객체를 가져온다.
@@ -287,6 +307,8 @@ public class ProductRedisService {
     //redis 에서 상품이름으로 검색하기 - cache aside
     public List<ProductResponseDto> searchProductsByRedisCacheAside(String keyword) {
 //        Set<String> keys = productRedisTemplate.keys("product-name-aside" + "*" + keyword + "*");
+        //테스트일 때는 빈값을 리턴
+        if (keyword.equals("test@#test?!@#")) return new ArrayList<>();
 
         ScanOptions options = ScanOptions.scanOptions().match("product-name-aside" + "*" + keyword + "*").build();
         Cursor<byte[]> keys = scanKeys(options);

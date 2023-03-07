@@ -327,6 +327,15 @@ public class ProductService {
         }
     }
 
+    //레디스 테스트용 캐시
+    public void TestCacheProduct() {
+        List<ProductResponseDto> list = new ArrayList<>();
+        ProductResponseDto productResponseDto = new ProductResponseDto();
+        productResponseDto.setName("test");
+        list.add(productResponseDto);
+        productRedisService.testCacheProduct(list);
+    }
+
     //상품이름 검색을 위한 상위 1000건 캐싱
     @Scheduled(cron = "0 0 0 * * *") //밤 12시마다 실행
     public void cacheProductsTop1000() {
