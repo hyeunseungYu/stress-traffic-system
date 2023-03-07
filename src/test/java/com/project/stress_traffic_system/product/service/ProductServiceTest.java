@@ -29,6 +29,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -241,21 +243,14 @@ public class ProductServiceTest {
         @Test
         void searchProductsByRedis() {
             //given
-            //redis 상품검색에 필요한 키값 설정
-            Set<String> MockKeys = new HashSet<String>();
-            MockKeys.add("product-name::Robbie"); MockKeys.add("product-name::Augustus");
-
-            //productRedisService.searchProductsByRedis()에 필요한 key&value 커스텀
-            when(productRedisTemplate.keys(any())).thenReturn(MockKeys);
-            when(productRedisTemplate.opsForValue()).thenReturn(ProductValueOperation);
-            when(ProductValueOperation.get(any())).thenReturn(redisProductDto); //전역변수 값
+            //테스트에 사용할 product-name::test 캐싱
+            AutowiredProductService.TestCacheProduct();
 
             //when
-            List<ProductResponseDto> productResponse = productService.searchProductsByRedis("Robbie");
+            List<ProductResponseDto> productResponse = AutowiredProductService.searchProductsByRedis("test");
 
             //then
-            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
-            Assertions.assertEquals(2, productResponse.size()); // MockKeys 두 개 설정
+            Assertions.assertTrue(productResponse.get(0).getName().equals("test"));
         }
 
         @DisplayName("redis 검색 - cache aside / 해당 상품이 캐시에 없을 경우")
@@ -267,11 +262,10 @@ public class ProductServiceTest {
             content.add(redisProductDto);
 
             //searchProductsByRedisCacheAside() 메서드에 키를 빈 값으로 반환
-            when(productRedisTemplate.keys(any())).thenReturn(new HashSet<String>());
-            when(productRepository.findByFullKeyword("Robbie")).thenReturn(content);
+            when(productRepository.findByFullKeyword("test@#test?!@#")).thenReturn(content);
 
             //when
-            List<ProductResponseDto> productResponse = productService.searchProductsByRedisCacheAside("Robbie");
+            List<ProductResponseDto> productResponse = productService.searchProductsByRedisCacheAside("test@#test?!@#");
 
             //then
             Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
@@ -292,9 +286,8 @@ public class ProductServiceTest {
 
             //when
             List<ProductResponseDto> productResponse = productService.searchCacheKeyword("Robbie");//검색할 때는 소문자로//
-            System.out.println("productResponse.get(0).getName()"+productResponse.get(0).getName());
+
             //then
-//            Assertions.assertTrue(productResponse.get(0).getName().contains("Robbie"));
             Assertions.assertEquals(100, productResponse.size()); //searchCacheKeyword() 에서 100개 값을 조회
         }
 
