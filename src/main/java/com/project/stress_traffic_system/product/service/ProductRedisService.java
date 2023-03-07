@@ -57,7 +57,7 @@ public class ProductRedisService {
         RedisSerializer keySerializer = productRedisTemplate.getStringSerializer();
         RedisSerializer valueSerializer = productRedisTemplate.getValueSerializer();
 
-        //기존 데이터 삭제 로직
+        //기존 데이터 삭제 로직(product)
         ScanOptions options = ScanOptions.scanOptions().match("product::*").build();
         Cursor<byte[]> keys = scanKeys(options);
 
@@ -65,12 +65,20 @@ public class ProductRedisService {
             productRedisTemplate.delete(new String(keys.next()));
         }
 
+        //기존 데이터 삭제 로직(clickCount)
+        ScanOptions options2 = ScanOptions.scanOptions().match("clickCount::*").build();
+        Cursor<byte[]> keys2 = scanKeys(options2);
+
+        while (keys2.hasNext()) {
+            productRedisTemplate.delete(new String(keys2.next()));
+        }
+
 //        Set<String> keys = productRedisTemplate.keys("product::*");
 //        for (String key : keys) {
 //            productRedisTemplate.delete(key);
 //        }
 
-        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.
+        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.(product)
         productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
 
             // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
@@ -81,6 +89,19 @@ public class ProductRedisService {
             });
             return null;
         });
+
+        //파이프라인을 실행하여 Bulk Insert와 유사한 작업을 수행한다.(clickCount)
+        productRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+
+            // 전달된 리스트의 각 요소에 대해서 Redis에 키-값 쌍을 저장한다.
+            list.forEach(i -> {
+                String key = "clickCount::" + i.getId(); //Redis에 저장할 키 (clickCount::1)
+                connection.set(keySerializer.serialize(key), // Redis에 저장할 키 직렬화
+                        valueSerializer.serialize(i.getClickCount())); // 랭킹 정보 객체를 직렬화하여 저장
+            });
+            return null;
+        });
+
     }
 
     //상품이름으로 검색하기 위한 캐싱데이터(1000건)
