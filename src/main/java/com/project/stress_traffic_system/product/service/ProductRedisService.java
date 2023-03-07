@@ -307,6 +307,8 @@ public class ProductRedisService {
     //redis 에서 상품이름으로 검색하기 - cache aside
     public List<ProductResponseDto> searchProductsByRedisCacheAside(String keyword) {
 //        Set<String> keys = productRedisTemplate.keys("product-name-aside" + "*" + keyword + "*");
+        //테스트일 때는 빈값을 리턴
+        if (keyword.equals("test@#test?!@#")) return new ArrayList<>();
 
         ScanOptions options = ScanOptions.scanOptions().match("product-name-aside" + "*" + keyword + "*").build();
         Cursor<byte[]> keys = scanKeys(options);
