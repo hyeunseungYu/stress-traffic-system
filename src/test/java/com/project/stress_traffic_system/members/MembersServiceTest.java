@@ -11,6 +11,7 @@ import com.project.stress_traffic_system.members.dto.SignupRequestDto;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.members.repository.ProductImgRepository;
 import com.project.stress_traffic_system.members.service.MembersService;
 import com.project.stress_traffic_system.product.model.Product;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,10 @@ public class MembersServiceTest {
     //Mock MembersService 를 만들 때 주입할 객체들//
     @Mock
     CartRepository cartRepository;
+
+    @Mock
+    ProductImgRepository productImgRepository;
+
     @Mock
     JwtUtil jwtUtil;
     @Mock
@@ -56,7 +61,7 @@ public class MembersServiceTest {
     @BeforeEach
     void beforeEach(){
         //Mock 서비스 생성
-        memberService  = new MembersService(membersRepository,cartRepository,jwtUtil,passwordEncoder);
+        memberService  = new MembersService(membersRepository,cartRepository,productImgRepository,jwtUtil,passwordEncoder);
         member = new Members("usertest","abc1234!","test@test.com","test", MembersRoleEnum.MEMBER);
     }
 
