@@ -88,9 +88,10 @@ public class ProductService {
         if (clickCount == -1L) {
             responseDto.setClickCount(responseDto.getClickCount() + 1);
         }
-
-        //저장된 조회수가 있으면 해당 값 +1 을 dto에 세팅해준다
-        responseDto.setClickCount(clickCount + 1);
+        else{
+            //저장된 조회수가 있으면 해당 값 +1 을 dto에 세팅해준다
+            responseDto.setClickCount(clickCount + 1);
+        }
 
         // 해당 상품 id의 조회수를 증가시켜서 레디스와 ElasticSearch 두곳에 저장한다
         // 레디스에 저장된 조회수는 주기적으로 RDS에 업데이트한다
