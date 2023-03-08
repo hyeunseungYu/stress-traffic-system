@@ -295,8 +295,13 @@ public class ProductRedisService {
         Cursor<byte[]> keys = scanKeys(options);
 
         List<ProductResponseDto> result = new ArrayList<>();
-        while (keys.hasNext()) {
-            result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
+        while (true) {
+            try{
+                result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
+            }
+            catch(Exception e) {
+                break;
+            }
         }
 //        for (String key : keys) {
 //            result.add(productRedisTemplate.opsForValue().get(key));
