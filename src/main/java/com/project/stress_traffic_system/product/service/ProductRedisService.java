@@ -291,17 +291,12 @@ public class ProductRedisService {
 
 //        Set<String> keys = productRedisTemplate.keys("product-name" + "*" + keyword + "*");
 
-        ScanOptions options = ScanOptions.scanOptions().match("product-name" + "*" + keyword + "*").build();
+        ScanOptions options = ScanOptions.scanOptions().match("product-name" + "*" + keyword + "*").count(300).build();
         Cursor<byte[]> keys = scanKeys(options);
 
         List<ProductResponseDto> result = new ArrayList<>();
-        while (true) {
-            try{
-                result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
-            }
-            catch(Exception e) {
-                break;
-            }
+        while (keys.hasNext()) {
+            result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
         }
 //        for (String key : keys) {
 //            result.add(productRedisTemplate.opsForValue().get(key));
