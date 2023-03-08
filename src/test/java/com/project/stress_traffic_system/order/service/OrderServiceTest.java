@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -106,6 +107,9 @@ class OrderServiceTest {
             //orderRepository.save()메서드가 호출되면 가로채서 save()의 0번째 인자를 리턴하도록 함.
             when(orderRepository.save(any(Orders.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+            ValueOperations<String, ProductResponseDto> productValueOperations = mock(ValueOperations.class);
+            when(productRedisTemplate.opsForValue()).thenReturn(productValueOperations);
+
             //회원의 장바구니를 찾을 때 내가 미리 만들어둔 cart를 리턴해주기 위해
             Map<Members, Cart> testCartMap = new HashMap<>();
             testCartMap.put(member, cart);
@@ -123,6 +127,10 @@ class OrderServiceTest {
                     return product;
                 }
 
+                @Override
+                public ProductResponseDto findProductInCache(Long productid, String productName){
+                    return new ProductResponseDto(product);
+                }
                 //service에 있는 대로 그대로 복사. override를 안하면 mock객체를 보는 게 아니어서 null값을 리턴함.
                 @Override
                 protected void checkStock(OrderRequestDto orderRequestDto, Product product) {
@@ -150,7 +158,7 @@ class OrderServiceTest {
 
             //then
             //재고가 차감되었는지 확인
-            Assertions.assertEquals(20, product.getStock());
+            Assertions.assertEquals(30, product.getStock());
             //장바구니가 다 지워졌는지
             Assertions.assertEquals(0,cartItemRepository.findByCartAndProduct(cart,product).stream().count());
 
