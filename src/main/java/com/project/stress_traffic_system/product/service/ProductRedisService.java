@@ -299,7 +299,7 @@ public class ProductRedisService {
             try{
                 result.add(productRedisTemplate.opsForValue().get(new String(keys.next())));
             }
-            finally {
+            catch(Exception e) {
                 break;
             }
         }
