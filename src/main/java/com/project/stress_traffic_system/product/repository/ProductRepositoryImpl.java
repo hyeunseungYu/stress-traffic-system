@@ -495,7 +495,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .from(productFull)
                 .where(productFull.name.contains(keyword))
                 .orderBy(productFull.clickCount.desc())
-                .limit(100)
                 .fetch();
     }
 
@@ -525,7 +524,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                     .from(productFull)
                     .where(builder)
                     .orderBy(productFull.clickCount.desc())
-                    .limit(1000)
                     .fetch();
     }
 
