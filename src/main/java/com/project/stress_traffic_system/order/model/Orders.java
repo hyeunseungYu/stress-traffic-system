@@ -59,6 +59,10 @@ public class Orders {
         this.status = status;
     }
 
+    public void setCreatedAt(LocalDateTime date) {
+        this.createdAt = date;
+    }
+
     //생성 메서드
     public static Orders createOrder(Members member, List<OrderItem> orderItems) {
         Orders order = new Orders();
