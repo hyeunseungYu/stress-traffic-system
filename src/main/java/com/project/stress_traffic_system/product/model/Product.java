@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -53,6 +54,7 @@ public class Product {
     public void setOrderCount(Long orderCount) { this.orderCount = orderCount; }
 
     //상품 주문 시 재고수량 감소 시키기
+
     public void removeStock(int quantity) {
         int restStock = this.stock - quantity;
         if (restStock < 0) {
@@ -86,7 +88,13 @@ public class Product {
 
     public Product(ProductResponseDto productResponseDto) {
         this.name = productResponseDto.getName();
+        this.id = productResponseDto.getId();
         this.stock = productResponseDto.getStock();
         this.price = productResponseDto.getPrice();
+        this.orderCount = productResponseDto.getOrderCount();
+        this.date = productResponseDto.getDate();
+        this.description = productResponseDto.getDescription();
+        this.introduction = productResponseDto.getIntroduction();
+        this.clickCount = productResponseDto.getClickCount();
     }
 }

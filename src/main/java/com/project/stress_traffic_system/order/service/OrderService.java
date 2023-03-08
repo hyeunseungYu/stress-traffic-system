@@ -24,10 +24,12 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,13 +49,16 @@ public class OrderService {
 
     private final RedisCacheManager redisCacheManager;
 
+    private final RedisTemplate<String, ProductResponseDto> productRedisTemplate;
+
     //단일 상품 주문하기
     @Transactional
     public OrderDto orderOne(Members member, OrderRequestDto requestDto) {
 
-
         Cart cart = findCart(member);   //회원의 장바구니 가져오기
-        Product product = checkProduct(requestDto); //상품정보
+        ProductResponseDto productResponseDto = findProductInCache(requestDto.getProductId(),requestDto.getProductName()); //상품정보
+
+        Product product = new Product(productResponseDto);
         checkStock(requestDto, product); //재고가 있는지 확인
         checkQuantity(requestDto);  //주문수량이 유효한지 확인
 
@@ -63,23 +68,33 @@ public class OrderService {
         //주문상품 객체 만들기(생성메서드)
         //주문 수량만큼 재고 차감
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
+        productResponseDto.setStock(product.getStock());
+
+//        productRepository.saveAndFlush(product); //db에 반영
+
+        String productCacheKey = "product-name::" + requestDto.getProductName();
+        productRedisTemplate.opsForValue().set(productCacheKey,productResponseDto);
+
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
         Orders order = Orders.createOrder(member, orderItems);
+        order.setCreatedAt(LocalDateTime.now());
+
 
         //주문정보 저장
         Orders savedOrders = orderRepository.save(order);
 
-        deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
 
+        deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
 
         //주문내역 반환 (주문번호와, 주문일자)
         return OrderDto.builder()
                 .orderId(savedOrders.getId())
-                .orderDate(savedOrders.getCreatedAt())
+                .orderDate(order.getCreatedAt())
                 .resultStock(product.getStock())
+                .resultStockList(new ArrayList<>())
                 .build();
     }
 
@@ -89,7 +104,9 @@ public class OrderService {
 
 
         Cart cart = findCart(member);   //회원의 장바구니 가져오기
-        Product product = checkProductWithPessimisticLock(requestDto); //상품정보
+        ProductResponseDto productResponseDto = findProductInCachePessimisticLock(requestDto.getProductId(),requestDto.getProductName()); //상품정보
+
+        Product product = new Product(productResponseDto);
         checkStock(requestDto, product); //재고가 있는지 확인
         checkQuantity(requestDto);  //주문수량이 유효한지 확인
 
@@ -99,23 +116,30 @@ public class OrderService {
         //주문상품 객체 만들기(생성메서드)
         //주문 수량만큼 재고 차감
         OrderItem orderItem = OrderItem.createOrderItem(product, requestDto);
+        productResponseDto.setStock(product.getStock());
+//        productRepository.saveAndFlush(product); //db에 반영
+
+        String productCacheKey = "product-name::" + requestDto.getProductName();
+        productRedisTemplate.opsForValue().set(productCacheKey,productResponseDto);
+
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
         Orders order = Orders.createOrder(member, orderItems);
+        order.setCreatedAt(LocalDateTime.now());
 
         //주문정보 저장
         Orders savedOrders = orderRepository.save(order);
 
         deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
 
-
         //주문내역 반환 (주문번호와, 주문일자)
         return OrderDto.builder()
                 .orderId(savedOrders.getId())
                 .orderDate(savedOrders.getCreatedAt())
                 .resultStock(product.getStock())
+                .resultStockList(new ArrayList<>())
                 .build();
     }
 
@@ -131,9 +155,11 @@ public class OrderService {
         //주문상품 리스트에 주문상품 목록을 담아준다
         for (OrderRequestDto orderRequestDto : requestDtoList) {
 
-            Product product = checkProduct(orderRequestDto); //상품정보 가져오기
-            checkStock(orderRequestDto, product);   //재고확인하기
-            checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
+            ProductResponseDto productResponseDto = findProductInCache(orderRequestDto.getProductId(),orderRequestDto.getProductName()); //상품정보
+
+            Product product = new Product(productResponseDto);
+            checkStock(orderRequestDto, product); //재고가 있는지 확인
+            checkQuantity(orderRequestDto);  //주문수량이 유효한지 확인
 
             //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
             product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
@@ -143,8 +169,13 @@ public class OrderService {
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
             orderItems.add(orderItem);
 
-//            //주문 수량만큼 재고 차감.
-//            product.removeStock(orderRequestDto.getQuantity());
+            productResponseDto.setStock(product.getStock());
+
+//        productRepository.saveAndFlush(product); //db에 반영
+
+            String productCacheKey = "product-name::" + orderRequestDto.getProductName();
+            productRedisTemplate.opsForValue().set(productCacheKey,productResponseDto);
+
             resultStock.add(product.getStock());
 
             deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
@@ -152,6 +183,7 @@ public class OrderService {
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
         Orders order = Orders.createOrder(member, orderItems);
+        order.setCreatedAt(LocalDateTime.now());
 
         Orders savedOrder = orderRepository.save(order);
 
@@ -175,9 +207,11 @@ public class OrderService {
         //주문상품 리스트에 주문상품 목록을 담아준다
         for (OrderRequestDto orderRequestDto : requestDtoList) {
 
-            Product product = checkProductWithPessimisticLock(orderRequestDto); //상품정보 가져오기
-            checkStock(orderRequestDto, product);   //재고확인하기
-            checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
+            ProductResponseDto productResponseDto = findProductInCachePessimisticLock(orderRequestDto.getProductId(),orderRequestDto.getProductName()); //상품정보
+
+            Product product = new Product(productResponseDto);
+            checkStock(orderRequestDto, product); //재고가 있는지 확인
+            checkQuantity(orderRequestDto);  //주문수량이 유효한지 확인
 
             //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
             product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
@@ -187,8 +221,13 @@ public class OrderService {
             OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
             orderItems.add(orderItem);
 
-//            //주문 수량만큼 재고 차감.
-//            product.removeStock(orderRequestDto.getQuantity());
+            productResponseDto.setStock(product.getStock());
+
+//        productRepository.saveAndFlush(product); //db에 반영
+
+            String productCacheKey = "product-name::" + orderRequestDto.getProductName();
+            productRedisTemplate.opsForValue().set(productCacheKey,productResponseDto);
+
             resultStock.add(product.getStock());
 
             deleteCartItem(cart, product); //장바구니에서 주문상품 삭제한다
@@ -196,6 +235,7 @@ public class OrderService {
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
         Orders order = Orders.createOrder(member, orderItems);
+        order.setCreatedAt(LocalDateTime.now());
 
         Orders savedOrder = orderRepository.save(order);
 
@@ -207,6 +247,7 @@ public class OrderService {
                 .build();
     }
 
+    //여러상품 주문하기 - redissonLock
     @Transactional
     public OrderDto orderManyWithRedissonLock(Members member, List<OrderRequestDto> requestDtoList) {
 
@@ -227,9 +268,11 @@ public class OrderService {
                     log.info("lock 획득 실패");
                 }
 
-                Product product = checkProductWithPessimisticLock(orderRequestDto); //상품정보 가져오기
-                checkStock(orderRequestDto, product);   //재고확인하기
-                checkQuantity(orderRequestDto); //주문수량 유효한지 확인하기
+                ProductResponseDto productResponseDto = findProductInCache(orderRequestDto.getProductId(),orderRequestDto.getProductName()); //상품정보
+
+                Product product = new Product(productResponseDto);
+                checkStock(orderRequestDto, product); //재고가 있는지 확인
+                checkQuantity(orderRequestDto);  //주문수량이 유효한지 확인
 
                 //주문수량만큼 상품 테이블에 총 주문수량 증가시킨다
                 product.setOrderCount(product.getOrderCount() + orderRequestDto.getQuantity());
@@ -238,6 +281,13 @@ public class OrderService {
                 //주문 수량만큼 재고 차감
                 OrderItem orderItem = OrderItem.createOrderItem(product, orderRequestDto);
                 orderItems.add(orderItem);
+
+                productResponseDto.setStock(product.getStock());
+
+//        productRepository.saveAndFlush(product); //db에 반영
+
+                String productCacheKey = "product-name::" + orderRequestDto.getProductName();
+                productRedisTemplate.opsForValue().set(productCacheKey,productResponseDto);
 
                 resultStock.add(product.getStock());
 
@@ -255,6 +305,7 @@ public class OrderService {
 
         //주문 객체 생성해서 회원정보와 주문상품 정보 저장
         Orders order = Orders.createOrder(member, orderItems);
+        order.setCreatedAt(LocalDateTime.now());
 
         Orders savedOrder = orderRepository.save(order);
 
@@ -378,33 +429,63 @@ public class OrderService {
 
     }
 
-    //==============Look-aside 테스트를 위한 메서드==============
+    //==============Look-aside 메서드==============
     @Transactional(readOnly = true)
     //cacheable을 사용하면 밑에 productCache.put을 안 써도 됩니다. 다만 우리의 캐싱 전략에서 언제 캐싱이 되는지 좀 더 명시적으로 아는 게 필요하다고 판단해서 사용하지 않았습니다.
 //    @Cacheable("productId")
-    public ProductResponseDto findProductInCache(Long productId) {
-        Cache productCache = redisCacheManager.getCache("productId"); //getCache는 캐시 이름을 기준으로 캐시를 가져옴
-        Cache.ValueWrapper valueWrapper = productCache.get(String.valueOf(productId)); //가져온 캐시에서 키(key)를 기준으로 캐시를 찾고, 그것의 value를 가져오기 위해 사용
+    public ProductResponseDto findProductInCache(Long productid, String productName) {
+        Cache productCache = redisCacheManager.getCache("product-name"); //getCache는 캐시 이름을 기준으로 캐시를 가져옴
+        Cache.ValueWrapper valueWrapper = productCache.get(productName); //가져온 캐시에서 키(key)를 기준으로 캐시를 찾고, 그것의 value를 가져오기 위해 사용
 
         //cache hit의 경우
         if (valueWrapper != null) {
             //value Wrapper는 래퍼 클래스니까 밸류를 get으로 가져와야 함.
-            return (ProductResponseDto) valueWrapper.get();
-        }else {
+            log.info("cache hit");
+            ProductResponseDto productResponseDto = (ProductResponseDto) valueWrapper.get();
+            Product product = new Product(productResponseDto);
+            return productResponseDto;
+        }
+        else {
             //cache miss의 경우
             //db에서 데이터를 가져와서 반환
             //그리고 캐시에 저장
-            Product product = productRepository.findById(productId).orElseThrow(
-                    () -> new IllegalArgumentException("해당 상품이 존재하지 않음")
+            log.info("cache miss");
+            Product product = productRepository.findById(productid).orElseThrow(
+                    ()-> new IllegalArgumentException("상품이 존재하지 않음")
             );
 
-            ProductResponseDto build = ProductResponseDto.builder()
-                    .id(product.getId())
-                    .name(product.getName())
-                    .build();
+            ProductResponseDto productResponseDto = new ProductResponseDto(product);
+            productCache.put(productName, productResponseDto);
+            return productResponseDto;
+        }
+    }
 
-            productCache.put(String.valueOf(productId), build);
-            return build;
+
+    @Transactional(readOnly = true)
+    //cacheable을 사용하면 밑에 productCache.put을 안 써도 됩니다. 다만 우리의 캐싱 전략에서 언제 캐싱이 되는지 좀 더 명시적으로 아는 게 필요하다고 판단해서 사용하지 않았습니다.
+//    @Cacheable("productId")
+    public ProductResponseDto findProductInCachePessimisticLock(Long productid, String productName) {
+        Cache productCache = redisCacheManager.getCache("product-name"); //getCache는 캐시 이름을 기준으로 캐시를 가져옴
+        Cache.ValueWrapper valueWrapper = productCache.get(productName); //가져온 캐시에서 키(key)를 기준으로 캐시를 찾고, 그것의 value를 가져오기 위해 사용
+
+        //cache hit의 경우
+        if (valueWrapper != null) {
+            //value Wrapper는 래퍼 클래스니까 밸류를 get으로 가져와야 함.
+            log.info("cache hit");
+            ProductResponseDto productResponseDto = (ProductResponseDto) valueWrapper.get();
+            Product product = new Product(productResponseDto);
+            return productResponseDto;
+        }
+        else {
+            //cache miss의 경우
+            //db에서 데이터를 가져와서 반환
+            //그리고 캐시에 저장
+            log.info("cache miss");
+            Product product = productRepository.findByIdWithPessimisticLock(productid);
+
+            ProductResponseDto productResponseDto = new ProductResponseDto(product);
+            productCache.put(productName, productResponseDto);
+            return productResponseDto;
         }
     }
 

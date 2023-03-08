@@ -17,6 +17,7 @@ import com.project.stress_traffic_system.order.model.dto.OrderListDto;
 import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
 import com.project.stress_traffic_system.order.repository.OrderRepository;
 import com.project.stress_traffic_system.product.model.Product;
+import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
 import com.project.stress_traffic_system.product.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -28,6 +29,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -63,6 +65,9 @@ class OrderServiceTest {
 
     @Mock
     private RedisCacheManager redisCacheManager;
+
+    @Mock
+    private RedisTemplate<String, ProductResponseDto> productRedisTemplate;
 
     Members member;
     Cart cart;
@@ -104,7 +109,7 @@ class OrderServiceTest {
             //회원의 장바구니를 찾을 때 내가 미리 만들어둔 cart를 리턴해주기 위해
             Map<Members, Cart> testCartMap = new HashMap<>();
             testCartMap.put(member, cart);
-            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient, redisCacheManager) {
+            OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository, redissonClient, redisCacheManager,productRedisTemplate) {
 
                 //findCart라는 메서드가 사용되면 내가 지정한 cart를 바로 가져오게 하기 위해
                 //그냥 원래 service에 있던 코드를 그대로 가져와도 되는데, 그러면 when으로 가로채야 하는 코드가 더 생겨서 이렇게 작성함
@@ -164,7 +169,7 @@ class OrderServiceTest {
             //findAllByMembersOrderByCreatedAtAsc 호출되면 미리 생성한 주문 리스트 반환
             when(orderRepository.findAllByMembersOrderByCreatedAtAsc(member)).thenReturn(ordersList);
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
 
             //when
             List<OrderListDto> orders = orderService.getOrders(member);
@@ -193,7 +198,7 @@ class OrderServiceTest {
             Orders order = new Orders(1L, member, orderItems); //member가 주문한 orderItem들이 들어간 order생성
 
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
             when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
             //when
@@ -212,7 +217,7 @@ class OrderServiceTest {
             //given
             when(productRepository.findByIdWithPessimisticLock(orderRequestDto.getProductId())).thenReturn(product);
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
             //when
             Product findResult = orderService.checkProductWithPessimisticLock(orderRequestDto);
             //then
@@ -225,7 +230,7 @@ class OrderServiceTest {
             //given
             when(productRepository.findById(orderRequestDto.getProductId())).thenReturn(Optional.ofNullable(product));
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
             //when
             Product findResult = orderService.checkProduct(orderRequestDto);
             //then
@@ -238,7 +243,7 @@ class OrderServiceTest {
         void checkStockTest() {
             //given
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
             //when
 
             //then
@@ -255,7 +260,7 @@ class OrderServiceTest {
         void checkStockFail1() {
             //given
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
             OrderRequestDto orderRequestDto = null;
             //when
 
@@ -269,7 +274,7 @@ class OrderServiceTest {
         void checkStockFail2() {
             //given
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    , redissonClient, redisCacheManager);
+                    , redissonClient, redisCacheManager,productRedisTemplate);
             Product product = null;
             //when
 
@@ -283,7 +288,7 @@ class OrderServiceTest {
         void checkStockFail3() {
             //given
             OrderService orderService = new OrderService(orderRepository, productRepository, cartItemRepository, cartRepository
-                    ,redissonClient, redisCacheManager);
+                    ,redissonClient, redisCacheManager,productRedisTemplate);
             orderRequestDto.setQuantity(100);
             //when
 
