@@ -88,9 +88,9 @@ public class OrderController {
     }
 
     //look-aside 테스트를 위한 api
-    @GetMapping("/cacheTest/look-aside/{productId}")
-    public ProductResponseDto getCache(@PathVariable Long productId) {
-        return orderService.findProductInCache(productId);
+    @GetMapping("/cacheTest/look-aside/{productId}/{productName}")
+    public ProductResponseDto getCache(@PathVariable Long productId, @PathVariable String productName) {
+        return orderService.findProductInCache(productId, productName);
     }
 
     @PostMapping("/cacheTest/write-through")

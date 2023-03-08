@@ -5,6 +5,7 @@ import com.project.stress_traffic_system.order.model.dto.OrderRequestDto;
 import com.project.stress_traffic_system.product.model.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 
@@ -43,6 +44,7 @@ public class OrderItem {
 
 
     //생성메서드
+
     public static OrderItem createOrderItem(Product product, OrderRequestDto orderRequestDto) {
 
         //주문상품에 상품정보 넣기
@@ -51,6 +53,7 @@ public class OrderItem {
 
         // 주문 들어온 만큼 재고 줄어들게끔
         product.removeStock(orderRequestDto.getQuantity());
+
 
         return orderItem;
     }
