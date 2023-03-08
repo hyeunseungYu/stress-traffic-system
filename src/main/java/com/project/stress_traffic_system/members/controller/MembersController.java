@@ -1,18 +1,19 @@
 package com.project.stress_traffic_system.members.controller;
 
-import com.project.stress_traffic_system.members.dto.LoginRequestDto;
-import com.project.stress_traffic_system.members.dto.MembersCheckRequestMsgDto;
-import com.project.stress_traffic_system.members.dto.SignupRequestDto;
-import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
+import com.project.stress_traffic_system.members.dto.*;
+import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.service.MembersService;
+import com.project.stress_traffic_system.security.UserDetailsImpl;
 import com.project.stress_traffic_system.product.model.dto.ProductImgDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.PushBuilder;
 import java.util.List;
 
 @Slf4j
@@ -43,6 +44,18 @@ public class MembersController {
 
     }
 
+    @GetMapping("/info")
+    public MemberResponseDto getInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Members member = userDetails.getMember();
+        return MemberResponseDto.builder()
+                .username(member.getUsername())
+                .address(member.getAddress())
+                .email(member.getEmail())
+                .email(member.getEmail())
+                .role(member.getRole())
+                .build();
+    }
+    
     @GetMapping("/img")
     public List<ProductImgDto> img() {
         List<ProductImgDto> imgArray = membersService.getImg();
@@ -51,7 +64,7 @@ public class MembersController {
 
     @PostMapping("/logTest")
     public void logTest() {
-        int test = 0/0;
+        int test = 0 / 0;
         log.trace("trace Log");
         log.debug("Debug Log");
         log.info("info Log");
