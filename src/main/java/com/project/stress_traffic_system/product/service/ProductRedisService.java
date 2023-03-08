@@ -291,7 +291,7 @@ public class ProductRedisService {
 
 //        Set<String> keys = productRedisTemplate.keys("product-name" + "*" + keyword + "*");
 
-        ScanOptions options = ScanOptions.scanOptions().match("product-name" + "*" + keyword + "*").count(300).build();
+        ScanOptions options = ScanOptions.scanOptions().match("product-name" + "*" + keyword + "*").count(1500).build();
         Cursor<byte[]> keys = scanKeys(options);
 
         List<ProductResponseDto> result = new ArrayList<>();
