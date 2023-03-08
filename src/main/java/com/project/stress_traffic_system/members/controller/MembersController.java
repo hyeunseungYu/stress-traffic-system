@@ -4,6 +4,7 @@ import com.project.stress_traffic_system.members.dto.*;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.service.MembersService;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
+import com.project.stress_traffic_system.product.model.dto.ProductImgDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.PushBuilder;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -52,6 +54,12 @@ public class MembersController {
                 .email(member.getEmail())
                 .role(member.getRole())
                 .build();
+    }
+    
+    @GetMapping("/img")
+    public List<ProductImgDto> img() {
+        List<ProductImgDto> imgArray = membersService.getImg();
+        return imgArray;
     }
 
     @PostMapping("/logTest")

@@ -2,10 +2,7 @@ package com.project.stress_traffic_system.product.service;
 
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.product.model.*;
-import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
-import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
-import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
-import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
+import com.project.stress_traffic_system.product.model.dto.*;
 import com.project.stress_traffic_system.product.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -88,9 +86,10 @@ public class ProductService {
         if (clickCount == -1L) {
             responseDto.setClickCount(responseDto.getClickCount() + 1);
         }
-
-        //저장된 조회수가 있으면 해당 값 +1 을 dto에 세팅해준다
-        responseDto.setClickCount(clickCount + 1);
+        else{
+            //저장된 조회수가 있으면 해당 값 +1 을 dto에 세팅해준다
+            responseDto.setClickCount(clickCount + 1);
+        }
 
         // 해당 상품 id의 조회수를 증가시켜서 레디스와 ElasticSearch 두곳에 저장한다
         // 레디스에 저장된 조회수는 주기적으로 RDS에 업데이트한다
@@ -326,6 +325,15 @@ public class ProductService {
             List<ProductResponseDto> products = productRepository.findByFullKeyword(keyword);
             productRedisService.cacheProductsByKeyword(products, keyword);
         }
+    }
+
+    //레디스 테스트용 캐시
+    public void TestCacheProduct() {
+        List<ProductResponseDto> list = new ArrayList<>();
+        ProductResponseDto productResponseDto = new ProductResponseDto();
+        productResponseDto.setName("test");
+        list.add(productResponseDto);
+        productRedisService.testCacheProduct(list);
     }
 
     //상품이름 검색을 위한 상위 1000건 캐싱

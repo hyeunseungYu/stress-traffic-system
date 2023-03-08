@@ -1,10 +1,7 @@
 package com.project.stress_traffic_system.product.controller;
 
 import com.google.common.base.Stopwatch;
-import com.project.stress_traffic_system.product.model.dto.ProductResponseDto;
-import com.project.stress_traffic_system.product.model.dto.ProductSearchCondition;
-import com.project.stress_traffic_system.product.model.dto.ReviewRequestDto;
-import com.project.stress_traffic_system.product.model.dto.ReviewResponseDto;
+import com.project.stress_traffic_system.product.model.dto.*;
 import com.project.stress_traffic_system.product.response.Response;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import com.project.stress_traffic_system.product.service.ProductService;
@@ -68,7 +65,8 @@ public class ProductController {
         return Response.success(totalTime, "full text 검색", data);
     }
 
-    //@ApiOperation(value = "redis 검색")
+    //@ApiOperation(value = "redis read though 검색")
+    //keys 사용
     @GetMapping("/products/search/redis/{keyword}")
     public Response searchProductsByRedis(@PathVariable String keyword) {
         StopWatch stopwatch = new StopWatch();

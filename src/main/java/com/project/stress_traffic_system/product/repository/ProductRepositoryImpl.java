@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.project.stress_traffic_system.product.model.QProduct.product;
 import static com.project.stress_traffic_system.product.model.QProductFull.productFull;
 
 @Slf4j
@@ -495,7 +496,6 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
                 .from(productFull)
                 .where(productFull.name.contains(keyword))
                 .orderBy(productFull.clickCount.desc())
-                .limit(100)
                 .fetch();
     }
 
@@ -504,28 +504,27 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     public List<ProductResponseDto> findByFullKeyword(String keyword) {
             BooleanBuilder builder = new BooleanBuilder();
             NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
-                    "function('match',{0},{1})", productFull.name, keyword + "*");
+                    "function('match',{0},{1})", product.name, keyword + "*");
             builder.and(booleanTemplate.gt(0));
 
             return queryFactory
                     .select(new QProductResponseDto(
-                            productFull.id,
-                            productFull.name,
-                            productFull.price,
-                            productFull.description,
-                            productFull.shippingFee,
-                            productFull.imgurl,
-                            productFull.clickCount,
-                            productFull.orderCount,
-                            productFull.stock,
-                            productFull.introduction,
-                            productFull.pages,
-                            productFull.date
+                            product.id,
+                            product.name,
+                            product.price,
+                            product.description,
+                            product.shippingFee,
+                            product.imgurl,
+                            product.clickCount,
+                            product.orderCount,
+                            product.stock,
+                            product.introduction,
+                            product.pages,
+                            product.date
                     ))
-                    .from(productFull)
+                    .from(product)
                     .where(builder)
-                    .orderBy(productFull.clickCount.desc())
-                    .limit(1000)
+                    .orderBy(product.clickCount.desc())
                     .fetch();
     }
 

@@ -10,6 +10,9 @@ import com.project.stress_traffic_system.members.dto.MembersResponseMsgDto;
 import com.project.stress_traffic_system.members.entity.Members;
 import com.project.stress_traffic_system.members.entity.MembersRoleEnum;
 import com.project.stress_traffic_system.members.repository.MembersRepository;
+import com.project.stress_traffic_system.members.repository.ProductImgRepository;
+import com.project.stress_traffic_system.product.model.ImgS3;
+import com.project.stress_traffic_system.product.model.dto.ProductImgDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -26,6 +31,7 @@ import java.util.Optional;
 public class MembersService {
     private final MembersRepository membersRepository;
     private final CartRepository cartRepository;
+    private final ProductImgRepository productImgRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
@@ -100,6 +106,17 @@ public class MembersService {
     @Transactional
     public Boolean checkId(MembersCheckRequestMsgDto membersCheckResponseMsgDto, HttpServletResponse response) {
         return membersRepository.existsByUsername(membersCheckResponseMsgDto.getUsername());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductImgDto> getImg() {
+        List<ProductImgDto> imgArray = new ArrayList<>();
+        List<ImgS3> result = productImgRepository.findAll();
+        for (ImgS3 img : result) {
+            ProductImgDto dto = new ProductImgDto(img.getId(),img.getImgUrl());
+            imgArray.add(dto);
+        }
+        return imgArray;
     }
 
 }
