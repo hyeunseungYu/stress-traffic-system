@@ -24,7 +24,7 @@ public class EventSchedulingService {
     private final RedisTemplate<String,String> userQueue;
     private final CouponEventWinnerRepository couponEventWinnerRepository;
 
-    @Scheduled(fixedDelay = 120000) // 2분 마다 실행
+    @Scheduled(fixedDelay = 300000) // 5분 마다 실행
     public void winnersRedisToMySQL() {
         ZSetOperations<String, String> winners = userQueue.opsForZSet();
         ScanOptions options = ScanOptions.scanOptions().match(USER_QUEUE_PREFIX + "*").count(10000).build();
