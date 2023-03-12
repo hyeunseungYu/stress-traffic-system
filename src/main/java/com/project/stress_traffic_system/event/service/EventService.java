@@ -1,7 +1,10 @@
 package com.project.stress_traffic_system.event.service;
 
+import com.project.stress_traffic_system.event.dto.CouponEventWinnerDto;
+import com.project.stress_traffic_system.event.model.CouponEventWinner;
 import com.project.stress_traffic_system.event.model.Event;
 import com.project.stress_traffic_system.event.model.Winners;
+import com.project.stress_traffic_system.event.repository.CouponEventWinnerRepository;
 import com.project.stress_traffic_system.event.repository.EventRepository;
 import com.project.stress_traffic_system.event.repository.WinnersRepository;
 import com.project.stress_traffic_system.members.entity.Members;
@@ -11,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class EventService {
@@ -18,6 +24,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ProductRepository productRepository;
     private final WinnersRepository winnersRepository;
+    private final CouponEventWinnerRepository couponEventWinnerRepository;
 
     //선착순 이벤트
     @Transactional
@@ -45,6 +52,21 @@ public class EventService {
 
         Event event = new Event(product);
         eventRepository.save(event);
+    }
+
+    @Transactional
+    public List<CouponEventWinnerDto> couponWinner(Members members) {
+        List<CouponEventWinner> winner = couponEventWinnerRepository.findByUsername(members.getUsername());
+        List<CouponEventWinnerDto> userCouponList = new ArrayList<>();
+        for (CouponEventWinner win : winner) {
+            CouponEventWinnerDto dto = new CouponEventWinnerDto();
+            dto.setId(win.getId());
+            dto.setCouponType(win.getCouponType());
+            dto.setEventDate(win.getEventDate());
+            dto.setUsername(members.getUsername());
+            userCouponList.add(dto);
+        }
+        return userCouponList;
     }
 
     private Long getWinnersCount(Long eventId) {

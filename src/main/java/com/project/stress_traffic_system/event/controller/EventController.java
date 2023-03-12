@@ -1,15 +1,16 @@
 package com.project.stress_traffic_system.event.controller;
 
+import com.project.stress_traffic_system.event.dto.CouponEventWinnerDto;
+import com.project.stress_traffic_system.event.model.CouponEventWinner;
 import com.project.stress_traffic_system.event.service.EventService;
 import com.project.stress_traffic_system.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -34,5 +35,10 @@ public class EventController {
             @PathVariable Long productId) {
         eventService.createEvent(userDetails.getMember(), productId);
         return new ResponseEntity<>("success", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/event/couponWinner")
+    public List<CouponEventWinnerDto> couponWinner(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return eventService.couponWinner(userDetails.getMember());
     }
 }
