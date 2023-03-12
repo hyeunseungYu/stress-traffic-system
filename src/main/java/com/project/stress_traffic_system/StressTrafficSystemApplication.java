@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(exclude = {ElasticsearchRepositoriesAutoConfiguration.class})*/
 @SpringBootApplication
 @EnableCaching
+@EnableScheduling
 public class StressTrafficSystemApplication {
 
     public static void main(String[] args) {
